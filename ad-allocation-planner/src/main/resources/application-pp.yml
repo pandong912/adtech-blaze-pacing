@@ -1,0 +1,6 @@
+spring:
+  profiles:
+    include: ad-model-repository-pp, ad-model-client-pp, allocation-plan-client-pp
+blaze:
+  data-exchanger:
+    endpoint: adtech-blaze-data-exchanger-pp.pp.hotstar-labs.com

@@ -1,0 +1,165 @@
+{
+  "kubeDeployTag": "v3.2",
+  "namespaceName": "$ADS_ENV_NAMESPACE_NAME",
+  "appName": "adtech-blaze-ad-allocation-planner-sim",
+  "deployment": {
+    "imageSpec": [
+      {
+        "name": "adtech-blaze-ad-allocation-planner-sim",
+        "image": "$IMAGE",
+        "env": [
+          {
+            "name": "PROFILE",
+            "value": "$PROFILE"
+          },
+          {
+            "name": "JVM_OPTS",
+            "value": "$JVM_OPTS"
+          },
+          {
+            "name": "AD_MODEL_DB_USERNAME",
+            "value": "$TF_VAR_AD_MODEL_DB_USERNAME"
+          },
+          {
+            "name": "AD_MODEL_DB_PASSWORD",
+            "value": "$TF_VAR_AD_MODEL_DB_PASSWORD"
+          },
+          {
+            "name": "AWS_ACCESS_KEY_ID",
+            "value": "$AWS_ACCESS_KEY_ID"
+          },
+          {
+            "name": "AWS_SECRET_ACCESS_KEY",
+            "value": "$AWS_SECRET_ACCESS_KEY"
+          }
+        ],
+        "resources": {
+          "limits": {
+            "memory": "$ADS_ENV_RESOURCES_LIMIT_MEMORY",
+            "cpu": "$ADS_ENV_RESOURCES_LIMIT_CPU"
+          },
+          "requests": {
+            "memory": "$ADS_ENV_REQUESTS_LIMIT_MEMORY",
+            "cpu": "$ADS_ENV_REQUESTS_LIMIT_CPU"
+          }
+        },
+        "probe": {
+          "type": "httpGet",
+          "healthCheckPath": "/actuator/health",
+          "healthCheckPort": 8081,
+          "initialDelaySeconds": 60,
+          "periodSeconds": 10,
+          "timeoutSeconds": 3,
+          "successThreshold": 1,
+          "failureThreshold": 3
+        }
+      }
+    ],
+    "labels": {
+      "coralogix-account": "$CORALOGIX_ACCOUNT"
+    },
+    "annotations": {
+      "iam.amazonaws.com/role": "$BLAZE_COMMON_ROLE"
+    }
+  },
+  "services": [
+    {
+      "type": "NodePort",
+      "loadBalancerType": "alb",
+      "name": "adtech-blaze-ad-allocation-planner-service-sim",
+      "annotations": {
+        "alb.ingress.kubernetes.io/healthcheck-path": "/actuator/health",
+        "alb.ingress.kubernetes.io/healthcheck-port": "8081",
+        "alb.ingress.kubernetes.io/healthcheck-protocol": "HTTP",
+        "alb.ingress.kubernetes.io/healthcheck-interval-seconds": "30",
+        "alb.ingress.kubernetes.io/healthcheck-timeout-seconds": "5",
+        "alb.ingress.kubernetes.io/success-codes": "200",
+        "alb.ingress.kubernetes.io/healthy-threshold-count": "2"
+      },
+      "ports": [
+        {
+          "name": "8080",
+          "port": 8080,
+          "targetPort": 8080
+        },
+        {
+          "name": "8081",
+          "port": 8081,
+          "targetPort": 8081
+        }
+      ],
+      "ingress": {
+        "rules": [
+          {
+            "host": "$ADS_ENV_SERVICE_HOSTNAME",
+            "paths": [
+              {
+                "path": "/actuator*",
+                "servicePort": 8081
+              },
+              {
+                "path": "/*",
+                "servicePort": 8080
+              }
+            ]
+          }
+        ],
+        "annotations": {
+          "kubernetes.io/ingress.class": "alb",
+          "alb.ingress.kubernetes.io/listen-ports": "[{\"HTTP\":80}]",
+          "alb.ingress.kubernetes.io/target-type": "ip",
+          "alb.ingress.kubernetes.io/inbound-cidrs": "127.0.0.1/32",
+          "alb.ingress.kubernetes.io/scheme": "internal",
+          "alb.ingress.kubernetes.io/security-groups": "$SG_K8S_OFFICE",
+          "alb.ingress.kubernetes.io/load-balancer-attributes": "access_logs.s3.enabled=true,access_logs.s3.bucket=$ACCESS_LOGS_BUCKET_NAME,access_logs.s3.prefix=$ADS_ENV_NAMESPACE_NAME/adtech-blaze-ad-allocation-planner-sim",
+          "alb.ingress.kubernetes.io/tags": "Owner=dong.pan@hotstar.com,CostCenter=India,Product=Hotstar,Team=AdTech,Stage=${ADS_ENV_STAGE},Name=AdTechBlazeAdAllocationPlannerSim"
+        }
+      }
+    }
+  ],
+  "serviceMonitor": {
+    "port": "8081",
+    "interval": "30s",
+    "metricsPath": "/actuator/prometheus"
+  },
+  "prometheus": {
+    "alertTeam": "AdtechServing",
+    "includes": {
+      "backendHttp5XXResponses": {
+        "duration": "2m",
+        "threshold": "25",
+        "severity": "page"
+      },
+      "http5XXResponses": {
+        "duration": "2m",
+        "threshold": "25",
+        "severity": "page"
+      },
+      "highSpillOverCount": {
+        "duration": "2m",
+        "threshold": "10",
+        "severity": "page"
+      },
+      "highPodFailures": {
+        "duration": "5m",
+        "threshold": "2",
+        "severity": "page"
+      },
+      "highPodRestarts": {
+        "duration": "5m",
+        "threshold": "2",
+        "severity": "page"
+      },
+      "backendHttp4XXResponses": {
+        "duration": "2m",
+        "threshold": "1000",
+        "severity": "page"
+      },
+      "highLatency": {
+        "duration": "5m",
+        "threshold": "1000",
+        "severity": "page"
+      }
+    }
+  }
+}

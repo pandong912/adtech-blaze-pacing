@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: blaze-allocation-planner
+  profiles:
+    active: local
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  metrics:
+    enable:
+      all: false
+      system: true
+      http: true
+      blaze: true
+      jvm:
+        memory: true
+        gc: true
+      tomcat: true
+  endpoint:
+    health:
+      show-details: always
+blaze:
+  ad-allocation-planner:
+    metrics-prefix: blaze.allocation.planner
+    executor:
+      core-pool-size: 4
+      max-pool-size: 16
+      keep-alive-seconds: 60
+      queue-capacity: 20000
+    schedule:
+      load.ad-model: 10000
+      load.break-progress-model: 300000
+      load.break-definition: 300000
+    mode: SHALE
+  data-exchanger:
+    endpoint: localhost:8097
+    retryer:
+      period: 100
+      maxPeriod: 1000
+      maxAttempts: 3
+feign:
+  client:
+    config:
+      ad-data-exchanger:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic

@@ -1,0 +1,9 @@
+name: stale-pr-check
+
+on:
+  schedule:
+    - cron: "0 23 * * *"
+
+jobs:
+  stale:
+    uses: hotstar/hotstar-github-action-workflows/.github/workflows/hotstar-stale-pr-check.yml@main

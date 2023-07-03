@@ -1,0 +1,64 @@
+name: build-ci
+
+on:
+  push:
+    branches:
+      - master
+      - hotfix/**
+      - fix/**
+      - feature/**
+      - AD-**
+      - release**
+
+jobs:
+  build-ci-ad-allocation-planner:
+    uses: hotstar/hotstar-github-action-workflows/.github/workflows/hotstar-java-maven-ci-workflow.yml@main
+    with:
+      IMAGE_NAME: adtech-blaze-ad-allocation-planner
+      TRIGGER_PIPELINE: false
+      SERVICE_NAME: adtech-blaze-ad-allocation-planner
+      HARNESS_APP_ID: 6pljp6twRxWWqpbOhNLjUQ
+      HARNESS_PARAMETER_STRING: ''
+      WORKING_DIRECTORY: 'ad-allocation-planner'
+      DOCKER_FILEPATH: 'deploy/docker/Dockerfile'
+      DOCKER_ARGUMENTS_STRING: ''
+      TRUNK_BRANCH_NAME: master
+      HARNESS_WEBHOOK: RKUICdPdce717uOns0dnh7PeaHxbKphMuavziZAV
+      MAVEN_SETTINGS_PATHS: 'secret/non-prod/adtech/nexus/release secret/non-prod/adtech/nexus/snapshot secret/non-prod/seceng/nexus/iauth secret/non-prod/adtech/self-serve/nexus/release secret/non-prod/adtech/self-serve/nexus/snapshot secret/non-prod/adtech/nexus/launchdarkly'
+      JAVA_VERSION: 8
+      PRE_BUILD_SCRIPT_PATH: 'mvn clean package -pl ad-allocation-planner -am -Dmaven.test.skip=true'
+      CUSTOM_UNIT_TEST_SCRIPT: 'mvn clean test -pl ad-allocation-planner -am'
+  build-ad-ingester-service:
+    uses: hotstar/hotstar-github-action-workflows/.github/workflows/hotstar-java-maven-ci-workflow.yml@main
+    with:
+      IMAGE_NAME: adtech-blaze-ad-ingester-service
+      TRIGGER_PIPELINE: false
+      SERVICE_NAME: adtech-blaze-ad-ingester-service
+      HARNESS_APP_ID: 6pljp6twRxWWqpbOhNLjUQ
+      HARNESS_PARAMETER_STRING: ''
+      WORKING_DIRECTORY: 'ad-ingester-service'
+      DOCKER_FILEPATH: 'deploy/docker/Dockerfile'
+      DOCKER_ARGUMENTS_STRING: ''
+      TRUNK_BRANCH_NAME: master
+      HARNESS_WEBHOOK: luCSjvyaHAcKnIa4Vnrgd0rvxWjnSbindbo0pwEb
+      MAVEN_SETTINGS_PATHS: 'secret/non-prod/adtech/nexus/release secret/non-prod/adtech/nexus/snapshot secret/non-prod/seceng/nexus/iauth secret/non-prod/adtech/self-serve/nexus/release secret/non-prod/adtech/self-serve/nexus/snapshot'
+      JAVA_VERSION: 8
+      PRE_BUILD_SCRIPT_PATH: 'mvn clean package -pl ad-ingester-service -am -Dmaven.test.skip=true'
+      CUSTOM_UNIT_TEST_SCRIPT: 'mvn clean test -pl ad-ingester-service -am'
+  build-ci-ad-data-exchanger:
+    uses: hotstar/hotstar-github-action-workflows/.github/workflows/hotstar-java-maven-ci-workflow.yml@main
+    with:
+      IMAGE_NAME: adtech-blaze-ad-data-exchanger
+      TRIGGER_PIPELINE: false
+      SERVICE_NAME: adtech-blaze-ad-data-exchanger
+      HARNESS_APP_ID: 6pljp6twRxWWqpbOhNLjUQ
+      HARNESS_PARAMETER_STRING: ''
+      WORKING_DIRECTORY: 'ad-data-exchanger'
+      DOCKER_FILEPATH: 'deploy/docker/Dockerfile'
+      DOCKER_ARGUMENTS_STRING: ''
+      TRUNK_BRANCH_NAME: master
+      HARNESS_WEBHOOK: 1bjWVdjKBpV3qV5Gk5Nmd8RNWZOorIAsUX0yPPBt
+      MAVEN_SETTINGS_PATHS: 'secret/non-prod/adtech/nexus/release secret/non-prod/adtech/nexus/snapshot secret/non-prod/seceng/nexus/iauth secret/non-prod/adtech/self-serve/nexus/release secret/non-prod/adtech/self-serve/nexus/snapshot'
+      JAVA_VERSION: 8
+      PRE_BUILD_SCRIPT_PATH: 'mvn clean package -pl ad-data-exchanger -am -Dmaven.test.skip=true'
+      CUSTOM_UNIT_TEST_SCRIPT: 'mvn clean test -pl ad-data-exchanger -am'

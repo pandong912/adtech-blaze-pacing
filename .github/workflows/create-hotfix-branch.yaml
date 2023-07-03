@@ -1,0 +1,29 @@
+name: hotfix-util
+
+on:
+  push:
+    branches:
+      - 'hotfix/*'
+
+  workflow_dispatch:
+    inputs:
+      jira_id:
+        description: 'Jira ticket ID for hotfix'
+        required: true
+        type: string
+      commit_id:
+        description: 'BaseCommitId from which to chekout from'
+        required: true
+        type: string
+      cherry_pick_ids:
+        description: 'Cherry Pick Commit Ids to merge in the commit_id - CSV'
+        required: false
+        type: string
+
+jobs:
+  hotfix-util:
+    uses: hotstar/hotstar-github-action-workflows/.github/workflows/hotstar-hotfix-branch.yml@main
+    with:
+      JIRA_ID: '${{ github.event.inputs.jira_id }}'
+      COMMIT_ID: '${{ github.event.inputs.commit_id }}'
+      CHERRY_PICK_IDS: '${{ github.event.inputs.cherry_pick_ids }}'

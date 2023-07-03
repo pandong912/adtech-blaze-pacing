@@ -1,0 +1,8 @@
+spring:
+  profiles:
+    include: ad-model-repository-ro-qa, ad-redis-client-qa, allocation-plan-client-qa
+blaze:
+  match-progress-loader:
+    bucket-name: adtech-ml-perf-ads-us-east-1-preprod-v1
+    s3-region: us-east-1
+    path: concurrency_progress/stat_progress.csv

@@ -1,8 +1,8 @@
 package com.hotstar.adtech.blaze.allocation.planner;
 
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ReachStorage;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.ReachStorage;
 
-public class TestReachStorage extends ReachStorage {
+public class TestReachStorage implements ReachStorage {
   //  Map<Integer, Map<Integer, Double>> unReachData = new HashMap<>();
   private final double[][] reachData;
   // use OFFSET to verify demandId allocation
@@ -10,7 +10,6 @@ public class TestReachStorage extends ReachStorage {
   private static final Double reachRatio = 1d;
 
   public TestReachStorage(int adSetSize, int concurrencySize) {
-    super(null);
     //    for (int i = 0; i < 50000; i++) {
     //      for (int j = 0; j < 1000; j++) {
     //        unReachData.computeIfAbsent(j, k -> new HashMap<>()).put(i, (j % 10 + i % 10 + 1) % 10 * 0.1);

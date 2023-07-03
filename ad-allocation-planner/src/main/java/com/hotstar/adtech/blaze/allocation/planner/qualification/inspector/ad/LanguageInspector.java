@@ -7,10 +7,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class LanguageInspector implements Inspector<Ad> {
 
-  private final int language;
+  private final Integer languageId;
 
   @Override
   public boolean qualify(Ad ad) {
-    return ad.getLanguageIds().contains(language);
+    return ad.getLanguageIds().contains(languageId);
   }
 }

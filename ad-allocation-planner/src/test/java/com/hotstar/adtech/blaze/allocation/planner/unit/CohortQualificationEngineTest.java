@@ -12,6 +12,8 @@ import com.hotstar.adtech.blaze.allocation.planner.qualification.QualifiedAdSet;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AudienceTargetingRule;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AudienceTargetingRuleClause;
+import com.hotstar.adtech.blaze.exchanger.api.entity.LanguageMapping;
+import com.hotstar.adtech.blaze.exchanger.api.entity.PlatformMapping;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -21,6 +23,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class CohortQualificationEngineTest {
+  private final LanguageMapping languageMapping = QualificationTestData.getLanguageMapping();
+  private final PlatformMapping platformMapping = QualificationTestData.getPlatformMapping();
 
   @Test
   public void whenContainAllNeededTagsThenSuccess() {
@@ -29,16 +33,16 @@ public class CohortQualificationEngineTest {
         .streamType(StreamType.SSAI_Spot)
         .ssaiTag("SSAI:M_MUM:M_NCR")
         .playoutStream(PlayoutStream.builder()
-          .language("English")
+          .language(languageMapping.getByName("English"))
           .platforms(Collections.singletonList(
-            Platform.Android
+            platformMapping.getByName(Platform.Android.toString())
           ))
           .tenant(Tenant.India)
           .build())
         .build();
     CohortQualificationEngine cohortQualificationEngine =
-      new CohortQualificationEngine(cohort, QualificationTestData.getAttributeId2TargetingTagMap(),
-        QualificationTestData.getLanguages());
+      new CohortQualificationEngine(cohort.getSsaiTag(), QualificationTestData.getAttributeId2TargetingTagMap(),
+        cohort.getPlayoutStream().getLanguage().getId());
 
 
     AdSet adSet = AdSet.builder()
@@ -77,17 +81,17 @@ public class CohortQualificationEngineTest {
         .streamType(StreamType.SSAI_Spot)
         .ssaiTag("SSAI:M_MUM:M_NCR")
         .playoutStream(PlayoutStream.builder()
-          .language("English")
+          .language(languageMapping.getByName("English"))
           .platforms(Collections.singletonList(
-            Platform.Android
+            platformMapping.getByName(Platform.Android.toString())
           ))
           .tenant(Tenant.India)
           .build())
         .build();
 
     CohortQualificationEngine cohortQualificationEngine =
-      new CohortQualificationEngine(cohort, QualificationTestData.getAttributeId2TargetingTagMap(),
-        QualificationTestData.getLanguages());
+      new CohortQualificationEngine(cohort.getSsaiTag(), QualificationTestData.getAttributeId2TargetingTagMap(),
+        cohort.getPlayoutStream().getLanguage().getId());
 
 
     AdSet adSet = AdSet.builder()
@@ -112,17 +116,17 @@ public class CohortQualificationEngineTest {
         .streamType(StreamType.SSAI_Spot)
         .ssaiTag("SSAI::")
         .playoutStream(PlayoutStream.builder()
-          .language("English")
+          .language(languageMapping.getByName("English"))
           .platforms(Collections.singletonList(
-            Platform.Android
+            platformMapping.getByName(Platform.Android.toString())
           ))
           .tenant(Tenant.India)
           .build())
         .build();
 
     CohortQualificationEngine cohortQualificationEngine =
-      new CohortQualificationEngine(cohort, QualificationTestData.getAttributeId2TargetingTagMap(),
-        QualificationTestData.getLanguages());
+      new CohortQualificationEngine(cohort.getSsaiTag(), QualificationTestData.getAttributeId2TargetingTagMap(),
+        cohort.getPlayoutStream().getLanguage().getId());
 
     AdSet adSet = AdSet.builder()
       .ssaiAds(QualificationTestData.getAds())
@@ -160,17 +164,17 @@ public class CohortQualificationEngineTest {
         .streamType(StreamType.SSAI_Spot)
         .ssaiTag("SSAI:M_MUM:M_NCR:S_APTG")
         .playoutStream(PlayoutStream.builder()
-          .language("English")
+          .language(languageMapping.getByName("English"))
           .platforms(Collections.singletonList(
-            Platform.Android
+            platformMapping.getByName(Platform.Android.toString())
           ))
           .tenant(Tenant.India)
           .build())
         .build();
 
     CohortQualificationEngine cohortQualificationEngine =
-      new CohortQualificationEngine(cohort, QualificationTestData.getAttributeId2TargetingTagMap(),
-        QualificationTestData.getLanguages());
+      new CohortQualificationEngine(cohort.getSsaiTag(), QualificationTestData.getAttributeId2TargetingTagMap(),
+        cohort.getPlayoutStream().getLanguage().getId());
 
 
     AdSet adSet = AdSet.builder()

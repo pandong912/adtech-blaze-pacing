@@ -1,7 +1,5 @@
 package com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.adset;
 
-import com.hotstar.adtech.blaze.admodel.client.model.LanguageInfo;
-import com.hotstar.adtech.blaze.admodel.common.enums.Platform;
 import com.hotstar.adtech.blaze.admodel.common.enums.RuleType;
 import com.hotstar.adtech.blaze.admodel.common.enums.Tenant;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.Inspector;
@@ -17,8 +15,8 @@ import lombok.RequiredArgsConstructor;
 public class StreamTargetingRuleInspector implements Inspector<AdSet> {
 
   private final Tenant tenant;
-  private final LanguageInfo language;
-  private final List<Platform> platforms;
+  private final Integer languageId;
+  private final List<Integer> platformIds;
 
   @Override
   public boolean qualify(AdSet adSet) {
@@ -33,28 +31,20 @@ public class StreamTargetingRuleInspector implements Inspector<AdSet> {
 
     List<StreamTargetingRuleClause> ruleClauses = streamTargetingRule.getStreamTargetingRuleClauses();
     if (Objects.equals(streamTargetingRule.getRuleType(), RuleType.Include)) {
-      return platforms.stream().allMatch(platform -> ruleClauses.stream()
-        .anyMatch(streamTargetingRulePredictor(platform, language, tenant)));
+      return platformIds.stream().allMatch(platformId -> ruleClauses.stream()
+        .anyMatch(streamTargetingRulePredictor(platformId, languageId, tenant)));
     } else {
-      return platforms.stream().noneMatch(platform -> ruleClauses.stream()
-        .anyMatch(streamTargetingRulePredictor(platform, language, tenant)));
+      return platformIds.stream().noneMatch(platformId -> ruleClauses.stream()
+        .anyMatch(streamTargetingRulePredictor(platformId, languageId, tenant)));
     }
   }
 
-  private Predicate<StreamTargetingRuleClause> streamTargetingRulePredictor(Platform platform,
-                                                                            LanguageInfo language,
+  private Predicate<StreamTargetingRuleClause> streamTargetingRulePredictor(Integer platformId,
+                                                                            Integer languageId,
                                                                             Tenant tenant) {
-    return ruleClause -> Objects.equals(ruleClause.getPlatform(), platform)
-      && Objects.equals(extractLanguage(ruleClause), language.getName())
+    return ruleClause -> Objects.equals(ruleClause.getPlatformId(), platformId)
+      && Objects.equals(ruleClause.getLanguageId(), languageId)
       && Objects.equals(ruleClause.getTenant(), tenant);
-  }
-
-  private String extractLanguage(StreamTargetingRuleClause clause) {
-    if (clause.getLanguage() != null) {
-      return clause.getLanguage().getName();
-    } else {
-      return clause.getStreamLanguage().toString();
-    }
   }
 
 }

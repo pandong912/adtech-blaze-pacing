@@ -34,7 +34,7 @@ public class DataProcessService {
                                                       Map<Long, Long> adSetImpressions) {
 
     return adSets.stream()
-      .filter(adSet -> adSet.getSpotAds().size() != 0 || adSet.getSsaiAds().size() != 0)
+      .filter(adSet -> !adSet.getSpotAds().isEmpty() || !adSet.getSsaiAds().isEmpty())
       .map(adSet -> {
         long delivered = adSetImpressions.getOrDefault(adSet.getId(), 0L);
         return convertToDemandDiagnosis(adSet, delivered, breakContext);

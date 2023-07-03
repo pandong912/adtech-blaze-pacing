@@ -11,11 +11,15 @@ import com.hotstar.adtech.blaze.admodel.client.model.AudienceTargetingRuleInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.BreakTargetingRuleInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.GoalMatchInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.LanguageInfo;
-import com.hotstar.adtech.blaze.admodel.client.model.SpotCreative;
-import com.hotstar.adtech.blaze.admodel.client.model.SsaiCreative;
+import com.hotstar.adtech.blaze.admodel.client.model.PlatformInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.StreamTargetingRuleClauseInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.StreamTargetingRuleInfo;
+import com.hotstar.adtech.blaze.admodel.client.model.VideoAd;
+import com.hotstar.adtech.blaze.admodel.common.entity.LanguageEntity;
+import com.hotstar.adtech.blaze.admodel.common.entity.PlatformEntity;
 import com.hotstar.adtech.blaze.admodel.common.enums.CampaignStatus;
+import com.hotstar.adtech.blaze.admodel.common.enums.CreativeType;
+import com.hotstar.adtech.blaze.admodel.common.enums.DeliveryMode;
 import com.hotstar.adtech.blaze.admodel.common.enums.RuleType;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.AdModelVersion;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Ad;
@@ -24,8 +28,6 @@ import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AudienceTargetingRule;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AudienceTargetingRuleClause;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.BreakTargetingRule;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Language;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Languages;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Match;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.StreamTargetingRule;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.StreamTargetingRuleClause;
@@ -52,10 +54,6 @@ public class AdModelLoader {
     LiveEntities liveEntities = adModelClient.loadLiveAdModel(adModelUri);
     MatchEntities matchEntities = adModelClient.loadMatch(adModelUri);
 
-    List<Language> languages = metaEntities.getLanguages().stream()
-      .map(this::buildLanguage)
-      .collect(Collectors.toList());
-
     Map<String, Match> matchMap = getMatchMap(matchEntities);
 
     Map<String, List<AdSet>> adSetGroup = buildAdSets(liveEntities.getGoalMatches()).stream().collect(
@@ -67,7 +65,6 @@ public class AdModelLoader {
       Collectors.toMap(AttributeValueInfo::getSsaiTag, AttributeValueInfo::getAttributeId));
 
     return AdModel.builder()
-      .languages(new Languages(languages))
       .matches(matchMap)
       .adSetGroup(adSetGroup)
       .adModelVersion(adModelVersion)
@@ -104,6 +101,8 @@ public class AdModelLoader {
     return adSets.stream()
       .filter(goalMatchInfo -> goalMatchInfo.getCampaignStatus() != CampaignStatus.PAUSED)
       .filter(GoalMatchInfo::isEnabled)
+      .filter(goalMatchInfo -> goalMatchInfo.getDeliveryMode() == DeliveryMode.SSAI
+        || goalMatchInfo.getDeliveryMode() == DeliveryMode.SSAI_SPOT)
       .map(this::buildAdSet)
       .collect(Collectors.toList());
   }
@@ -112,48 +111,47 @@ public class AdModelLoader {
     return AdSet.builder()
       .contentId(adSet.getContentId())
       .campaignId(adSet.getCampaignId())
-      .id(adSet.getGoalId())
+      .id(adSet.getAdSetId())
       .impressionTarget(adSet.getImpressionTarget())
       .priority(adSet.getPriority())
       .campaignType(adSet.getCampaignType())
-      .spotAds(adSet.getSpotCreatives().stream().filter(SpotCreative::isEnabled).map(this::buildSpotAd)
+      .spotAds(adSet.getVideoAds().stream().filter(VideoAd::isEnabled)
+        .filter(videoAd -> videoAd.getCreativeType() == CreativeType.Spot).map(this::buildAd)
         .collect(Collectors.toList()))
-      .ssaiAds(adSet.getSsaiCreatives().stream().filter(SsaiCreative::isEnabled).map(this::buildSsaiAd)
+      .ssaiAds(adSet.getVideoAds().stream().filter(VideoAd::isEnabled)
+        .filter(videoAd -> videoAd.getCreativeType() == CreativeType.SSAI).map(this::buildAd)
         .collect(Collectors.toList()))
       .audienceTargetingRule(buildAudienceTargetingRule(adSet.getAudienceTargetingRuleInfo()))
       .breakTargetingRule(buildBreakTargetingRule(adSet.getBreakTargetingRuleInfo()))
       .streamTargetingRule(buildStreamTargetingRule(adSet.getStreamTargetingRuleInfo()))
       .demandPacingCoefficient(DEMAND_PACING_COEFFICIENT)
-      //todo read from goal match
-      .maximizeReach(1)
+      .maximizeReach(adSet.isMaximiseReach() ? 1 : 0)
       .build();
   }
 
-  private Ad buildSsaiAd(SsaiCreative ad) {
+  private Ad buildAd(VideoAd ad) {
     return Ad.builder()
       .id(ad.getId())
-      .adSetId(ad.getGoalId())
+      .adSetId(ad.getAdSetId())
       .durationMs(ad.getDurationMs())
       .enabled(ad.isEnabled())
       .languageIds(ad.getLanguageIds())
       .build();
   }
 
-  private Ad buildSpotAd(SpotCreative ad) {
-    return Ad.builder()
-      .id(ad.getId())
-      .adSetId(ad.getGoalId())
-      .durationMs(ad.getDuration())
-      .enabled(ad.isEnabled())
-      .languageIds(ad.getLanguageIds())
-      .build();
-  }
-
-  private Language buildLanguage(LanguageInfo languageInfo) {
-    return Language.builder()
+  private LanguageEntity buildLanguage(LanguageInfo languageInfo) {
+    return LanguageEntity.builder()
       .id(languageInfo.getId())
       .name(languageInfo.getName())
       .tag(languageInfo.getTag())
+      .build();
+  }
+
+  private PlatformEntity buildPlatform(PlatformInfo platformInfo) {
+    return PlatformEntity.builder()
+      .id(platformInfo.getId())
+      .name(platformInfo.getName())
+      .tag(platformInfo.getTag())
       .build();
   }
 
@@ -203,8 +201,8 @@ public class AdModelLoader {
     StreamTargetingRuleClauseInfo streamTargetingRuleClauseInfo) {
     return StreamTargetingRuleClause.builder()
       .tenant(streamTargetingRuleClauseInfo.getTenant())
-      .streamLanguage(streamTargetingRuleClauseInfo.getStreamLanguage())
-      .platform(streamTargetingRuleClauseInfo.getPlatform())
+      .languageId(streamTargetingRuleClauseInfo.getLanguageId())
+      .platformId(streamTargetingRuleClauseInfo.getPlatformId())
       .build();
   }
 

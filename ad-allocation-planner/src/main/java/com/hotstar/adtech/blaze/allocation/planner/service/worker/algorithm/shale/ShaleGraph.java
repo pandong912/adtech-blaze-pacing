@@ -1,5 +1,6 @@
 package com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale;
 
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.ReachStorage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,13 +16,15 @@ public class ShaleGraph {
   List<ShaleSupply> supplies;
   Map<Integer, List<ShaleSupply>> demandToSupply;
   Map<Integer, List<ShaleDemand>> supplyToDemand;
+  ReachStorage reachStorage;
   double penalty;
 
-  public ShaleGraph(List<ShaleDemand> demands, List<ShaleSupply> supplies, double penalty) {
+  public ShaleGraph(List<ShaleDemand> demands, List<ShaleSupply> supplies, ReachStorage reachStorage, double penalty) {
     this.demands = demands;
     this.supplies = supplies;
     this.demandToSupply = new HashMap<>();
     this.supplyToDemand = new HashMap<>();
+    this.reachStorage = reachStorage;
     this.penalty = penalty;
   }
 
@@ -50,6 +53,27 @@ public class ShaleGraph {
 
       long totalSupply = supplies.stream().mapToLong(ShaleSupply::getConcurrency).sum();
       demand.setTheta(totalSupply == 0 ? 1 : Math.min(1, demand.getDemand() / totalSupply));
+      // reachOffset is mean of reach ratio
+      demand.setReachOffset(supplies.stream()
+        .mapToDouble(supply -> getUnReachRatio(demand, supply))
+        .average()
+        .orElse(0));
+      demand.setStd(Math.sqrt(supplies.stream()
+        .mapToDouble(supply -> Math.pow(getUnReachRatio(demand, supply) - demand.getReachOffset(), 2))
+        .average()
+        .orElse(0)));
     });
+  }
+
+  public double getTd(ShaleDemand demand, ShaleSupply supply) {
+    return reachStorage.getTd(demand, supply);
+  }
+
+  public double getRd(ShaleDemand demand, ShaleSupply supply) {
+    return reachStorage.getRd(demand, supply);
+  }
+
+  public double getUnReachRatio(ShaleDemand demand, ShaleSupply supply) {
+    return reachStorage.getUnReachRatio(demand.getId(), supply.getId());
   }
 }

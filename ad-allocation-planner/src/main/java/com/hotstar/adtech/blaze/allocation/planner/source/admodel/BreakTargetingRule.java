@@ -10,5 +10,5 @@ import lombok.Data;
 public class BreakTargetingRule {
 
   private RuleType ruleType;
-  private List<Long> breakTypeIds;
+  private List<Integer> breakTypeIds;
 }

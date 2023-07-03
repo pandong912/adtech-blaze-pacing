@@ -15,6 +15,8 @@ public class ShaleDemand extends Demand {
   private double alpha;
   private double theta;
   private double sigma;
+  private double reachOffset;
+  private double std;
   private int reachEnabled;
 
   public ShaleDemand(Response response) {

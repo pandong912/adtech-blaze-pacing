@@ -1,8 +1,9 @@
 package com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification;
 
+import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.QUALIFICATION;
+
 import com.hotstar.adtech.blaze.admodel.common.enums.PlanType;
 import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
-import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.CohortBreakQualificationEngine;
@@ -10,7 +11,6 @@ import com.hotstar.adtech.blaze.allocation.planner.qualification.CohortQualifica
 import com.hotstar.adtech.blaze.allocation.planner.qualification.QualificationEngine;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.QualifiedAdSet;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Languages;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GraphContext;
 import io.micrometer.core.annotation.Timed;
@@ -20,14 +20,13 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 @Service
-public class SsaiQualificationExecutor implements PlanQualificationExecutor {
+public class SsaiQualificationExecutor {
 
-  @Override
-  @Timed(value = "plan.qualification", extraTags = {"type", "ssai"})
-  public List<GraphContext> executeQualify(GeneralPlanContext generalPlanContext) {
+  @Timed(value = QUALIFICATION, extraTags = {"type", "ssai"})
+  public List<GraphContext> executeQualify(GeneralPlanContext generalPlanContext,
+                                           List<BreakTypeGroup> breakTypeGroups) {
     List<AdSet> adSets = generalPlanContext.getAdSets();
     ConcurrencyData concurrency = generalPlanContext.getConcurrencyData();
-    Languages languages = generalPlanContext.getLanguages();
 
     List<ContentCohort> mixedStreamCohorts = concurrency.getCohorts()
       .stream()
@@ -36,40 +35,30 @@ public class SsaiQualificationExecutor implements PlanQualificationExecutor {
 
     List<Request> qualifiedByConcurrency = mixedStreamCohorts.stream()
       .map(contentCohort -> qualifyByConcurrency(contentCohort, adSets,
-        generalPlanContext.getAttributeId2TargetingTagMap(), languages))
+        generalPlanContext.getAttributeId2TargetingTagMap()))
       .collect(Collectors.toList());
 
-    List<Integer> durationList = getDurationList(generalPlanContext.getBreakDetails());
 
-
-    return durationList
+    return breakTypeGroups
       .parallelStream()
-      .map(breakDuration -> buildGraphContextForEachPlan(generalPlanContext, qualifiedByConcurrency,
-        breakDuration))
+      .flatMap(breakTypeGroup -> breakTypeGroup.getAllBreakDurations().parallelStream()
+        .map(duration -> buildGraphContextForEachPlan(generalPlanContext, qualifiedByConcurrency, duration,
+          breakTypeGroup)))
       .collect(Collectors.toList());
   }
 
-  //todo duration list
-  private List<Integer> getDurationList(List<BreakDetail> breakDetails) {
-    BreakDetail overBreakDetail = breakDetails.stream()
-      .filter(breakDetail -> breakDetail.getBreakTypeId() == 1)
-      .findFirst()
-      .orElseThrow(() -> new RuntimeException("Over break not found"));
-    return overBreakDetail.getBreakDuration();
-  }
 
   private GraphContext buildGraphContextForEachPlan(GeneralPlanContext generalPlanContext,
                                                     List<Request> qualifiedByConcurrency,
-                                                    Integer breakDuration) {
-    BreakDetail breakDetail = BreakDetail.getEmptyBreakDetail();
+                                                    Integer duration, BreakTypeGroup breakTypeGroup) {
 
     List<Request> qualifiedByBreak = qualifiedByConcurrency.stream()
-      .map(request -> qualifyByBreak(request, breakDuration))
+      .map(request -> qualifyByBreak(request, duration))
       .collect(Collectors.toList());
 
     return GraphContext.builder()
-      .breakDuration(breakDuration)
-      .breakDetail(breakDetail)
+      .breakDuration(duration)
+      .breakTypeGroup(breakTypeGroup)
       .planType(PlanType.SSAI)
       .requests(qualifiedByBreak)
       .responses(generalPlanContext.getResponses())
@@ -78,9 +67,10 @@ public class SsaiQualificationExecutor implements PlanQualificationExecutor {
 
 
   private Request qualifyByConcurrency(ContentCohort contentCohort, List<AdSet> adSets,
-                                       Map<String, Integer> attributeId2TargetingTagMap, Languages languages) {
+                                       Map<String, Integer> attributeId2TargetingTagMap) {
+    Integer languageId = contentCohort.getPlayoutStream().getLanguage().getId();
     QualificationEngine<AdSet> qualificationEngine =
-      new CohortQualificationEngine(contentCohort, attributeId2TargetingTagMap, languages);
+      new CohortQualificationEngine(contentCohort.getSsaiTag(), attributeId2TargetingTagMap, languageId);
 
     List<QualifiedAdSet> qualifiedAdSets = qualificationEngine.qualify(adSets);
     return Request.builder()

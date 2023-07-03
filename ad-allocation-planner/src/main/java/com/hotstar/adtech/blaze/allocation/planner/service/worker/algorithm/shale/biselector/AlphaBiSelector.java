@@ -48,8 +48,8 @@ public class AlphaBiSelector {
 
   private double calculateKttForAlpha(ShaleSupply supply, ShaleDemand demand, double a) {
     double x = Math.min(1,
-      Math.max(0, demand.getTheta()
-        * (1 + (a - supply.getBeta()) / V)));
+      Math.max(0, shaleGraph.getTd(demand, supply)
+        * (1 + (a - supply.getBeta() + shaleGraph.getRd(demand, supply)) / V)));
     return x * supply.getConcurrency();
   }
 }

@@ -1,0 +1,11 @@
+spring:
+  profiles:
+    include: ad-model-client-prod, ad-redis-client-prod
+blaze:
+  data-exchanger:
+    endpoint: http://adtech-blaze-data-exchanger-apse1.hotstar-labs.com
+pulse:
+  counter-service:
+    endpoint: https://pf-pulse-counter-service-apse1.hotstar-labs.com
+    readTimeout: 5000
+

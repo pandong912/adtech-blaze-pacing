@@ -1,6 +1,5 @@
 package com.hotstar.adtech.blaze.allocation.planner.qualification;
 
-import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.ad.DurationInspector;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.adset.BreakTargetingRuleInspector;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Ad;
@@ -12,9 +11,9 @@ public class StreamBreakQualificationEngine implements QualificationEngine<Quali
   private final DurationInspector durationInspector;
   private final BreakTargetingRuleInspector breakTargetingRuleInspector;
 
-  public StreamBreakQualificationEngine(Integer breakDuration, BreakDetail breakDetail) {
+  public StreamBreakQualificationEngine(Integer breakDuration, Integer breakTypeId) {
     durationInspector = new DurationInspector(breakDuration);
-    breakTargetingRuleInspector = new BreakTargetingRuleInspector(breakDetail.getBreakTypeId());
+    breakTargetingRuleInspector = new BreakTargetingRuleInspector(breakTypeId);
   }
 
   public List<QualifiedAdSet> qualify(List<QualifiedAdSet> candidateAdSets) {

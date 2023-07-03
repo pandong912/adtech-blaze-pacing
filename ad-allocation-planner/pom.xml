@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>blaze-pacing</artifactId>
+        <artifactId>pacing</artifactId>
         <groupId>com.hotstar.adtech.blaze</groupId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.7.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -18,7 +18,7 @@
     <dependencies>
         <dependency>
             <groupId>com.hotstar.adtech.blaze</groupId>
-            <artifactId>ad-allocation-plan-client</artifactId>
+            <artifactId>allocation-plan-client</artifactId>
         </dependency>
         <dependency>
             <groupId>com.hotstar.adtech.blaze</groupId>
@@ -35,6 +35,10 @@
         <dependency>
             <groupId>com.hotstar.adtech.blaze</groupId>
             <artifactId>ad-data-exchanger-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.hotstar.macro</groupId>
+            <artifactId>templatize-macro</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

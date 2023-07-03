@@ -1,0 +1,12 @@
+export PROFILE="pp"
+export JVM_OPTS="-Xms2048m -Xmx3584m -XX:+UseG1GC"
+export ADS_ENV_NAMESPACE_NAME="adtech-in-pp-aps1"
+export ADS_ENV_SERVICE_HOSTNAME="adtech-blaze-data-exchanger-pp.pp.hotstar-labs.com"
+export ADS_ENV_RESOURCES_LIMIT_MEMORY="4096Mi"
+export ADS_ENV_RESOURCES_LIMIT_CPU=2
+export ADS_ENV_REQUESTS_LIMIT_MEMORY="4096Mi"
+export ADS_ENV_REQUESTS_LIMIT_CPU=2
+export ADS_ENV_STAGE="PP"
+export ADS_ENV_HPA_MIN_PODS=1
+export ADS_ENV_HPA_MAX_PODS=2
+export ACCESS_LOGS_BUCKET_NAME="all-elb-logs-aps1"

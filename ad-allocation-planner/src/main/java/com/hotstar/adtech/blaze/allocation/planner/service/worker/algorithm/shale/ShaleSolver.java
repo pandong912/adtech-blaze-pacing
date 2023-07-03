@@ -8,6 +8,7 @@ import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.Shal
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.biselector.AlphaBiSelector;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.biselector.BetaBiSelector;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.biselector.SigmaBiSelector;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.ReachStorage;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Request;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GraphContext;
 import io.micrometer.core.annotation.Timed;
@@ -26,7 +27,7 @@ public class ShaleSolver {
   private static final int MAX_ITER = 2;
 
   @Timed(value = GRAPH_SOLVE, extraTags = {"algorithm", "shale"})
-  public List<ShaleResult> solve(GraphContext context, double penalty) {
+  public List<ShaleResult> solve(GraphContext context, ReachStorage reachStorage, double penalty) {
     Map<Integer, List<Long>> supplyToDemand = context.getRequests().stream()
       .collect(Collectors.toMap(Request::getConcurrencyId, this::collectAdSetId));
 
@@ -41,7 +42,7 @@ public class ShaleSolver {
         .collect(Collectors.toList());
 
 
-    ShaleGraph shaleGraph = new ShaleGraph(demands, supplies, penalty);
+    ShaleGraph shaleGraph = new ShaleGraph(demands, supplies, reachStorage, penalty);
     shaleGraph.buildEdge(supplyToDemand);
     shaleGraph.initParams();
 
@@ -90,6 +91,8 @@ public class ShaleSolver {
         .alpha(demand.getAlpha())
         .theta(demand.getTheta())
         .sigma(demand.getSigma())
+        .std(demand.getStd())
+        .mean(demand.getReachOffset())
         .reachEnabled(demand.getReachEnabled())
         .adDuration(demand.getAdDuration())
         .build())
@@ -98,8 +101,8 @@ public class ShaleSolver {
 
   private void updateInventory(ShaleGraph shaleGraph, ShaleDemand demand) {
     shaleGraph.getEdgesForDemand(demand).forEach(supply -> {
-      double prob = Math.min(1, Math.max(0, demand.getTheta()
-        * (1 + (demand.getSigma() - supply.getBeta()) / V)));
+      double prob = Math.min(1, Math.max(0, shaleGraph.getTd(demand, supply)
+        * (1 + (demand.getSigma() - supply.getBeta() + shaleGraph.getRd(demand, supply)) / V)));
       long needs = (long) (supply.getConcurrency() * demand.getAdDuration() * prob);
       supply.updateInventory(needs);
     });

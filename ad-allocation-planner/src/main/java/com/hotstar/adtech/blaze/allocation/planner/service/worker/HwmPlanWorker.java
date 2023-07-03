@@ -9,14 +9,11 @@ import com.hotstar.adtech.blaze.allocation.planner.common.response.diagnosis.Pla
 import com.hotstar.adtech.blaze.allocation.planner.common.response.hwm.HwmAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.HwmResult;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.hwm.HwmSolver;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.PlanQualificationExecutor;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.SpotQualificationExecutor;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.SsaiQualificationExecutor;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.QualificationExecutor;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.BreakContext;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GraphContext;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,20 +22,15 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class HwmPlanWorker {
   private final DiagnosisService diagnosisService;
-  private final SpotQualificationExecutor spotQualificationExecutor;
-  private final SsaiQualificationExecutor ssaiQualificationExecutor;
+  private final QualificationExecutor qualificationExecutor;
   private final HwmSolver solver;
 
   public List<HwmSolveResult> generatePlans(GeneralPlanContext generalPlanContext, PlanType planType) {
     List<GraphContext> graphContexts =
-      buildGraphContextPlanType(planType).executeQualify(generalPlanContext);
+      qualificationExecutor.doQualification(planType, generalPlanContext);
     return graphContexts.parallelStream()
       .map(graphContext -> solveGraph(generalPlanContext, graphContext))
       .collect(Collectors.toList());
-  }
-
-  private PlanQualificationExecutor buildGraphContextPlanType(PlanType planType) {
-    return Objects.equals(planType, PlanType.SPOT) ? spotQualificationExecutor : ssaiQualificationExecutor;
   }
 
   private HwmSolveResult solveGraph(GeneralPlanContext generalPlanContext, GraphContext graphContext) {
@@ -68,7 +60,7 @@ public class HwmPlanWorker {
       .contentId(contentId)
       .nextBreakIndex(breakContext.getNextBreakIndex())
       .totalBreakNumber(breakContext.getTotalBreakNumber())
-      .breakTypeId(graphContext.getBreakDetail().getBreakTypeId())
+      .breakTypeIds(graphContext.getBreakTypeGroup().getBreakTypeIds())
       .duration(graphContext.getBreakDuration())
       .hwmAllocationDetails(
         hwmAllocationResults.stream().map(this::buildHwmAllocationDetail).collect(Collectors.toList()))

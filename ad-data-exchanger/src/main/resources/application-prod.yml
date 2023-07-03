@@ -1,0 +1,8 @@
+spring:
+  profiles:
+    include: ad-model-repository-ro-prod, ad-redis-client-prod, allocation-plan-client-prod
+blaze:
+  match-progress-loader:
+    bucket-name: adtech-ml-perf-ads-us-east-1-prod-v1
+    s3-region: us-east-1
+    path: live_ads_progress/avg_progress_70_90_csv_format/{date}.csv

@@ -1,31 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.3.12.RELEASE</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath /> <!-- lookup parent from repository -->
     </parent>
 
     <modules>
+        <module>ad-ingester-service</module>
+        <module>ad-allocation-planner-common</module>
+        <module>allocation-plan-client</module>
         <module>ad-allocation-planner</module>
-        <module>ad-allocation-plan-client</module>
+        <module>ad-data-exchanger-client</module>
+        <module>ad-data-exchanger</module>
     </modules>
 
     <groupId>com.hotstar.adtech.blaze</groupId>
-    <artifactId>blaze-pacing</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <artifactId>pacing</artifactId>
+    <version>1.7.2-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>blaze-pacing-project</name>
-    <description>hotstar blaze pacing project</description>
+    <name>ssai-blaze-project</name>
+    <description>hotstar ssai blaze project</description>
 
     <properties>
-        <blaze-pacing.version>1.0.0-SNAPSHOT</blaze-pacing.version>
-        <blaze-module.version>1.5.1-SNAPSHOT</blaze-module.version>
-        <pulse.version>2.2.2</pulse.version>
+        <blaze-module.version>1.7.2-SNAPSHOT</blaze-module.version>
+        <blaze-ad-model-module.version>1.7.1</blaze-ad-model-module.version>
+        <pulse.version>2.2.3</pulse.version>
         <shifu-common-stats-micrometer>0.1.1</shifu-common-stats-micrometer>
+        <templatize.macro.version>2.0.5-RELEASE</templatize.macro.version>
         <swagger.version>2.9.2</swagger.version>
         <spring.boot.version>2.3.12.RELEASE</spring.boot.version>
         <spring.cloud.version>Hoxton.SR8</spring.cloud.version>
@@ -44,10 +48,6 @@
             https://nexus.hotstar-labs.com/repository/ads-snapshot/
         </snapshot-repository-url>
         <jacoco.version>0.8.4</jacoco.version>
-        <apollo.version>1.9.2</apollo.version>
-        <avro.version>1.11.0</avro.version>
-        <campaign.registry.version>1.3.55</campaign.registry.version>
-
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.jacoco.reportPaths>target/jacoco.exec</sonar.jacoco.reportPaths>
@@ -69,21 +69,26 @@
             <dependency>
                 <groupId>com.hotstar.adtech.blaze</groupId>
                 <artifactId>ad-model-common</artifactId>
-                <version>${blaze-module.version}</version>
+                <version>${blaze-ad-model-module.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.hotstar.adtech.blaze</groupId>
                 <artifactId>ad-model-repository</artifactId>
-                <version>${blaze-module.version}</version>
+                <version>${blaze-ad-model-module.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.hotstar.adtech.blaze</groupId>
-                <artifactId>ad-allocation-plan-client</artifactId>
-                <version>${blaze-pacing.version}</version>
+                <artifactId>ad-redis-client</artifactId>
+                <version>${blaze-ad-model-module.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.hotstar.adtech.blaze</groupId>
                 <artifactId>ad-model-client</artifactId>
+                <version>${blaze-ad-model-module.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hotstar.adtech.blaze</groupId>
+                <artifactId>allocation-plan-client</artifactId>
                 <version>${blaze-module.version}</version>
             </dependency>
             <dependency>
@@ -97,12 +102,23 @@
                 <version>${blaze-module.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.hotstar.macro</groupId>
+                <artifactId>templatize-macro</artifactId>
+                <version>${templatize.macro.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.hotstar.pulse</groupId>
+                <artifactId>pulse-counter-client</artifactId>
+                <version>${pulse.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring.boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
                 <artifactId>spring-cloud-dependencies</artifactId>
@@ -110,7 +126,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
 
             <!-- Protostuff -->
             <dependency>
@@ -207,19 +222,30 @@
                 <version>0.1.5</version>
             </dependency>
             <dependency>
-                <groupId>com.ctrip.framework.apollo</groupId>
-                <artifactId>apollo-client</artifactId>
-                <version>${apollo.version}</version>
+                <groupId>io.lettuce</groupId>
+                <artifactId>lettuce-core</artifactId>
+                <version>6.1.9.RELEASE</version>
+            </dependency>
+            <dependency>
+                <groupId>com.opencsv</groupId>
+                <artifactId>opencsv</artifactId>
+                <version>5.3</version>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>1.16.2</version>
+                <version>1.17.6</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>localstack</artifactId>
+                <version>1.17.6</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers</artifactId>
                 <version>1.17.6</version>
                 <scope>test</scope>
             </dependency>
@@ -256,13 +282,6 @@
     </dependencies>
 
     <repositories>
-        <!--<repository>-->
-        <!--<id>aliyun-repos</id>-->
-        <!--<url>http://maven.aliyun.com/nexus/content/groups/public/</url>-->
-        <!--<snapshots>-->
-        <!--<enabled>false</enabled>-->
-        <!--</snapshots>-->
-        <!--</repository>-->
         <repository>
             <id>central</id>
             <url>https://repo1.maven.org/maven2/</url>
@@ -282,26 +301,11 @@
             </snapshots>
         </repository>
         <repository>
-            <id>confluent</id>
-            <url>https://packages.confluent.io/maven</url>
+            <id>templatize-macro-release</id>
+            <name>templatize-macro-release</name>
+            <url>https://nexus.hotstar.com/repository/templatize-macro-release</url>
             <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>dmsp-snapshot</id>
-            <name>dms snapshot</name>
-            <url>https://nexus.hotstar-labs.com/repository/dmsp-snapshot/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>dmsp-release</id>
-            <name>dms release</name>
-            <url>https://nexus.hotstar-labs.com/repository/dmsp-release/</url>
-            <snapshots>
-                <enabled>true</enabled>
+                <enabled>false</enabled>
             </snapshots>
         </repository>
     </repositories>

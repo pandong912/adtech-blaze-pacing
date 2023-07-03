@@ -1,5 +1,7 @@
 package com.hotstar.adtech.blaze.allocation.planner.service.manager.loader;
 
+import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.PLAN_DATA_LOAD;
+
 import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
@@ -16,6 +18,7 @@ import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Match;
 import com.hotstar.adtech.blaze.allocation.planner.source.algomodel.StandardMatchProgressModel;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.BreakContext;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
+import io.micrometer.core.annotation.Timed;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +34,7 @@ public class GeneralPlanContextLoader {
   private final DataLoader dataLoader;
   private final DataProcessService dataProcessService;
 
+  @Timed(value = PLAN_DATA_LOAD, extraTags = {"algorithm", "general"})
   public GeneralPlanContext getGeneralPlanContext(Match match, AdModel adModel) {
     String contentId = match.getContentId();
 
@@ -64,7 +68,6 @@ public class GeneralPlanContextLoader {
       .responses(responses)
       .breakContext(breakContext)
       .breakDetails(breakDetails)
-      .languages(adModel.getLanguages())
       .build();
   }
 

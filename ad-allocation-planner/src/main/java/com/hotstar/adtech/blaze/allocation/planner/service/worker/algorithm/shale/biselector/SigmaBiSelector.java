@@ -30,7 +30,7 @@ public class SigmaBiSelector {
 
   private double calculateZMax(ShaleSupply supply, ShaleDemand demand) {
     return supply.getBreakDuration() * V / demand.getAdDuration() / demand.getTheta() + supply.getBeta()
-      - V;
+      - V - graph.getRd(demand, supply);
   }
 
   private double bisectSigma(double sigmaMin, double sigmaMax, ShaleDemand demand) {
@@ -53,8 +53,8 @@ public class SigmaBiSelector {
   }
 
   private double calculateKttForSigma(ShaleSupply supply, double z, ShaleDemand demand) {
-    double x = Math.min(1, Math.max(0, demand.getTheta()
-      * (1 + (z - supply.getBeta()) / V)));
+    double x = Math.min(1, Math.max(0, graph.getTd(demand, supply)
+      * (1 + (z - supply.getBeta() + graph.getRd(demand, supply)) / V)));
     double s = supply.getConcurrency() * x * demand.getAdDuration();
     return Math.min(s, supply.getRawInventory());
   }

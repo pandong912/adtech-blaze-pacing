@@ -1,0 +1,23 @@
+server:
+  port: 8097
+management:
+  server:
+    port: 8197
+spring:
+  profiles:
+    include: ad-model-repository-local, ad-redis-client-local, allocation-plan-client-local
+  flyway:
+    locations: classpath:db/migration,classpath:db/data,classpath:db/custom-data
+blaze:
+  match-progress-loader:
+    bucket-name: adtech-blaze-ad-model-pp
+    s3-region: ap-southeast-1
+    path: break_progress/{date}.csv
+  redis:
+    master-replica:
+      enable: true
+    beacon-cluster:
+      enable: true
+    reach-cluster:
+      enable: true
+

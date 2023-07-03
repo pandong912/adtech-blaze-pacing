@@ -1,0 +1,67 @@
+spring:
+  application:
+    name: blaze-ingester-service
+  profiles:
+    active: local
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  metrics:
+    enable:
+      all: false
+      system: true
+      http: true
+      jvm:
+        memory: true
+        gc: true
+      tomcat: true
+      blaze: true
+      lettuce: true
+    distribution:
+      percentiles-histogram:
+        lettuce: true
+        blaze: true
+  endpoint:
+    health:
+      show-details: always
+blaze:
+  redis:
+    master-replica:
+      enable: true
+    beacon-cluster:
+      enable: true
+  data-exchanger:
+    endpoint: adtech-blaze-data-exchanger-service.internal.hotstar.com
+    retryer:
+      period: 100
+      maxPeriod: 1000
+      maxAttempts: 3
+  ad-ingester-service:
+    metrics-prefix: blaze.ingester.service
+    executor:
+      core-pool-size: 4
+      max-pool-size: 16
+      keep-alive-seconds: 60
+      queue-capacity: 20000
+    load.ad-model: 10000
+    schedule:
+      concurrency-sync-delay: 20000
+      impression-sync-delay: 10000
+pulse:
+  counter-service:
+    endpoint: ${PULSE_COUNTER_SERVICE_ENDPOINT}
+    retryer:
+      period: 100
+      maxPeriod: 1000
+      maxAttempts: 3
+feign:
+  client:
+    config:
+      pulse-counter-service:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic

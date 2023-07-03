@@ -30,12 +30,12 @@ public class SolverBenchTest {
         .mapToObj(i -> getGraphContext(random, cohortSize, adSetSize, maxConcurrency))
         .collect(Collectors.toList());
     TestReachStorage testReachStorage = new TestReachStorage(300, 20000);
-    int sum = 0;
+    long sum = 0;
     for (int j = 0; j < 10; j++) {
       stopWatch.reset();
       stopWatch.start();
       ShaleSolver shaleSolver = new ShaleSolver();
-      graphContexts.parallelStream().forEach(graphContext -> shaleSolver.solve(graphContext,
+      graphContexts.parallelStream().forEach(graphContext -> shaleSolver.solve(graphContext, testReachStorage,
         ShaleConstant.PENALTY));
       stopWatch.stop();
       sum += stopWatch.getTime();

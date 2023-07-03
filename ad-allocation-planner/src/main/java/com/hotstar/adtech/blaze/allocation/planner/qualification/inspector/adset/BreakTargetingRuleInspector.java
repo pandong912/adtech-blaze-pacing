@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BreakTargetingRuleInspector implements Inspector<QualifiedAdSet> {
 
-  private final long breakTypeId;
+  private final Integer breakTypeId;
 
   @Override
   public boolean qualify(QualifiedAdSet adSet) {
@@ -21,11 +21,12 @@ public class BreakTargetingRuleInspector implements Inspector<QualifiedAdSet> {
       return true;
     }
 
-    List<Long> breakTypeIds = breakTargetingRule.getBreakTypeIds();
+    List<Integer> breakTypeIds = breakTargetingRule.getBreakTypeIds();
     if (Objects.equals(breakTargetingRule.getRuleType(), RuleType.Include)) {
       return breakTypeIds.stream().anyMatch(id -> id.equals(breakTypeId));
     } else {
       return breakTypeIds.stream().noneMatch(id -> id.equals(breakTypeId));
     }
   }
+
 }

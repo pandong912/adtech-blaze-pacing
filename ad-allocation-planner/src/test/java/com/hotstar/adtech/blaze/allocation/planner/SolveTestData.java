@@ -41,7 +41,7 @@ public class SolveTestData {
 
     return GraphContext.builder()
       .breakDuration(20000)
-      .breakDetail(null)
+      .breakTypeGroup(null)
       .requests(requests)
       .responses(responses)
       .planType(PlanType.SSAI)

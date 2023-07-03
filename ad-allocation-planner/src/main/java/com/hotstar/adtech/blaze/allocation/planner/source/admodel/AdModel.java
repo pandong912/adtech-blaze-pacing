@@ -13,7 +13,6 @@ public class AdModel {
     .adModelVersion(AdModelVersion.EMPTY)
     .build();
 
-  private Languages languages;
   private Map<String, Integer> attributeId2TargetingTags;
   private Map<String, Match> matches;
   private Map<String, List<AdSet>> adSetGroup;

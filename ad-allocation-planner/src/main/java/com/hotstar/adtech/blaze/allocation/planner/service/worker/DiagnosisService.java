@@ -44,8 +44,8 @@ public class DiagnosisService {
   public PlanInfo buildPlanInfo(GraphContext graphContext, BreakContext breakContext) {
     return PlanInfo.builder()
       .planType(graphContext.getPlanType())
-      .breakTypeId(graphContext.getBreakDetail().getBreakTypeId())
-      .breakType(graphContext.getBreakDetail().getBreakType())
+      .breakTypeId(graphContext.getBreakTypeGroup().getBreakTypeIds())
+      .breakType(graphContext.getBreakTypeGroup().getBreakTypes())
       .breakDuration(graphContext.getBreakDuration())
       .nextBreakIndex(breakContext.getNextBreakIndex())
       .totalBreakNumber(breakContext.getTotalBreakNumber())

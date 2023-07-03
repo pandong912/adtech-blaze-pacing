@@ -5,6 +5,7 @@ import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
 import com.hotstar.adtech.blaze.allocation.planner.common.request.AllocationRequest;
 import com.hotstar.adtech.blaze.allocation.planner.common.request.ShaleAllocationRequest;
+import com.hotstar.adtech.blaze.allocation.planner.common.request.UnReachData;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.HwmSolveResult;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.ShaleSolveResult;
 import com.hotstar.adtech.blaze.allocation.planner.ingester.AdModelLoader;
@@ -12,6 +13,8 @@ import com.hotstar.adtech.blaze.allocation.planner.service.manager.DataProcessSe
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.DemandDiagnosis;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.HwmPlanWorker;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.ShalePlanWorker;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.ReachStorage;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.RedisReachStorage;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Response;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdModel;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
@@ -19,9 +22,11 @@ import com.hotstar.adtech.blaze.allocation.planner.source.algomodel.StandardMatc
 import com.hotstar.adtech.blaze.allocation.planner.source.context.BreakContext;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.ShalePlanContext;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
@@ -54,9 +59,14 @@ public class AllocationPlanController {
     GeneralPlanContext generalPlanContext = buildGeneralPlanContext(shaleAllocationRequest.getAllocationRequest(),
       shaleAllocationRequest.getReachAdSetIds());
     setConcurrencyId(generalPlanContext);
-
+    Map<String, Integer> concurrencyIdMap = generalPlanContext.getConcurrencyData().getCohorts().stream()
+      .collect(Collectors.toMap(ContentCohort::getKey, ContentCohort::getConcurrencyId));
+    Map<Long, Integer> adSetIdMap =
+      generalPlanContext.getAdSets().stream().collect(Collectors.toMap(AdSet::getId, AdSet::getDemandId));
+    ReachStorage reachStorage = buildReachStorage(concurrencyIdMap, adSetIdMap, shaleAllocationRequest);
     ShalePlanContext shalePlanContext = ShalePlanContext.builder()
       .generalPlanContext(generalPlanContext)
+      .reachStorage(reachStorage)
       .penalty(shaleAllocationRequest.getPenalty())
       .build();
 
@@ -64,6 +74,25 @@ public class AllocationPlanController {
       shalePlanWorker.generatePlans(shalePlanContext, shaleAllocationRequest.getAllocationRequest().getPlanType());
     return StandardResponse.success(ssaiHwmSolveResults);
   }
+
+
+  private ReachStorage buildReachStorage(Map<String, Integer> concurrencyIdMap,
+                                         Map<Long, Integer> adSetIdMap, ShaleAllocationRequest shaleAllocationRequest) {
+    List<UnReachData> unReachDataList = shaleAllocationRequest.getUnReachDataList();
+    double[][] unReachStore = new double[adSetIdMap.size()][concurrencyIdMap.size()];
+    for (double[] row : unReachStore) {
+      Arrays.fill(row, 1.0);
+    }
+    unReachDataList.stream()
+      .filter(unReachData -> concurrencyIdMap.containsKey(unReachData.getKey()))
+      .forEach(unReachData -> unReachData.getUnReachRatio().entrySet().stream()
+        .filter(entry -> adSetIdMap.containsKey(entry.getKey()))
+        .forEach(entry -> unReachStore[adSetIdMap.get(entry.getKey())][concurrencyIdMap.get(unReachData.getKey())] =
+          entry.getValue()
+        ));
+    return new RedisReachStorage(unReachStore);
+  }
+
 
   private GeneralPlanContext buildGeneralPlanContext(AllocationRequest request, Collection<Long> reachAdSetIds) {
     AdModel adModel = adModelLoader.loadAdModel(request.getAdModelVersion());
@@ -92,7 +121,6 @@ public class AllocationPlanController {
       .responses(responses)
       .breakContext(breakContext)
       .breakDetails(request.getBreakDetails())
-      .languages(adModel.getLanguages())
       .build();
   }
 

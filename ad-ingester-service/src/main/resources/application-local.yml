@@ -1,0 +1,22 @@
+spring:
+  profiles:
+    include: ad-model-client-local, ad-redis-client-local
+pulse:
+  counter-service:
+    readTimeout: 30000
+    endpoint: localhost:8096
+feign:
+  client:
+    config:
+      default:
+        loggerLevel: full
+server:
+  port: 9092
+management:
+  server:
+    port: 9093
+blaze:
+  ad-ingester-service:
+    concurrency-sync-lag: 0
+  data-exchanger:
+    endpoint: localhost:8097

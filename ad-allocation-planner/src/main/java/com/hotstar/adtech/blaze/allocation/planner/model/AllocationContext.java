@@ -3,7 +3,7 @@ package com.hotstar.adtech.blaze.allocation.planner.model;
 import com.hotstar.adtech.blaze.admodel.common.enums.AlgorithmType;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ReachStorage;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.ReachStorage;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdModel;
 import com.hotstar.adtech.blaze.allocation.planner.source.algomodel.StandardMatchProgressModel;
 import java.util.List;

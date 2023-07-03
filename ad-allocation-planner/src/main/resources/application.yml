@@ -25,7 +25,7 @@ management:
       show-details: always
 blaze:
   ad-allocation-planner:
-    metrics-prefix: blaze.allocation.planner
+    metrics-prefix: blaze
     executor:
       core-pool-size: 4
       max-pool-size: 16
@@ -35,9 +35,8 @@ blaze:
       load.ad-model: 10000
       load.break-progress-model: 300000
       load.break-definition: 300000
-    mode: SHALE
   data-exchanger:
-    endpoint: localhost:8097
+    endpoint: adtech-blaze-data-exchanger-service.internal.hotstar.com
     retryer:
       period: 100
       maxPeriod: 1000

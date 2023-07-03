@@ -1,5 +1,6 @@
 package com.hotstar.adtech.blaze.allocation.planner.service.manager;
 
+import com.hotstar.adtech.blaze.admodel.common.entity.PlatformEntity;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
@@ -55,8 +56,10 @@ public class AllocationDiagnosisService {
       .streamType(contentStream.getStreamType())
       .cohortId(contentStream.getConcurrencyId())
       .contentId(contentStream.getContentId())
-      .language(contentStream.getPlayoutStream().getLanguage())
-      .platforms(contentStream.getPlayoutStream().getPlatforms())
+      .language(contentStream.getPlayoutStream().getLanguage().getName())
+      .platforms(
+        contentStream.getPlayoutStream().getPlatforms().stream().map(PlatformEntity::getName)
+          .collect(Collectors.toList()))
       .build();
   }
 
@@ -67,8 +70,10 @@ public class AllocationDiagnosisService {
       .cohortId(contentCohort.getConcurrencyId())
       .contentId(contentCohort.getContentId())
       .streamType(contentCohort.getStreamType())
-      .language(contentCohort.getPlayoutStream().getLanguage())
-      .platforms(contentCohort.getPlayoutStream().getPlatforms())
+      .language(contentCohort.getPlayoutStream().getLanguage().getName())
+      .platforms(
+        contentCohort.getPlayoutStream().getPlatforms().stream().map(PlatformEntity::getName)
+          .collect(Collectors.toList()))
       .ssaiTag(contentCohort.getSsaiTag())
       .build();
   }

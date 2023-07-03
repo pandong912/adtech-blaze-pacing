@@ -1,6 +1,5 @@
 package com.hotstar.adtech.blaze.allocation.planner.unit;
 
-import com.hotstar.adtech.blaze.admodel.client.model.LanguageInfo;
 import com.hotstar.adtech.blaze.admodel.common.enums.Platform;
 import com.hotstar.adtech.blaze.admodel.common.enums.RuleType;
 import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
@@ -13,6 +12,8 @@ import com.hotstar.adtech.blaze.allocation.planner.qualification.StreamQualifica
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.StreamTargetingRule;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.StreamTargetingRuleClause;
+import com.hotstar.adtech.blaze.exchanger.api.entity.LanguageMapping;
+import com.hotstar.adtech.blaze.exchanger.api.entity.PlatformMapping;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +24,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class StreamQualificationEngineTest {
+  private final LanguageMapping languageMapping = QualificationTestData.getLanguageMapping();
+  private final PlatformMapping platformMapping = QualificationTestData.getPlatformMapping();
 
   @Test
   public void whenIncludeRuleIsAllMatchThenSuccess() {
@@ -30,16 +33,16 @@ public class StreamQualificationEngineTest {
       ContentStream.builder()
         .streamType(StreamType.SSAI_Spot)
         .playoutStream(PlayoutStream.builder()
-          .language("English")
+          .language(languageMapping.getByName("English"))
           .platforms(Arrays.asList(
-            Platform.Android,
-            Platform.iOS
+            platformMapping.getByName(Platform.Android.toString()),
+            platformMapping.getByName(Platform.iOS.toString())
           ))
           .tenant(Tenant.India)
           .build())
         .build();
     StreamQualificationEngine streamQualificationEngine =
-      new StreamQualificationEngine(stream, QualificationTestData.getLanguages());
+      new StreamQualificationEngine(stream.getPlayoutStream());
 
 
     AdSet adSet = AdSet.builder()
@@ -51,13 +54,13 @@ public class StreamQualificationEngineTest {
         .streamTargetingRuleClauses(Arrays.asList(
           StreamTargetingRuleClause.builder()
             .tenant(Tenant.India)
-            .platform(Platform.Android)
-            .language(LanguageInfo.builder().id(1).name("English").build())
+            .platformId(1)
+            .languageId(1)
             .build(),
           StreamTargetingRuleClause.builder()
             .tenant(Tenant.India)
-            .platform(Platform.iOS)
-            .language(LanguageInfo.builder().id(1).name("English").build())
+            .platformId(2)
+            .languageId(1)
             .build()
         ))
         .build())
@@ -75,13 +78,13 @@ public class StreamQualificationEngineTest {
         .streamTargetingRuleClauses(Arrays.asList(
           StreamTargetingRuleClause.builder()
             .tenant(Tenant.India)
-            .platform(Platform.Android)
-            .language(LanguageInfo.builder().id(1).name("English").build())
+            .platformId(1)
+            .languageId(1)
             .build(),
           StreamTargetingRuleClause.builder()
             .tenant(Tenant.India)
-            .platform(Platform.FireTV)
-            .language(LanguageInfo.builder().id(1).name("English").build())
+            .platformId(8)
+            .languageId(1)
             .build()
         ))
         .build())
@@ -96,16 +99,16 @@ public class StreamQualificationEngineTest {
       ContentStream.builder()
         .streamType(StreamType.SSAI_Spot)
         .playoutStream(PlayoutStream.builder()
-          .language("English")
+          .language(languageMapping.getByName("English"))
           .platforms(Arrays.asList(
-            Platform.Android,
-            Platform.iOS
+            platformMapping.getByName(Platform.Android.toString()),
+            platformMapping.getByName(Platform.iOS.toString())
           ))
           .tenant(Tenant.India)
           .build())
         .build();
     StreamQualificationEngine streamQualificationEngine =
-      new StreamQualificationEngine(stream, QualificationTestData.getLanguages());
+      new StreamQualificationEngine(stream.getPlayoutStream());
 
 
     AdSet adSet = AdSet.builder()
@@ -117,13 +120,13 @@ public class StreamQualificationEngineTest {
         .streamTargetingRuleClauses(Arrays.asList(
           StreamTargetingRuleClause.builder()
             .tenant(Tenant.India)
-            .platform(Platform.AndroidTV)
-            .language(LanguageInfo.builder().id(1).name("English").build())
+            .platformId(6)
+            .languageId(1)
             .build(),
           StreamTargetingRuleClause.builder()
             .tenant(Tenant.India)
-            .platform(Platform.FireTV)
-            .language(LanguageInfo.builder().id(1).name("English").build())
+            .platformId(8)
+            .languageId(1)
             .build()
         ))
         .build())
@@ -141,13 +144,14 @@ public class StreamQualificationEngineTest {
         .streamTargetingRuleClauses(Arrays.asList(
           StreamTargetingRuleClause.builder()
             .tenant(Tenant.India)
-            .platform(Platform.AndroidTV)
-            .language(LanguageInfo.builder().id(1).name("Hindi").build())
+            .platformId(6)
+            .languageId(2)
             .build(),
           StreamTargetingRuleClause.builder()
             .tenant(Tenant.India)
-            .platform(Platform.FireTV)
-            .language(LanguageInfo.builder().id(1).name("English").build())
+            .platformId(8)
+            .languageId(1)
+            .languageId(1)
             .build()
         ))
         .build())

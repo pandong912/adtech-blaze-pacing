@@ -22,7 +22,7 @@ public class BetaBiSelector {
       double betaMin = 0;
       double betaMax = 0;
       double calculateBMax = graph.getEdgesForSupply(supply).stream()
-        .mapToDouble(demand -> demand.getAlpha() + V)
+        .mapToDouble(demand -> demand.getAlpha() + graph.getRd(demand, supply) + V)
         .max()
         .orElse(0d);
       betaMax = Math.max(betaMax, calculateBMax);
@@ -52,7 +52,7 @@ public class BetaBiSelector {
 
   private double calculateKttForBeta(ShaleDemand demand, double b, ShaleSupply supply) {
     return Math.min(1, Math.max(0,
-      demand.getTheta() * (1 + (demand.getAlpha() - b) / V)))
+      graph.getTd(demand, supply) * (1 + (graph.getRd(demand, supply) + demand.getAlpha() - b) / V)))
       * demand.getAdDuration() / supply.getBreakDuration();
   }
 }

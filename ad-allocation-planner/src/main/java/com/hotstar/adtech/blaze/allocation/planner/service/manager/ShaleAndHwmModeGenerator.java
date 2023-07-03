@@ -21,9 +21,11 @@ import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
-public class ShaleAndHwmModeGenerator implements AllocationPlanGenerator {
+@Service
+public class ShaleAndHwmModeGenerator {
 
   private final ShalePlanWorker shalePlanWorker;
   private final HwmPlanWorker hwmPlanWorker;
@@ -32,8 +34,6 @@ public class ShaleAndHwmModeGenerator implements AllocationPlanGenerator {
   private final AllocationResultUploader allocationResultUploader;
   private final AllocationPlanResultRepository allocationPlanResultRepository;
 
-
-  @Override
   public void generateAndUploadAllocationPlan(Match match, AdModel adModel) {
     ShalePlanContext shalePlanContext = shalePlanContextLoader.getShalePlanContext(match, adModel);
     List<ShaleSolveResult> ssaiShaleSolveResults = shalePlanWorker.generatePlans(shalePlanContext, PlanType.SSAI);

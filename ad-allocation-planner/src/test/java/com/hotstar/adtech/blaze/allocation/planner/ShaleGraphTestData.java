@@ -1,11 +1,11 @@
 package com.hotstar.adtech.blaze.allocation.planner;
 
 import com.hotstar.adtech.blaze.allocation.planner.qualification.QualifiedAdSet;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ReachStorage;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleConstant;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleDemand;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleGraph;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleSupply;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.ReachStorage;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Request;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Response;
 import java.util.Arrays;
@@ -53,7 +53,7 @@ public class ShaleGraphTestData {
       .map(shaleSupply -> new ShaleSupply(shaleSupply, 20000))
       .collect(Collectors.toList());
 
-    ShaleGraph shaleGraph = new ShaleGraph(shaleDemands, shaleSupplies, ShaleConstant.PENALTY);
+    ShaleGraph shaleGraph = new ShaleGraph(shaleDemands, shaleSupplies, new MockReachStorage(), ShaleConstant.PENALTY);
     shaleGraph.buildEdge(supplyToDemand);
     shaleGraph.initParams();
     return shaleGraph;
@@ -63,12 +63,7 @@ public class ShaleGraphTestData {
     return request.getQualifiedAdSets().stream().map(QualifiedAdSet::getId).collect(Collectors.toList());
   }
 
-  public static class MockReachStorage extends ReachStorage {
-
-    public MockReachStorage() {
-      super(null);
-    }
-
+  public static class MockReachStorage implements ReachStorage {
     @Override
     public double getUnReachRatio(int adSetId, int concurrencyId) {
       return 0.5;

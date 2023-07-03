@@ -20,9 +20,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
-public class HwmModeGenerator implements AllocationPlanGenerator {
+@Service
+public class HwmModeGenerator {
   private final HwmPlanWorker hwmPlanWorker;
   private final GeneralPlanContextLoader generalPlanContextLoader;
   private final AllocationDiagnosisService allocationDiagnosisService;
@@ -31,7 +33,6 @@ public class HwmModeGenerator implements AllocationPlanGenerator {
 
   private final AllocationResultUploader allocationResultUploader;
 
-  @Override
   public void generateAndUploadAllocationPlan(Match match, AdModel adModel) {
     GeneralPlanContext generalPlanContext = generalPlanContextLoader.getGeneralPlanContext(match, adModel);
     List<HwmSolveResult> ssaiShaleSolveResults = hwmPlanWorker.generatePlans(generalPlanContext, PlanType.SSAI);

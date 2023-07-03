@@ -55,11 +55,11 @@
     </properties>
 
     <scm>
-        <connection>scm:git:git@github.com:hotstar/adtech-blaze-lcm-backend.git
+        <connection>scm:git:git@github.com:hotstar/adtech-blaze-pacing.git
         </connection>
-        <url>scm:git:git@github.com:hotstar/adtech-blaze-lcm-backend.git</url>
+        <url>scm:git:git@github.com:hotstar/adtech-blaze-pacing.git</url>
         <developerConnection>
-            scm:git:git@github.com:hotstar/adtech-blaze-lcm-backend.git
+            scm:git:git@github.com:hotstar/adtech-blaze-pacing.git
         </developerConnection>
         <tag>HEAD</tag>
     </scm>

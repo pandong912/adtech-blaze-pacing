@@ -26,14 +26,13 @@
 
     <properties>
         <blaze-module.version>1.7.2-SNAPSHOT</blaze-module.version>
-        <blaze-ad-model-module.version>1.7.1</blaze-ad-model-module.version>
+        <blaze-ad-model-module.version>1.7.2</blaze-ad-model-module.version>
         <pulse.version>2.2.3</pulse.version>
         <shifu-common-stats-micrometer>0.1.1</shifu-common-stats-micrometer>
         <templatize.macro.version>2.0.5-RELEASE</templatize.macro.version>
         <swagger.version>2.9.2</swagger.version>
         <spring.boot.version>2.3.12.RELEASE</spring.boot.version>
         <spring.cloud.version>Hoxton.SR8</spring.cloud.version>
-        <hibernate-types-52.version>2.9.13</hibernate-types-52.version>
         <guava.version>29.0-jre</guava.version>
         <commons-collections4.version>4.1</commons-collections4.version>
         <commons-io.version>2.7</commons-io.version>

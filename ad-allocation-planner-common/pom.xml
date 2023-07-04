@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.hotstar.adtech.blaze</groupId>
-        <artifactId>pacing</artifactId>
+        <artifactId>blaze-pacing</artifactId>
         <version>1.7.2-SNAPSHOT</version>
     </parent>
 

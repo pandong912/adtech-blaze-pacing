@@ -18,11 +18,11 @@
     </modules>
 
     <groupId>com.hotstar.adtech.blaze</groupId>
-    <artifactId>pacing</artifactId>
+    <artifactId>blaze-pacing</artifactId>
     <version>1.7.2-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>ssai-blaze-project</name>
-    <description>hotstar ssai blaze project</description>
+    <name>blaze pacing</name>
+    <description>hotstar adtech blaze pacing</description>
 
     <properties>
         <blaze-module.version>1.7.2-SNAPSHOT</blaze-module.version>

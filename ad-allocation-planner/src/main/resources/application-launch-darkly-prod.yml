@@ -9,7 +9,7 @@ launch:
     filters:
       region: ap-southeast-1
     relay:
-      host: https://launch-darkly-relay.hotstar-labs.com
+      host: http://launch-darkly-relay-internal.hotstar-labs.com
       sdkkey: ${LAUNCH_DARKLY_SDK_KEY}
       port: 80
       streamingDelay: 500

@@ -9,7 +9,7 @@ import com.hotstar.adtech.blaze.allocation.planner.common.model.HwmAllocationDet
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ShaleAllocationDetail;
 import com.hotstar.adtech.blaze.allocationplan.client.AllocationPlanClient;
 import com.hotstar.adtech.blaze.allocationplan.client.model.LoadRequest;
-import com.hotstar.adtech.blaze.exchanger.api.entity.AllocationPlanDetailResponse;
+import com.hotstar.adtech.blaze.exchanger.api.entity.AllocationPlanDetail;
 import com.hotstar.adtech.blaze.exchanger.api.entity.ShaleResultDetail;
 import com.hotstar.adtech.blaze.exchanger.api.response.AllocationPlanResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.AllocationPlanUriResponse;
@@ -43,7 +43,7 @@ public class AllocationPlanService {
   }
 
   private AllocationPlanUriResponse buildAllocationPlanUriResponse(AllocationPlanResult allocationPlanResult) {
-    List<AllocationPlanDetailResponse> allocationPlanDetailResponses =
+    List<AllocationPlanDetail> allocationPlanDetails =
       allocationPlanResultDetailRepository.findAllByAllocationPlanResultId(allocationPlanResult.getId())
         .stream()
         .map(this::buildAllocationPlanDetailResponse)
@@ -52,13 +52,13 @@ public class AllocationPlanService {
     return AllocationPlanUriResponse.builder()
       .version(allocationPlanResult.getVersion().toEpochMilli())
       .path(allocationPlanResult.getPath())
-      .allocationPlanDetailResponses(allocationPlanDetailResponses)
+      .allocationPlanDetails(allocationPlanDetails)
       .build();
   }
 
-  private AllocationPlanDetailResponse buildAllocationPlanDetailResponse(
+  private AllocationPlanDetail buildAllocationPlanDetailResponse(
     AllocationPlanResultDetail allocationPlanResultDetail) {
-    return AllocationPlanDetailResponse.builder()
+    return AllocationPlanDetail.builder()
       .planType(allocationPlanResultDetail.getPlanType())
       .duration(allocationPlanResultDetail.getDuration())
       .fileName(allocationPlanResultDetail.getFileName())

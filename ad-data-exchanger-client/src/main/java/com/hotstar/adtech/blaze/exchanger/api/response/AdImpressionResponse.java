@@ -1,12 +1,12 @@
 package com.hotstar.adtech.blaze.exchanger.api.response;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Value;
 
-@Data
+@Value
 @Builder
 public class AdImpressionResponse {
 
-  private String creativeId;
-  private Long impression;
+  String creativeId;
+  Long impression;
 }

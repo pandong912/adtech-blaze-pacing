@@ -4,6 +4,7 @@ import com.hotstar.adtech.blaze.admodel.common.domain.ResultCode;
 import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
 import com.hotstar.adtech.blaze.admodel.common.enums.Tenant;
 import com.hotstar.adtech.blaze.exchanger.api.entity.CohortInfo;
+import com.hotstar.adtech.blaze.exchanger.api.response.AdCrashModelResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdImpressionResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdSetImpressionResponse;
@@ -13,9 +14,11 @@ import com.hotstar.adtech.blaze.exchanger.api.response.BreakTypeResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentCohortConcurrencyResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentStreamConcurrencyResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentStreamResponse;
+import com.hotstar.adtech.blaze.exchanger.api.response.MatchProgressModelResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.UnReachResponse;
 import feign.hystrix.FallbackFactory;
 import java.util.List;
+import org.springframework.web.bind.annotation.RequestParam;
 
 public class DataExchangerDefaultFallbackFactory implements FallbackFactory<DataExchangerClient> {
 
@@ -52,12 +55,23 @@ public class DataExchangerDefaultFallbackFactory implements FallbackFactory<Data
       }
 
       @Override
-      public StandardResponse<List<Double>> getMatchBreakProgressModel(String date) {
+      public StandardResponse<MatchProgressModelResponse> getMatchBreakProgressModel(
+          @RequestParam String date) {
         return response;
       }
 
       @Override
-      public StandardResponse<List<Double>> getMatchBreakProgressModel() {
+      public StandardResponse<MatchProgressModelResponse> getLatestMatchBreakProgressModel() {
+        return response;
+      }
+
+      @Override
+      public StandardResponse<AdCrashModelResponse> getAdCrashModel(@RequestParam String date) {
+        return response;
+      }
+
+      @Override
+      public StandardResponse<AdCrashModelResponse> getLatestAdCrashModel() {
         return response;
       }
 

@@ -4,7 +4,7 @@ import com.hotstar.adtech.blaze.admodel.repository.AdModelResultDetailRepository
 import com.hotstar.adtech.blaze.admodel.repository.AdModelResultRepository;
 import com.hotstar.adtech.blaze.admodel.repository.model.AdModelResult;
 import com.hotstar.adtech.blaze.admodel.repository.model.AdModelResultDetail;
-import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultDetailResponse;
+import com.hotstar.adtech.blaze.exchanger.api.entity.AdModelDetail;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;
 import java.time.Instant;
 import java.util.List;
@@ -42,15 +42,15 @@ public class AdModelResultService {
       .id(result.getId())
       .path(result.getPath())
       .version(result.getVersion().toEpochMilli())
-      .adModelResultDetailResponses(adModelResultDetails
+      .adModelDetails(adModelResultDetails
         .stream()
         .map(this::buildAdModelResultDetailResponse)
         .collect(Collectors.toList()))
       .build();
   }
 
-  private AdModelResultDetailResponse buildAdModelResultDetailResponse(AdModelResultDetail detail) {
-    return AdModelResultDetailResponse.builder()
+  private AdModelDetail buildAdModelResultDetailResponse(AdModelResultDetail detail) {
+    return AdModelDetail.builder()
       .fileName(detail.getFileName())
       .md5(detail.getMd5())
       .build();

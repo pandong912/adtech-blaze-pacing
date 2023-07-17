@@ -1,12 +1,9 @@
 package com.hotstar.adtech.blaze.exchanger.api.response;
 
-import lombok.AccessLevel;
 import lombok.Builder;
-import lombok.Data;
-import lombok.experimental.FieldDefaults;
+import lombok.Value;
 
-@Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Value
 @Builder
 public class BreakTypeResponse {
   Integer id;

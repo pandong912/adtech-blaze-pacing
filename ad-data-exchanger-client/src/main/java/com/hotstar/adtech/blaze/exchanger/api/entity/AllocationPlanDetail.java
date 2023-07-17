@@ -3,15 +3,12 @@ package com.hotstar.adtech.blaze.exchanger.api.entity;
 import com.hotstar.adtech.blaze.admodel.common.enums.AlgorithmType;
 import com.hotstar.adtech.blaze.admodel.common.enums.PlanType;
 import java.util.List;
-import lombok.AccessLevel;
 import lombok.Builder;
-import lombok.Data;
-import lombok.experimental.FieldDefaults;
+import lombok.Value;
 
-@Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Value
 @Builder
-public class AllocationPlanDetailResponse {
+public class AllocationPlanDetail {
   PlanType planType;
   Integer totalBreakNumber;
   Integer nextBreakIndex;

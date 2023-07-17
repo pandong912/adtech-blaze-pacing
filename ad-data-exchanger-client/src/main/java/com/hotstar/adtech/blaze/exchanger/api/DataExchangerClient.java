@@ -12,6 +12,8 @@ import static com.hotstar.adtech.blaze.exchanger.api.Constant.REACH_PATH;
 import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
 import com.hotstar.adtech.blaze.admodel.common.enums.Tenant;
 import com.hotstar.adtech.blaze.exchanger.api.entity.CohortInfo;
+import com.hotstar.adtech.blaze.exchanger.api.entity.Distribution;
+import com.hotstar.adtech.blaze.exchanger.api.response.AdCrashModelResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdImpressionResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdSetImpressionResponse;
@@ -21,7 +23,10 @@ import com.hotstar.adtech.blaze.exchanger.api.response.BreakTypeResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentCohortConcurrencyResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentStreamConcurrencyResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentStreamResponse;
+import com.hotstar.adtech.blaze.exchanger.api.response.MatchProgressModelResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.UnReachResponse;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,10 +61,17 @@ public interface DataExchangerClient {
   StandardResponse<ContentStreamResponse> getStreamDefinition(@PathVariable String contentId);
 
   @GetMapping(ALGORITHM_PATH + "/match-break-progress")
-  StandardResponse<List<Double>> getMatchBreakProgressModel(@RequestParam String date);
+  StandardResponse<MatchProgressModelResponse> getMatchBreakProgressModel(
+      @RequestParam String date);
 
-  @GetMapping(ALGORITHM_PATH + "/match-break-progress")
-  StandardResponse<List<Double>> getMatchBreakProgressModel();
+  @GetMapping(ALGORITHM_PATH + "/match-break-progress/latest")
+  StandardResponse<MatchProgressModelResponse> getLatestMatchBreakProgressModel();
+
+  @GetMapping(ALGORITHM_PATH + "/ad-crash-distribution")
+  StandardResponse<AdCrashModelResponse> getAdCrashModel(@RequestParam String date);
+
+  @GetMapping(ALGORITHM_PATH + "/ad-crash-distribution/latest")
+  StandardResponse<AdCrashModelResponse> getLatestAdCrashModel();
 
   @GetMapping(ALLOCATION_PLAN_PATH + "/match/{contentId}")
   StandardResponse<AllocationPlanUriResponse> getAllocationPlanUri(

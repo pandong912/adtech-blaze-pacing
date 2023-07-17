@@ -5,7 +5,7 @@ import lombok.Value;
 
 @Value
 @Builder
-public class BreakId {
-  String breadId;
-  Long timestamp;
+public class AdModelDetail {
+  String fileName;
+  String md5;
 }

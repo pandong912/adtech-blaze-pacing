@@ -7,12 +7,12 @@ import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
-import com.hotstar.adtech.blaze.exchanger.algorithm.S3MatchProgressLoader;
+import com.hotstar.adtech.blaze.exchanger.algorithmmodel.matchprogress.S3MatchProgressLoader;
+import com.hotstar.adtech.blaze.exchanger.api.response.MatchProgressModelResponse;
 import com.hotstar.adtech.blaze.exchanger.controller.AlgorithmController;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -59,18 +59,20 @@ public class AlgorithmControllerTest extends TestEnvConfig {
 
   @Test
   public void testLatestGetMatchBreakProgressModel() {
-    StandardResponse<List<Double>> matchBreakProgressModel = algorithmController.getMatchBreakProgressModel(null);
+    StandardResponse<MatchProgressModelResponse> matchBreakProgressModel =
+        algorithmController.getLatestMatchBreakProgressModel();
     System.out.println(matchBreakProgressModel.getData());
-    Assertions.assertEquals(5, matchBreakProgressModel.getData().size());
-    Assertions.assertEquals(0.2, matchBreakProgressModel.getData().get(0), 0.0);
+    Assertions.assertEquals(5, matchBreakProgressModel.getData().getDeliveryProgresses().size());
+    Assertions.assertEquals(0.2, matchBreakProgressModel.getData().getDeliveryProgresses().get(0), 0.0);
   }
 
   @Test
   public void testGetMatchBreakProgressModelByDate() {
-    StandardResponse<List<Double>> matchBreakProgressModel = algorithmController.getMatchBreakProgressModel(currentDay);
+    StandardResponse<MatchProgressModelResponse> matchBreakProgressModel =
+        algorithmController.getMatchBreakProgressModel(currentDay);
     System.out.println(matchBreakProgressModel.getData());
-    Assertions.assertEquals(5, matchBreakProgressModel.getData().size());
-    Assertions.assertEquals(0.2, matchBreakProgressModel.getData().get(0), 0.0);
+    Assertions.assertEquals(5, matchBreakProgressModel.getData().getDeliveryProgresses().size());
+    Assertions.assertEquals(0.2, matchBreakProgressModel.getData().getDeliveryProgresses().get(0), 0.0);
   }
 
   private static AmazonS3 getS3Client() {

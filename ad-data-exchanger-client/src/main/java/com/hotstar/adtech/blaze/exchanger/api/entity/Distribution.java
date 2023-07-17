@@ -5,7 +5,7 @@ import lombok.Value;
 
 @Value
 @Builder
-public class BreakId {
-  String breadId;
-  Long timestamp;
+public class Distribution {
+  int breakDurationMs;
+  double probability;
 }

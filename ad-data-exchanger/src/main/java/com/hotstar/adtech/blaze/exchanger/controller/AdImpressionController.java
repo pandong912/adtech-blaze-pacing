@@ -6,7 +6,6 @@ import static com.hotstar.adtech.blaze.exchanger.api.Constant.IMPRESSION_PATH;
 import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdImpressionResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdSetImpressionResponse;
-import com.hotstar.adtech.blaze.exchanger.api.response.CompareResponse;
 import com.hotstar.adtech.blaze.exchanger.service.ImpressionService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -49,13 +48,6 @@ public class AdImpressionController {
     @PathVariable("creativeId") String creativeId) {
     AdImpressionResponse adImpressionResponse = impressionService.getAdImpression(contentId, creativeId);
     return StandardResponse.success(adImpressionResponse);
-  }
-
-  @GetMapping("/content/{contentId}/compare")
-  public StandardResponse<CompareResponse> getAdImpression(
-    @PathVariable("contentId") String contentId) {
-    CompareResponse response = impressionService.compareImpression(contentId);
-    return StandardResponse.success(response);
   }
 
 }

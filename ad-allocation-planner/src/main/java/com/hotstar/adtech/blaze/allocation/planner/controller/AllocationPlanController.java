@@ -60,7 +60,7 @@ public class AllocationPlanController {
       shaleAllocationRequest.getReachAdSetIds());
     setConcurrencyId(generalPlanContext);
     Map<String, Integer> concurrencyIdMap = generalPlanContext.getConcurrencyData().getCohorts().stream()
-      .collect(Collectors.toMap(ContentCohort::getKey, ContentCohort::getConcurrencyId));
+      .collect(Collectors.toMap(ContentCohort::getPlayoutIdKey, ContentCohort::getConcurrencyId));
     Map<Long, Integer> adSetIdMap =
       generalPlanContext.getAdSets().stream().collect(Collectors.toMap(AdSet::getId, AdSet::getDemandId));
     ReachStorage reachStorage = buildReachStorage(concurrencyIdMap, adSetIdMap, shaleAllocationRequest);

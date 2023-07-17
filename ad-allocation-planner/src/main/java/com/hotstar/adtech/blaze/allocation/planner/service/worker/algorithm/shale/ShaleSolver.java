@@ -41,7 +41,6 @@ public class ShaleSolver {
         .map(ShaleDemand::new)
         .collect(Collectors.toList());
 
-
     ShaleGraph shaleGraph = new ShaleGraph(demands, supplies, reachStorage, penalty);
     shaleGraph.buildEdge(supplyToDemand);
     shaleGraph.initParams();

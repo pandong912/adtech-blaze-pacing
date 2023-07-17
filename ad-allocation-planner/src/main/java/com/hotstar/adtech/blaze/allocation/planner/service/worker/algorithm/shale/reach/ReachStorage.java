@@ -5,14 +5,21 @@ import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shal
 
 public interface ReachStorage {
   default double getTd(ShaleDemand demand, ShaleSupply supply) {
-    double reachRatio = getUnReachRatio(demand.getId(), supply.getId());
-    return demand.getTheta() + demand.getReachEnabled() * Math.max(0, reachRatio - demand.getReachOffset());
+    if (demand.getReachEnabled() == 1) {
+      double reachRatio = getUnReachRatio(demand.getId(), supply.getId());
+      return demand.getTheta() + Math.max(0, reachRatio - demand.getReachOffset());
+    } else {
+      return demand.getTheta();
+    }
   }
 
   default double getRd(ShaleDemand demand, ShaleSupply supply) {
-    double reachRatio = getUnReachRatio(demand.getId(), supply.getId());
-    return demand.getReachEnabled()
-      * (Math.min(1, Math.max(reachRatio - demand.getReachOffset(), 0) / (demand.getReachOffset() + 0.000001)));
+    if (demand.getReachEnabled() == 1) {
+      double reachRatio = getUnReachRatio(demand.getId(), supply.getId());
+      return Math.min(1, Math.max(reachRatio - demand.getReachOffset(), 0) / (demand.getReachOffset() + 0.000001));
+    } else {
+      return 0;
+    }
   }
 
   double getUnReachRatio(int demandId, int concurrencyId);

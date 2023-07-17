@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="CONSOLE_LOG_PATTERN"
+      value="%d{yyyy-MM-dd HH:mm:ss.SSS} %magenta([%thread]) %highlight(%-5level) %logger{36}.%M:%L - %msg%n"/>
+
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <appender name="STDOUT_JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.contrib.json.classic.JsonLayout">
+            <jsonFormatter class="ch.qos.logback.contrib.jackson.JacksonJsonFormatter">
+                <prettyPrint>false</prettyPrint>
+            </jsonFormatter>
+            <appendLineSeparator>true</appendLineSeparator>
+        </layout>
+    </appender>
+
+    <springProfile name="!local">
+        <root level="INFO">
+            <appender-ref ref="STDOUT_JSON"/>
+        </root>
+    </springProfile>
+    <springProfile name="local">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+</configuration>

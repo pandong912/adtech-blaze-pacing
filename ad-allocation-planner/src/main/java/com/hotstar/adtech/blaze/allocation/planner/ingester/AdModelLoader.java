@@ -104,6 +104,8 @@ public class AdModelLoader {
       .filter(goalMatchInfo -> goalMatchInfo.getDeliveryMode() == DeliveryMode.SSAI
         || goalMatchInfo.getDeliveryMode() == DeliveryMode.SSAI_SPOT)
       .map(this::buildAdSet)
+      // make reach-enabled adSets at the top of the list, This is to reduce the size of the reach storage array.
+      .sorted((a, b) -> b.getMaximizeReach() - a.getMaximizeReach())
       .collect(Collectors.toList());
   }
 

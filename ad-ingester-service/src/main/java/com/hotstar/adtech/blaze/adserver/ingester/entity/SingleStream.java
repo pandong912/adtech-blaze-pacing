@@ -14,11 +14,13 @@ public class SingleStream {
 
   String language;
 
-  String platform;
+  String ladder;
 
-  String playoutStream;
+  String ads;
+
+  String playoutId;
 
   public String getKey() {
-    return tenant + SPLITTER + language + SPLITTER + platform;
+    return tenant + SPLITTER + language + SPLITTER + ladder + SPLITTER + ads;
   }
 }

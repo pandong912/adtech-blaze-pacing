@@ -2,7 +2,8 @@ package com.hotstar.adtech.blaze.adserver.ingester;
 
 import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
 import com.hotstar.adtech.blaze.admodel.common.entity.LanguageEntity;
-import com.hotstar.adtech.blaze.admodel.common.entity.PlatformEntity;
+import com.hotstar.adtech.blaze.admodel.common.enums.Ladder;
+import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
 import com.hotstar.adtech.blaze.admodel.common.enums.Tenant;
 import com.hotstar.adtech.blaze.adserver.data.redis.service.StreamCohortConcurrencyRepository;
 import com.hotstar.adtech.blaze.adserver.data.redis.service.StreamConcurrencyRepository;
@@ -12,10 +13,9 @@ import com.hotstar.adtech.blaze.adserver.ingester.service.ConcurrencyService;
 import com.hotstar.adtech.blaze.adserver.ingester.service.DataExchangerService;
 import com.hotstar.adtech.blaze.adserver.ingester.service.PulseService;
 import com.hotstar.adtech.blaze.exchanger.api.DataExchangerClient;
-import com.hotstar.adtech.blaze.exchanger.api.entity.StreamDetail;
-import com.hotstar.adtech.blaze.exchanger.api.response.ContentStreamResponse;
-import com.hotstar.adtech.blaze.exchanger.api.response.PlayoutStreamResponse;
+import com.hotstar.adtech.blaze.exchanger.api.entity.StreamDefinition;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,66 +55,59 @@ public class ConcurrencyServiceTest extends TestEnvConfig {
       .when(pulseService.getLiveContentStreamConcurrency(Mockito.anyString()))
       .thenReturn(getStreamConcurrency());
     Mockito
-      .when(dataExchangerClient.getStreamDefinition(Mockito.anyString()))
+      .when(dataExchangerClient.getStreamDefinitionV2(Mockito.anyString()))
       .thenReturn(getStreamMapping());
     concurrencyService = new ConcurrencyService(pulseService, dataExchangerService, streamConcurrencyRepository,
       streamCohortConcurrencyRepository);
     concurrencyService.updateMatchConcurrency(new Match("123", "123"));
     Map<String, Long> contentAllStreamConcurrency = streamConcurrencyRepository.getContentAllStreamConcurrency("123");
-    System.out.println(contentAllStreamConcurrency);
+    System.out.println("contentAllStreamConcurrency: " + contentAllStreamConcurrency);
+    Assertions.assertEquals(1L, contentAllStreamConcurrency.get("in-hin--ssai"));
+    Assertions.assertEquals(3L, contentAllStreamConcurrency.get("P15"));
+    Assertions.assertEquals(10L, contentAllStreamConcurrency.get("P7"));
+
     Map<String, Long> contentAllStreamCohortConcurrency =
       streamCohortConcurrencyRepository.getContentStreamAllCohortConcurrency("123");
-    System.out.println(contentAllStreamCohortConcurrency);
-    Assertions.assertEquals(10L, contentAllStreamConcurrency.get("in-Hindi-Android"));
-    Assertions.assertEquals(11L, contentAllStreamCohortConcurrency.get("in-Hindi-Android+iOS|SSAI::001"));
-    Assertions.assertEquals(2L, contentAllStreamCohortConcurrency.get("in-English-Android+iOS|SSAI:002"));
+    System.out.println("contentAllStreamCohortConcurrency: " + contentAllStreamCohortConcurrency);
+    Assertions.assertEquals(1L, contentAllStreamCohortConcurrency.get("in--eng|SSAI::001"));
+    Assertions.assertEquals(1L, contentAllStreamCohortConcurrency.get("P15|SSAI::001"));
+    Assertions.assertEquals(11L, contentAllStreamCohortConcurrency.get("P1|SSAI::001"));
+    Assertions.assertEquals(12L, contentAllStreamCohortConcurrency.get("P15|SSAI::002"));
   }
 
-  private StandardResponse<ContentStreamResponse> getStreamMapping() {
-    List<PlayoutStreamResponse> list = Arrays.asList(
-      PlayoutStreamResponse.builder()
-        .streamDetail(StreamDetail.builder()
-          .tenant(Tenant.India)
-          .language(LanguageEntity.builder().name("Hindi").build())
-          .platforms(Arrays.asList(
-            PlatformEntity.builder()
-              .name("Android")
-              .build(),
-            PlatformEntity.builder()
-              .name("iOS")
-              .build()
-          ))
-          .build())
+  private StandardResponse<List<StreamDefinition>> getStreamMapping() {
+    List<StreamDefinition> list = Arrays.asList(
+      StreamDefinition.builder()
+        .playoutId("P1")
+        .streamType(StreamType.SSAI_Spot)
+        .ladders(Collections.singletonList(Ladder.phone))
+        .language(LanguageEntity.builder().abbreviation("eng").build())
+        .tenant(Tenant.India)
         .build(),
-      PlayoutStreamResponse.builder()
-        .streamDetail(StreamDetail.builder()
-          .tenant(Tenant.India)
-          .language(LanguageEntity.builder().name("English").build())
-          .platforms(Arrays.asList(
-            PlatformEntity.builder()
-              .name("Android")
-              .build(),
-            PlatformEntity.builder()
-              .name("iOS")
-              .build()
-          ))
-          .build())
+      StreamDefinition.builder()
+        .playoutId("P7")
+        .streamType(StreamType.SSAI_Spot)
+        .ladders(Collections.singletonList(Ladder.phone))
+        .language(LanguageEntity.builder().abbreviation("hin").build())
+        .tenant(Tenant.India)
+        .build(),
+      StreamDefinition.builder()
+        .playoutId("P15")
+        .streamType(StreamType.Spot)
+        .ladders(Arrays.asList(Ladder.phone, Ladder.tv))
+        .language(LanguageEntity.builder().abbreviation("tel").build())
+        .tenant(Tenant.India)
         .build()
     );
-    ContentStreamResponse contentStreamResponse = ContentStreamResponse.builder()
-      .playoutStreamResponses(list)
-      .contentId("123")
-      .build();
-    return StandardResponse.success(contentStreamResponse);
+    return StandardResponse.success(list);
   }
 
   private ConcurrencyGroup getStreamConcurrency() {
     Map<String, Long> concurrencyValues = new HashMap<>();
-    concurrencyValues.put("in-Hindi-Android", 10L);
-    concurrencyValues.put("in-Hindi-iOS", 1L);
-    concurrencyValues.put("in--iOS|SSAI::001", 1L);
-    concurrencyValues.put("in-English-Android", 1L);
-    concurrencyValues.put("in-English-tizenTv", 2L);
+    concurrencyValues.put("in-hin-phone-ssai", 10L);
+    concurrencyValues.put("in-hin--ssai|SSAI::001", 1L);
+    concurrencyValues.put("in-tel-phone-non_ssai", 1L);
+    concurrencyValues.put("in-tel-tv-non_ssai", 2L);
     return ConcurrencyGroup.builder()
       .tsBucket(100L)
       .concurrencyValues(concurrencyValues)
@@ -123,11 +116,13 @@ public class ConcurrencyServiceTest extends TestEnvConfig {
 
   private ConcurrencyGroup getStreamCohortConcurrency() {
     Map<String, Long> concurrencyValues = new HashMap<>();
-    concurrencyValues.put("in-Hindi-Android|SSAI::001", 10L);
-    concurrencyValues.put("in-Hindi-iOS|SSAI::001", 1L);
-    concurrencyValues.put("in--iOS|SSAI::001", 1L);
-    concurrencyValues.put("in-English-Android|SSAI:001", 1L);
-    concurrencyValues.put("in-English-Android|SSAI:002", 2L);
+    concurrencyValues.put("in--eng|SSAI::001", 1L);
+    concurrencyValues.put("in-eng-phone-ssai|SSAI::001|English+Android", 1L);
+    concurrencyValues.put("in-eng-phone-ssai|SSAI::001|English+iOS", 10L);
+    concurrencyValues.put("in-eng-phone-ssai|SSAI::002", 1L);
+    concurrencyValues.put("in-tel-phone-non_ssai|SSAI::002", 1L);
+    concurrencyValues.put("in-tel-tv-non_ssai|SSAI::002", 11L);
+    concurrencyValues.put("in-tel-tv-non_ssai|SSAI::001", 1L);
     return ConcurrencyGroup.builder()
       .tsBucket(100L)
       .concurrencyValues(concurrencyValues)

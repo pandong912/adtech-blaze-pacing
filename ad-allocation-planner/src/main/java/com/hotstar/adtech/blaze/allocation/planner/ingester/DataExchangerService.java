@@ -4,11 +4,9 @@ import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.MAT
 import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.MATCH_REACH_FETCH;
 import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.MATCH_TOTAL_BREAK_FETCH;
 
-import com.google.common.collect.Lists;
 import com.hotstar.adtech.blaze.admodel.client.common.Names;
 import com.hotstar.adtech.blaze.admodel.common.domain.ResultCode;
 import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
-import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
 import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
 import com.hotstar.adtech.blaze.admodel.common.util.RespUtil;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.AdModelVersion;
@@ -16,28 +14,32 @@ import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.DegradationReachStorage;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.ReachStorage;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.RedisReachStorage;
 import com.hotstar.adtech.blaze.exchanger.api.DataExchangerClient;
 import com.hotstar.adtech.blaze.exchanger.api.entity.BreakId;
-import com.hotstar.adtech.blaze.exchanger.api.entity.CohortInfo;
-import com.hotstar.adtech.blaze.exchanger.api.entity.StreamDetail;
+import com.hotstar.adtech.blaze.exchanger.api.entity.StreamDefinition;
+import com.hotstar.adtech.blaze.exchanger.api.entity.UnReachData;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdSetImpressionResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.BreakListResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.BreakTypeResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentCohortConcurrencyResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentStreamConcurrencyResponse;
-import com.hotstar.adtech.blaze.exchanger.api.response.PlayoutStreamResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.UnReachResponse;
 import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.Metrics;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -48,6 +50,7 @@ import org.springframework.stereotype.Service;
 public class DataExchangerService {
   private static final String DEFAULT_SSAI_TAG = "SSAI::";
   private static final String SPOT_BREAK = "Spot";
+  public static final int SHARD = 50;
   private final DataExchangerClient dataExchangerClient;
 
   public AdModelVersion getLatestAdModelVersion(AdModelVersion adModelVersion) {
@@ -69,10 +72,14 @@ public class DataExchangerService {
       .build();
   }
 
-  public Map<String, StreamType> getStreamDefinition(String contentId) {
-    return dataExchangerClient.getStreamDefinition(contentId).getData().getPlayoutStreamResponses().stream()
-      .collect(Collectors.toMap(playoutStreamResponse -> playoutStreamResponse.getStreamDetail().getKey(),
-        PlayoutStreamResponse::getStreamType));
+  public Map<String, StreamDefinition> getStreamDefinition(String contentId) {
+    List<StreamDefinition> streamDefinitions = Optional.ofNullable(dataExchangerClient.getStreamDefinitionV2(contentId))
+      .filter(RespUtil::isSuccess)
+      .map(StandardResponse::getData)
+      .orElseThrow(() -> new ServiceException("Failed to get stream definition from data exchanger"));
+
+    return streamDefinitions.stream()
+      .collect(Collectors.toMap(StreamDefinition::getPlayoutId, Function.identity()));
   }
 
   public List<Double> getMatchBreakProgressModel() {
@@ -133,7 +140,8 @@ public class DataExchangerService {
         AdSetImpressionResponse::getImpression));
   }
 
-  public List<ContentCohort> getContentCohortConcurrency(String contentId, Map<String, StreamType> streamTypeMap) {
+  public List<ContentCohort> getContentCohortConcurrency(String contentId,
+                                                         Map<String, StreamDefinition> streamDefinitionMap) {
     StandardResponse<List<ContentCohortConcurrencyResponse>> response =
       dataExchangerClient.getContentCohortWiseConcurrency(contentId);
 
@@ -141,16 +149,33 @@ public class DataExchangerService {
       throw new ServiceException(response.getMessage());
     }
 
-    return response.getData().stream().map(contentCohortConcurrencyResponse -> ContentCohort.builder()
-      .contentId(contentId)
-      .ssaiTag(getSsaiTag(contentCohortConcurrencyResponse.getSsaiTag()))
-      .playoutStream(buildPlayoutStream(contentCohortConcurrencyResponse.getStreamDetail()))
-      .concurrency(contentCohortConcurrencyResponse.getConcurrencyValue())
-      .streamType(streamTypeMap.get(contentCohortConcurrencyResponse.getStreamDetail().getKey()))
-      .build()).collect(Collectors.toList());
+    return response.getData()
+      .stream()
+      .map(contentCohortConcurrencyResponse -> getContentCohort(contentId, streamDefinitionMap,
+        contentCohortConcurrencyResponse))
+      .filter(Objects::nonNull)
+      .collect(Collectors.toList());
   }
 
-  public List<ContentStream> getContentStreamConcurrency(String contentId, Map<String, StreamType> streamTypeMap) {
+  private ContentCohort getContentCohort(String contentId, Map<String, StreamDefinition> streamDefinitionMap,
+                                         ContentCohortConcurrencyResponse resp) {
+    StreamDefinition streamDefinition = streamDefinitionMap.get(resp.getPlayoutId());
+    if (streamDefinition == null) {
+      Metrics.counter("blaze.stream.definition.notfound", "content", contentId).increment();
+      return null;
+    }
+    return ContentCohort.builder()
+      .contentId(contentId)
+      .ssaiTag(getSsaiTag(resp.getSsaiTag()))
+      .playoutStream(buildPlayoutStream(streamDefinition))
+      .concurrency(resp.getConcurrencyValue())
+      .playoutId(resp.getPlayoutId())
+      .streamType(streamDefinition.getStreamType())
+      .build();
+  }
+
+  public List<ContentStream> getContentStreamConcurrency(String contentId,
+                                                         Map<String, StreamDefinition> streamDefinitionMap) {
     StandardResponse<List<ContentStreamConcurrencyResponse>> response =
       dataExchangerClient.getContentStreamWiseConcurrency(contentId);
 
@@ -159,20 +184,33 @@ public class DataExchangerService {
     }
 
     return response.getData().stream()
-      .map(contentStreamConcurrencyResponse -> ContentStream.builder()
-        .contentId(contentId)
-        .playoutStream(buildPlayoutStream(contentStreamConcurrencyResponse.getStreamDetail()))
-        .concurrency(contentStreamConcurrencyResponse.getConcurrencyValue())
-        .streamType(streamTypeMap.get(contentStreamConcurrencyResponse.getStreamDetail().getKey()))
-        .build())
+      .map(contentStreamConcurrencyResponse -> getContentStream(contentId, streamDefinitionMap,
+        contentStreamConcurrencyResponse))
+      .filter(Objects::nonNull)
       .collect(Collectors.toList());
   }
 
-  private PlayoutStream buildPlayoutStream(StreamDetail streamDetail) {
+  private ContentStream getContentStream(String contentId, Map<String, StreamDefinition> streamDefinitionMap,
+                                         ContentStreamConcurrencyResponse resp) {
+    StreamDefinition streamDefinition = streamDefinitionMap.get(resp.getPlayoutId());
+    if (streamDefinition == null) {
+      Metrics.counter("blaze.stream.definition.notfound", "content", contentId).increment();
+      return null;
+    }
+    return ContentStream.builder()
+      .contentId(contentId)
+      .playoutStream(buildPlayoutStream(streamDefinition))
+      .playoutId(resp.getPlayoutId())
+      .concurrency(resp.getConcurrencyValue())
+      .streamType(streamDefinition.getStreamType())
+      .build();
+  }
+
+  private PlayoutStream buildPlayoutStream(StreamDefinition streamDefinition) {
     return PlayoutStream.builder()
-      .tenant(streamDetail.getTenant())
-      .language(streamDetail.getLanguage())
-      .platforms(streamDetail.getPlatforms())
+      .tenant(streamDefinition.getTenant())
+      .language(streamDefinition.getLanguage())
+      .platforms(streamDefinition.getPlatforms())
       .build();
   }
 
@@ -197,43 +235,64 @@ public class DataExchangerService {
 
   @Timed(MATCH_REACH_FETCH)
   public ReachStorage getUnReachRatio(String contentId, Map<String, Integer> concurrencyIdMap,
-                                      Map<Long, Integer> adSetIdMap) {
-    List<UnReachResponse> unReachResponses = getUnReachResponses(contentId);
-    int cohortSize = concurrencyIdMap.values().stream().mapToInt(Integer::intValue).max().orElse(0) + 1;
-    double[][] unReachStore = new double[adSetIdMap.size()][cohortSize];
+                                      Map<Long, Integer> adSetIdToDemandId) {
+    if (adSetIdToDemandId.size() == 0) {
+      return new DegradationReachStorage();
+    }
+    List<UnReachResponse> unReachResponses = fetchUnReachData(contentId);
+    int supplySize = concurrencyIdMap.values().stream().mapToInt(Integer::intValue).max().orElse(0) + 1;
+    double[][] unReachStore = new double[adSetIdToDemandId.size()][supplySize];
+
     for (double[] row : unReachStore) {
       Arrays.fill(row, 1.0);
     }
-    unReachResponses.stream()
-      .filter(unReachResponse -> concurrencyIdMap.containsKey(unReachResponse.getKey()))
-      .forEach(unReachResponse -> unReachResponse.getUnReachDataList().stream()
-        .filter(unReachData -> adSetIdMap.containsKey(unReachData.getAdSetId()))
-        .forEach(unReachData -> unReachStore[adSetIdMap.get(unReachData.getAdSetId())][concurrencyIdMap.get(
-          unReachResponse.getKey())] = unReachData.getUnReachRatio()
-        ));
+
+    for (UnReachResponse unReachResponse : unReachResponses) {
+      Integer supplyId = concurrencyIdMap.get(unReachResponse.getKey());
+      if (supplyId == null) {
+        continue;
+      }
+      for (UnReachData unReachData : unReachResponse.getUnReachDataList()) {
+        Integer demandId = adSetIdToDemandId.get(unReachData.getAdSetId());
+        if (demandId == null) {
+          continue;
+        }
+        unReachStore[demandId][supplyId] = unReachData.getUnReachRatio();
+      }
+    }
+
+    doStatistics(unReachStore, contentId);
     return new RedisReachStorage(unReachStore);
   }
 
-  private List<UnReachResponse> getUnReachResponses(String contentId) {
-    List<CohortInfo> cohortList = getCohortList(contentId);
-    List<List<CohortInfo>> partitions = Lists.partition(cohortList, 1000);
-    return partitions.parallelStream()
-      .flatMap(partition -> fetchUnReachData(contentId, partition).stream())
+  private void doStatistics(double[][] unReachStore, String contentId) {
+    log.info("{}: unReachStore size is {} * {}", contentId, unReachStore.length, unReachStore[0].length);
+    int totalCount = 0;
+    for (int supply = 0; supply < unReachStore[0].length; supply++) {
+      for (double[] doubles : unReachStore) {
+        if (doubles[supply] < 1.0) {
+          totalCount++;
+        }
+      }
+    }
+    log.info("{}: percentage of unReachRatio smaller than 1 is {}", contentId,
+      (double) totalCount / (unReachStore.length * unReachStore[0].length));
+  }
+
+  private List<UnReachResponse> fetchUnReachData(String contentId) {
+    return IntStream.range(0, SHARD)
+      .mapToObj(shard -> dataExchangerClient.batchGetUnReachDataInShard(contentId, shard))
+      .filter(response -> filterResponse(response, contentId))
+      .map(StandardResponse::getData)
+      .flatMap(Collection::stream)
       .collect(Collectors.toList());
   }
 
-  private List<CohortInfo> getCohortList(String contentId) {
-    return Optional.of(dataExchangerClient.getReachCohortList(contentId))
-      .filter(RespUtil::isSuccess)
-      .map(StandardResponse::getData)
-      .orElseThrow(() -> new RuntimeException("fail to get reach cohort list"));
+  private boolean filterResponse(StandardResponse<List<UnReachResponse>> response, String contentId) {
+    if (!RespUtil.isSuccess(response)) {
+      log.error("fail to get reach data for contentId: {}, message: {}", contentId, response.getMessage());
+      return false;
+    }
+    return true;
   }
-
-  private List<UnReachResponse> fetchUnReachData(String contentId, List<CohortInfo> partition) {
-    return Optional.of(dataExchangerClient.batchGetUnReachData(contentId, partition))
-      .filter(RespUtil::isSuccess)
-      .map(StandardResponse::getData)
-      .orElseThrow(() -> new RuntimeException("fail to get reach data"));
-  }
-
 }

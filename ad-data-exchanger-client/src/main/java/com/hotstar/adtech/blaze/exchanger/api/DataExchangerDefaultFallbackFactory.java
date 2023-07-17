@@ -2,8 +2,7 @@ package com.hotstar.adtech.blaze.exchanger.api;
 
 import com.hotstar.adtech.blaze.admodel.common.domain.ResultCode;
 import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
-import com.hotstar.adtech.blaze.admodel.common.enums.Tenant;
-import com.hotstar.adtech.blaze.exchanger.api.entity.CohortInfo;
+import com.hotstar.adtech.blaze.exchanger.api.entity.StreamDefinition;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdCrashModelResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdImpressionResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;
@@ -13,8 +12,8 @@ import com.hotstar.adtech.blaze.exchanger.api.response.BreakListResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.BreakTypeResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentCohortConcurrencyResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentStreamConcurrencyResponse;
-import com.hotstar.adtech.blaze.exchanger.api.response.ContentStreamResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.MatchProgressModelResponse;
+import com.hotstar.adtech.blaze.exchanger.api.response.TournamentInfoResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.UnReachResponse;
 import feign.hystrix.FallbackFactory;
 import java.util.List;
@@ -50,7 +49,7 @@ public class DataExchangerDefaultFallbackFactory implements FallbackFactory<Data
       }
 
       @Override
-      public StandardResponse<ContentStreamResponse> getStreamDefinition(String contentId) {
+      public StandardResponse<List<StreamDefinition>> getStreamDefinitionV2(String contentId) {
         return response;
       }
 
@@ -103,8 +102,7 @@ public class DataExchangerDefaultFallbackFactory implements FallbackFactory<Data
       }
 
       @Override
-      public StandardResponse<Long> getContentSingleStreamConcurrency(String contentId, Tenant tenant,
-                                                                      String language, String platform) {
+      public StandardResponse<Long> getContentStreamConcurrencyWithPlayoutId(String contentId, String playoutId) {
         return response;
       }
 
@@ -129,8 +127,12 @@ public class DataExchangerDefaultFallbackFactory implements FallbackFactory<Data
       }
 
       @Override
-      public StandardResponse<List<UnReachResponse>> batchGetUnReachData(String contentId,
-                                                                         List<CohortInfo> cohortInfos) {
+      public StandardResponse<List<UnReachResponse>> batchGetUnReachData(String contentId) {
+        return response;
+      }
+
+      @Override
+      public StandardResponse<List<UnReachResponse>> batchGetUnReachDataInShard(String contentId, int shard) {
         return response;
       }
 
@@ -141,14 +143,10 @@ public class DataExchangerDefaultFallbackFactory implements FallbackFactory<Data
       }
 
       @Override
-      public StandardResponse<Long> getSeasonIdByContentId(String contentId) {
+      public StandardResponse<TournamentInfoResponse> getSeasonIdByContentId(String contentId) {
         return response;
       }
 
-      @Override
-      public StandardResponse<List<CohortInfo>> getReachCohortList(String contentId) {
-        return response;
-      }
     };
   }
 }

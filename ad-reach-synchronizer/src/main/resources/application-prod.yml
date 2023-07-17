@@ -1,0 +1,7 @@
+spring:
+  profiles:
+    include: ad-model-client-prod, ad-redis-client-prod
+blaze:
+  data-exchanger:
+    endpoint: http://adtech-blaze-data-exchanger-apse1.hotstar-labs.com
+

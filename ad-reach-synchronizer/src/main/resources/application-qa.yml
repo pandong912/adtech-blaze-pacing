@@ -1,0 +1,3 @@
+spring:
+  profiles:
+    include: ad-model-client-qa, ad-redis-client-qa

@@ -4,12 +4,14 @@ import static com.hotstar.adtech.blaze.exchanger.api.Constant.AD_MODEL_PATH;
 
 import com.hotstar.adtech.blaze.admodel.common.domain.ResultCode;
 import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
+import com.hotstar.adtech.blaze.exchanger.api.entity.StreamDefinition;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentStreamResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.TournamentInfoResponse;
 import com.hotstar.adtech.blaze.exchanger.service.AdModelResultService;
 import com.hotstar.adtech.blaze.exchanger.service.MatchService;
 import com.hotstar.adtech.blaze.exchanger.service.StreamService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +32,12 @@ public class AdModelController {
   public StandardResponse<ContentStreamResponse> getStreamDefinition(@PathVariable String contentId) {
     ContentStreamResponse contentStreamResponse = streamService.getStreamDefinition(contentId);
     return StandardResponse.success(contentStreamResponse);
+  }
+
+  @GetMapping("/stream-definition/v2/content/{contentId}")
+  public StandardResponse<List<StreamDefinition>> getStreamDefinitionV2(@PathVariable String contentId) {
+    List<StreamDefinition> streamDefinitions = streamService.getStreamDefinitionV2(contentId);
+    return StandardResponse.success(streamDefinitions);
   }
 
   @GetMapping("/season-id/content/{contentId}")

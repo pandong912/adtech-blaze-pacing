@@ -4,10 +4,10 @@ import static com.hotstar.adtech.blaze.exchanger.api.Constant.API_VERSION;
 import static com.hotstar.adtech.blaze.exchanger.api.Constant.CONCURRENCY_PATH;
 
 import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
-import com.hotstar.adtech.blaze.admodel.common.enums.Tenant;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentCohortConcurrencyResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentStreamConcurrencyResponse;
 import com.hotstar.adtech.blaze.exchanger.service.ConcurrencyService;
+import com.hotstar.adtech.blaze.exchanger.util.PlayoutIdValidator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,11 +39,10 @@ public class ConcurrencyController {
   }
 
   @GetMapping("/content/{contentId}/single-stream")
-  public StandardResponse<Long> getContentSingleStreamConcurrency(@PathVariable String contentId,
-                                                                  @RequestParam Tenant tenant,
-                                                                  @RequestParam String language,
-                                                                  @RequestParam String platform) {
-    Long concurrency = concurrencyService.getContentSingleStreamConcurrency(contentId, tenant, language, platform);
+  public StandardResponse<Long> getContentStreamConcurrencyWithPlayoutId(@PathVariable String contentId,
+                                                                         @RequestParam String playoutId) {
+    PlayoutIdValidator.validate(playoutId);
+    Long concurrency = concurrencyService.getContentStreamConcurrencyWithPlayoutId(contentId, playoutId);
     return StandardResponse.success(concurrency);
   }
 }

@@ -56,6 +56,7 @@ public class MetaDataService {
       .id(language.getId())
       .tag(language.getTag())
       .name(language.getName())
+      .abbreviation(language.getAbbreviation())
       .build();
   }
 

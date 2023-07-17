@@ -1,0 +1,3 @@
+spring:
+  profiles:
+    include: ad-model-client-pp, ad-redis-client-pp

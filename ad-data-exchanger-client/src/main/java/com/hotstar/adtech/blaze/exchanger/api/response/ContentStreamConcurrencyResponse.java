@@ -1,6 +1,5 @@
 package com.hotstar.adtech.blaze.exchanger.api.response;
 
-import com.hotstar.adtech.blaze.exchanger.api.entity.StreamDetail;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -10,10 +9,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class ContentStreamConcurrencyResponse {
-  StreamDetail streamDetail;
+  String playoutId;
   Long concurrencyValue;
 
   public String getKey() {
-    return streamDetail.getKey();
+    return playoutId;
   }
 }

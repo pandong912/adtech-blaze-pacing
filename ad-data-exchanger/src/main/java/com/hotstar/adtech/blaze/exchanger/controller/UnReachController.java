@@ -3,17 +3,13 @@ package com.hotstar.adtech.blaze.exchanger.controller;
 import static com.hotstar.adtech.blaze.exchanger.api.Constant.REACH_PATH;
 
 import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
-import com.hotstar.adtech.blaze.exchanger.api.entity.CohortInfo;
-import com.hotstar.adtech.blaze.exchanger.api.response.ContentStreamResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.UnReachResponse;
-import com.hotstar.adtech.blaze.exchanger.service.StreamService;
 import com.hotstar.adtech.blaze.exchanger.service.UnReachService;
+import com.hotstar.adtech.blaze.exchanger.util.PlayoutIdValidator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,28 +19,26 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UnReachController {
   private final UnReachService unReachService;
-  private final StreamService streamService;
 
-  @PostMapping("/content/{contentId}/reach/batch")
-  public StandardResponse<List<UnReachResponse>> batchGetUnReachData(@PathVariable String contentId,
-                                                                     @RequestBody List<CohortInfo> cohortInfos) {
-    List<UnReachResponse> unReachResponses = unReachService.batchGetCohortReach(contentId, cohortInfos);
+  @GetMapping("/content/{contentId}/reach/batch")
+  public StandardResponse<List<UnReachResponse>> batchGetUnReachData(@PathVariable String contentId) {
+    List<UnReachResponse> unReachResponses = unReachService.batchGetCohortReach(contentId);
+    return StandardResponse.success(unReachResponses);
+  }
+
+  @GetMapping("/content/{contentId}/reach/shard")
+  StandardResponse<List<UnReachResponse>> batchGetUnReachDataInShard(@PathVariable String contentId,
+                                                                     @RequestParam int shard) {
+    List<UnReachResponse> unReachResponses = unReachService.batchGetCohortReachInShard(contentId, shard);
     return StandardResponse.success(unReachResponses);
   }
 
   @GetMapping("/content/{contentId}/reach")
   public StandardResponse<UnReachResponse> getUnReachDataWithStreamId(@PathVariable String contentId,
-                                                                      @RequestParam String streamId,
+                                                                      @RequestParam String playoutId,
                                                                       @RequestParam String ssaiTag) {
-    // todo: response time may be high
-    ContentStreamResponse streamDefinition = streamService.getStreamDefinition(contentId);
-    UnReachResponse unReachResponses = unReachService.getCohortReach(contentId, streamId, ssaiTag, streamDefinition);
+    PlayoutIdValidator.validate(playoutId);
+    UnReachResponse unReachResponses = unReachService.getCohortReach(contentId, playoutId, ssaiTag);
     return StandardResponse.success(unReachResponses);
-  }
-
-  @GetMapping("/content/{contentId}/reach/cohort-list")
-  public StandardResponse<List<CohortInfo>> getReachCohortList(@PathVariable String contentId) {
-    List<CohortInfo> cohortList = unReachService.getCohortList(contentId);
-    return StandardResponse.success(cohortList);
   }
 }

@@ -37,17 +37,23 @@ public class ConcurrencyService {
   public void updateMatchConcurrency(Match match) {
     String contentId = match.getContentId();
     Map<String, String> converter = dataExchangerService.getPlayoutStreamMapping(contentId);
-    updateStreamConcurrency(contentId);
+    updateStreamConcurrency(contentId, converter);
     updateStreamCohortConcurrency(contentId, converter);
   }
 
 
-  private void updateStreamConcurrency(String contentId) {
+  private void updateStreamConcurrency(String contentId, Map<String, String> converter) {
     try {
       ConcurrencyGroup concurrencyGroup = pulseService.getLiveContentStreamConcurrency(contentId);
       String tsBucket = String.valueOf(concurrencyGroup.getTsBucket());
+      Map<String, Long> aggregatedStreamCohortConcurrency =
+        concurrencyGroup.getConcurrencyValues().entrySet()
+          .stream()
+          .collect(Collectors.groupingBy(entry -> mapStreamKeyToPlayoutId(contentId, converter, entry),
+            Collectors.summingLong(Map.Entry::getValue)));
+
       streamConcurrencyRepository
-        .setContentAllStreamConcurrency(contentId, tsBucket, concurrencyGroup.getConcurrencyValues());
+        .setContentAllStreamConcurrency(contentId, tsBucket, aggregatedStreamCohortConcurrency);
       streamConcurrencyRepository.setStreamConcurrencyBucket(contentId, tsBucket);
     } catch (Exception e) {
       Metrics.counter(MetricNames.CONCURRENCY_UPDATE_EXCEPTION, MetricTags.EXCEPTION_CLASS, e.getClass().getName())
@@ -59,7 +65,7 @@ public class ConcurrencyService {
   private void updateStreamCohortConcurrency(String contentId, Map<String, String> converter) {
     try {
       //ConcurrencyGroup.concurrencyValues:
-      //key: in-Hindi-iOS|SSAI:
+      //key: in-eng-phone-ssai|SSAI::xxx|English+Android
       //value: concurrency number
       ConcurrencyGroup concurrencyGroup = pulseService.getLiveContentStreamCohortConcurrency(contentId);
       String tsBucket = String.valueOf(concurrencyGroup.getTsBucket());
@@ -67,7 +73,7 @@ public class ConcurrencyService {
       Map<String, Long> aggregatedStreamCohortConcurrency =
         concurrencyGroup.getConcurrencyValues().entrySet()
           .stream()
-          .collect(Collectors.groupingBy(entry -> mapKeyToMultiPlatformKey(contentId, converter, entry),
+          .collect(Collectors.groupingBy(entry -> mapCohortKeyToPlayoutId(contentId, converter, entry),
             Collectors.summingLong(Map.Entry::getValue)));
 
       streamCohortConcurrencyRepository
@@ -80,16 +86,34 @@ public class ConcurrencyService {
     }
   }
 
-  private String mapKeyToMultiPlatformKey(String contentId, Map<String, String> converter,
-                                          Map.Entry<String, Long> entry) {
+  private String mapCohortKeyToPlayoutId(String contentId, Map<String, String> converter,
+                                         Map.Entry<String, Long> entry) {
     String[] tags = entry.getKey().split("\\|", -1);
     String stream = tags.length > 0 ? tags[0] : "";
     String ssaiTag = tags.length > 1 ? tags[1] : "";
+    if (notRecognizable(contentId, converter, entry, stream)) {
+      return stream + STREAM_COHORT_HASH_KEY_SPLITTER + ssaiTag;
+    }
+    return converter.get(stream) + STREAM_COHORT_HASH_KEY_SPLITTER + ssaiTag;
+  }
+
+  private String mapStreamKeyToPlayoutId(String contentId, Map<String, String> converter,
+                                         Map.Entry<String, Long> entry) {
+    String[] tags = entry.getKey().split("\\|", -1);
+    String stream = tags.length > 0 ? tags[0] : "";
+    if (notRecognizable(contentId, converter, entry, stream)) {
+      return stream;
+    }
+    return converter.get(stream);
+  }
+
+  private boolean notRecognizable(String contentId, Map<String, String> converter, Map.Entry<String, Long> entry,
+                                  String stream) {
     Metrics.counter(TOTAL_CONCURRENCY, "contentId", contentId).increment(entry.getValue());
     if (!converter.containsKey(stream)) {
       Metrics.counter(INVALID_CONCURRENCY, "stream", stream, "contentId", contentId).increment(entry.getValue());
-      return entry.getKey();
+      return true;
     }
-    return converter.get(stream) + STREAM_COHORT_HASH_KEY_SPLITTER + ssaiTag;
+    return false;
   }
 }

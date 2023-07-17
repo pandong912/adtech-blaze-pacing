@@ -18,6 +18,7 @@ public class ContentStream {
   String contentId;
   long concurrency;
   StreamType streamType;
+  String playoutId;
 
   public void setConcurrencyId(int value) {
     concurrencyId = value + OFFSET;
@@ -26,4 +27,5 @@ public class ContentStream {
   public String getKey() {
     return playoutStream.getKey();
   }
+
 }

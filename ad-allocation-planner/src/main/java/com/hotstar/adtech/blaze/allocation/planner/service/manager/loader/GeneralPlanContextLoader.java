@@ -2,7 +2,6 @@ package com.hotstar.adtech.blaze.allocation.planner.service.manager.loader;
 
 import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.PLAN_DATA_LOAD;
 
-import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
@@ -18,6 +17,7 @@ import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Match;
 import com.hotstar.adtech.blaze.allocation.planner.source.algomodel.StandardMatchProgressModel;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.BreakContext;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
+import com.hotstar.adtech.blaze.exchanger.api.entity.StreamDefinition;
 import io.micrometer.core.annotation.Timed;
 import java.util.Collections;
 import java.util.List;
@@ -78,8 +78,8 @@ public class GeneralPlanContextLoader {
   }
 
   private ConcurrencyData getConcurrencyData(String contentId) {
-    Map<String, StreamType> streamDefinition =
-      dataExchangerService.getStreamDefinition(contentId);
+
+    Map<String, StreamDefinition> streamDefinition = dataExchangerService.getStreamDefinition(contentId);
 
     List<ContentCohort> cohorts =
       getContentCohorts(contentId, streamDefinition);
@@ -93,13 +93,13 @@ public class GeneralPlanContextLoader {
       .build();
   }
 
-  private List<ContentCohort> getContentCohorts(String contentId, Map<String, StreamType> streamDefinition) {
+  private List<ContentCohort> getContentCohorts(String contentId, Map<String, StreamDefinition> streamDefinition) {
     List<ContentCohort> cohorts = dataExchangerService.getContentCohortConcurrency(contentId, streamDefinition);
     IntStream.range(0, cohorts.size()).forEach(i -> cohorts.get(i).setConcurrencyId(i));
     return cohorts;
   }
 
-  private List<ContentStream> getContentStreams(String contentId, Map<String, StreamType> streamDefinition) {
+  private List<ContentStream> getContentStreams(String contentId, Map<String, StreamDefinition> streamDefinition) {
     List<ContentStream> streams = dataExchangerService.getContentStreamConcurrency(contentId, streamDefinition);
     IntStream.range(0, streams.size()).forEach(i -> streams.get(i).setConcurrencyId(i));
     return streams;

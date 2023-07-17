@@ -56,7 +56,6 @@ public class DataLoader {
     adModelReference.set(adModelLoader.loadAdModel(newVersion));
   }
 
-
   public StandardMatchProgressModel getStandardMatchProgressModel() {
     return standardMatchProgressModelRef.get();
   }

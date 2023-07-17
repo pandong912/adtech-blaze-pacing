@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableCaching
 public class CacheConfig extends CachingConfigurerSupport {
-  public static final String IMPRESSION_CACHE = "impression";
   public static final String COHORT_CONCURRENCY = "cohortConcurrency";
   public static final String COHORT_CONCURRENCY_MANAGER = "cacheManager";
   public static final String STREAM_CONCURRENCY = "streamConcurrency";
@@ -20,6 +19,8 @@ public class CacheConfig extends CachingConfigurerSupport {
   public static final String SINGLE_PLATFORM_STREAM_CONCURRENCY = "singlePlatformStreamConcurrency";
   public static final String SINGLE_PLATFORM_STREAM_CONCURRENCY_MANAGER = "cacheManager";
   public static final String STREAM_DEFINITION = "streamDefinition";
+  public static final String STREAM_DEFINITION_V2 = "streamDefinitionV2";
+
   public static final String SEASON_ID_BY_CONTENT = "seasonIdByContent";
   public static final String LANGUAGE = "language";
   public static final String PLATFORM = "platform";
@@ -52,7 +53,7 @@ public class CacheConfig extends CachingConfigurerSupport {
   @Bean
   public CacheManager databaseCacheManager() {
     CaffeineCacheManager cacheManager =
-      new CaffeineCacheManager(STREAM_DEFINITION, SEASON_ID_BY_CONTENT, LANGUAGE, PLATFORM);
+      new CaffeineCacheManager(STREAM_DEFINITION,STREAM_DEFINITION_V2, SEASON_ID_BY_CONTENT, LANGUAGE, PLATFORM);
     cacheManager.setCaffeine(Caffeine.newBuilder()
       .initialCapacity(16)
       .maximumSize(128)

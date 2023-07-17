@@ -2,9 +2,7 @@ package com.hotstar.adtech.blaze.adserver.ingester.service;
 
 import com.hotstar.adtech.blaze.adserver.ingester.entity.SingleStream;
 import com.hotstar.adtech.blaze.exchanger.api.DataExchangerClient;
-import com.hotstar.adtech.blaze.exchanger.api.entity.StreamDetail;
-import com.hotstar.adtech.blaze.exchanger.api.response.ContentStreamResponse;
-import com.hotstar.adtech.blaze.exchanger.api.response.PlayoutStreamResponse;
+import com.hotstar.adtech.blaze.exchanger.api.entity.StreamDefinition;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,27 +18,27 @@ public class DataExchangerService {
   private final DataExchangerClient dataExchangerClient;
 
   public Map<String, String> getPlayoutStreamMapping(String contentId) {
-    //convert stream to playout streams
-    //Map.KEY: in-Hindi-iOS -> Map.Value: in-Hindi-iOS+Android+mWeb:
-    ContentStreamResponse contentStreamResponse = dataExchangerClient.getStreamDefinition(contentId).getData();
-    return buildConvertMap(contentStreamResponse);
+    //convert stream to playoutId
+    //Map.KEY: in-eng-phone-ssai -> Map.Value: P1
+    List<StreamDefinition> streamDefinitions = dataExchangerClient.getStreamDefinitionV2(contentId).getData();
+    return buildConvertMap(streamDefinitions);
   }
 
-  private Map<String, String> buildConvertMap(ContentStreamResponse contentStreamResponse) {
-    return contentStreamResponse.getPlayoutStreamResponses().stream()
-      .map(PlayoutStreamResponse::getStreamDetail)
-      .flatMap(streamDetail -> buildStream(streamDetail).stream())
-      .collect(Collectors.toMap(SingleStream::getKey, SingleStream::getPlayoutStream));
+  private Map<String, String> buildConvertMap(List<StreamDefinition> streamDefinitions) {
+    return streamDefinitions.stream()
+      .flatMap(streamDefinition -> buildStream(streamDefinition).stream())
+      .collect(Collectors.toMap(SingleStream::getKey, SingleStream::getPlayoutId));
   }
 
-  private List<SingleStream> buildStream(StreamDetail streamDetail) {
-    return streamDetail.getPlatforms().stream()
-      .map(platform ->
+  private List<SingleStream> buildStream(StreamDefinition streamDefinition) {
+    return streamDefinition.getLadders().stream()
+      .map(ladder ->
         SingleStream.builder()
-          .tenant(streamDetail.getTenant().getName())
-          .language(streamDetail.getLanguage().getName())
-          .platform(platform.getName())
-          .playoutStream(streamDetail.getKey())
+          .tenant(streamDefinition.getTenant().getName())
+          .language(streamDefinition.getLanguage().getAbbreviation())
+          .ladder(ladder.name())
+          .ads(streamDefinition.getStreamType().getAds())
+          .playoutId(streamDefinition.getPlayoutId())
           .build()
       ).collect(Collectors.toList());
   }

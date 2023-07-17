@@ -10,9 +10,7 @@ import static com.hotstar.adtech.blaze.exchanger.api.Constant.IMPRESSION_PATH;
 import static com.hotstar.adtech.blaze.exchanger.api.Constant.REACH_PATH;
 
 import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
-import com.hotstar.adtech.blaze.admodel.common.enums.Tenant;
-import com.hotstar.adtech.blaze.exchanger.api.entity.CohortInfo;
-import com.hotstar.adtech.blaze.exchanger.api.entity.Distribution;
+import com.hotstar.adtech.blaze.exchanger.api.entity.StreamDefinition;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdCrashModelResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdImpressionResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;
@@ -22,17 +20,13 @@ import com.hotstar.adtech.blaze.exchanger.api.response.BreakListResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.BreakTypeResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentCohortConcurrencyResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentStreamConcurrencyResponse;
-import com.hotstar.adtech.blaze.exchanger.api.response.ContentStreamResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.MatchProgressModelResponse;
+import com.hotstar.adtech.blaze.exchanger.api.response.TournamentInfoResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.UnReachResponse;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(name = Constant.SERVICE_NAME,
@@ -57,8 +51,8 @@ public interface DataExchangerClient {
   @GetMapping(AD_CONTEXT_PATH + "/break-type")
   StandardResponse<List<BreakTypeResponse>> getAllBreakType();
 
-  @GetMapping(AD_MODEL_PATH + "/stream-definition/content/{contentId}")
-  StandardResponse<ContentStreamResponse> getStreamDefinition(@PathVariable String contentId);
+  @GetMapping(AD_MODEL_PATH + "/stream-definition/v2/content/{contentId}")
+  StandardResponse<List<StreamDefinition>> getStreamDefinitionV2(@PathVariable String contentId);
 
   @GetMapping(ALGORITHM_PATH + "/match-break-progress")
   StandardResponse<MatchProgressModelResponse> getMatchBreakProgressModel(
@@ -93,22 +87,20 @@ public interface DataExchangerClient {
   StandardResponse<AdModelResultUriResponse> getAdModel(@PathVariable long version);
 
   @GetMapping(CONCURRENCY_PATH + API_VERSION + "/content/{contentId}/single-stream")
-  StandardResponse<Long> getContentSingleStreamConcurrency(@PathVariable String contentId,
-                                                           @RequestParam Tenant tenant,
-                                                           @RequestParam String language,
-                                                           @RequestParam String platform);
+  StandardResponse<Long> getContentStreamConcurrencyWithPlayoutId(@PathVariable String contentId,
+                                                                  @RequestParam String playoutId);
 
-  @PostMapping(REACH_PATH + "/content/{contentId}/reach/batch")
-  StandardResponse<List<UnReachResponse>> batchGetUnReachData(@PathVariable String contentId,
-                                                              @RequestBody List<CohortInfo> cohortInfos);
+  @GetMapping(REACH_PATH + "/content/{contentId}/reach/batch")
+  StandardResponse<List<UnReachResponse>> batchGetUnReachData(@PathVariable String contentId);
 
-  @GetMapping("/content/{contentId}/reach")
+  @GetMapping(REACH_PATH + "/content/{contentId}/reach/shard")
+  StandardResponse<List<UnReachResponse>> batchGetUnReachDataInShard(@PathVariable String contentId,
+                                                                     @RequestParam int shard);
+
+  @GetMapping(REACH_PATH + "/content/{contentId}/reach")
   StandardResponse<UnReachResponse> getUnReachDataWithStreamId(@PathVariable String contentId,
                                                                @RequestParam String streamId,
                                                                @RequestParam String ssaiTag);
-
-  @GetMapping(REACH_PATH + "/content/{contentId}/reach/cohort-list")
-  StandardResponse<List<CohortInfo>> getReachCohortList(@PathVariable String contentId);
 
   @GetMapping(IMPRESSION_PATH + API_VERSION + "/content/{contentId}/ad-set/all")
   StandardResponse<List<AdSetImpressionResponse>> getAllAdSetImpressions(@PathVariable("contentId") String contentId);
@@ -124,7 +116,6 @@ public interface DataExchangerClient {
   StandardResponse<AdImpressionResponse> getAdImpression(@PathVariable("contentId") String contentId,
                                                          @PathVariable("creativeId") String creativeId);
 
-
-  @GetMapping("/season-id/content/{contentId}")
-  StandardResponse<Long> getSeasonIdByContentId(@PathVariable String contentId);
+  @GetMapping(AD_MODEL_PATH + "/season-id/content/{contentId}")
+  StandardResponse<TournamentInfoResponse> getSeasonIdByContentId(@PathVariable String contentId);
 }

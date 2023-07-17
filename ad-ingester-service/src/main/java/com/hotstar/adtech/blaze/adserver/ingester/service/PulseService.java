@@ -40,7 +40,7 @@ public class PulseService {
   public ConcurrencyGroup getLiveContentStreamCohortConcurrency(String contentId) {
 
     StandardResponse<ContentDataConcurrencyBatchResponse> response =
-      pulseClient.getLiveContentAllStreamCohortConcurrency(contentId, null);
+      pulseClient.getLiveContentAllCohortConcurrencyV3(contentId, null);
 
     if (!response.succeed()) {
       throw new ServiceException(response.getMessage());
@@ -57,7 +57,7 @@ public class PulseService {
   public ConcurrencyGroup getLiveContentStreamConcurrency(String contentId) {
 
     StandardResponse<ContentDataConcurrencyBatchResponse> response =
-      pulseClient.getLiveContentAllStreamConcurrency(contentId, null);
+      pulseClient.getLiveContentAllStreamConcurrencyV3(contentId, null);
 
     if (!response.succeed()) {
       throw new ServiceException(response.getMessage());

@@ -3,8 +3,7 @@ package com.hotstar.adtech.blaze.exchanger;
 
 import static com.hotstar.adtech.blaze.exchanger.config.CacheConfig.COHORT_CONCURRENCY;
 
-import com.hotstar.adtech.blaze.admodel.common.enums.Platform;
-import com.hotstar.adtech.blaze.admodel.common.enums.Tenant;
+import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
 import com.hotstar.adtech.blaze.adserver.data.redis.service.StreamCohortConcurrencyRepository;
 import com.hotstar.adtech.blaze.adserver.data.redis.service.StreamConcurrencyRepository;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentCohortConcurrencyResponse;
@@ -39,18 +38,18 @@ public class ConcurrencyControllerTest extends TestEnvConfig {
   @BeforeAll
   public void setUp() {
     Map<String, Long> concurrencyValues = new HashMap<>();
-    concurrencyValues.put("in-Hindi-Android|SSAI::001", 1L);
-    concurrencyValues.put("in-English-iOS|SSAI::001", 10L);
-    concurrencyValues.put("in-English-JioLyf|SSAI::001", 100L);
-    concurrencyValues.put("in-English-JioLyf|SSAI::002", 1000L);
+    concurrencyValues.put("P7|SSAI::001", 1L);
+    concurrencyValues.put("P1|SSAI::001", 10L);
+    concurrencyValues.put("P2|SSAI::001", 100L);
+    concurrencyValues.put("P2|SSAI::002", 1000L);
     streamCohortConcurrencyRepository.setStreamCohortConcurrencyBucket("1540018990", "1676628060");
     streamCohortConcurrencyRepository.setContentAllStreamCohortConcurrency("1540018990", "1676628060",
       concurrencyValues);
 
     Map<String, Long> streamConcurrencyValues = new HashMap<>();
-    streamConcurrencyValues.put("in-Hindi-Android", 1L);
-    streamConcurrencyValues.put("in-English-iOS", 10L);
-    streamConcurrencyValues.put("in-English-JioLyf", 1100L);
+    streamConcurrencyValues.put("P7", 1L);
+    streamConcurrencyValues.put("P1", 10L);
+    streamConcurrencyValues.put("P2", 1100L);
     streamConcurrencyRepository.setStreamConcurrencyBucket("1540018990", "1676628060");
     streamConcurrencyRepository.setContentAllStreamConcurrency("1540018990", "1676628060", streamConcurrencyValues);
   }
@@ -63,10 +62,10 @@ public class ConcurrencyControllerTest extends TestEnvConfig {
     Map<String, Long> map = data.stream()
       .collect(Collectors.toMap(ContentCohortConcurrencyResponse::getKey,
         ContentCohortConcurrencyResponse::getConcurrencyValue));
-    Assertions.assertEquals(1, map.get("in-Hindi-Android|SSAI::001").longValue());
-    Assertions.assertEquals(10, map.get("in-English-iOS|SSAI::001").longValue());
-    Assertions.assertEquals(100, map.get("in-English-JioLyf|SSAI::001").longValue());
-    Assertions.assertEquals(1000, map.get("in-English-JioLyf|SSAI::002").longValue());
+    Assertions.assertEquals(1, map.get("P7|SSAI::001").longValue());
+    Assertions.assertEquals(10, map.get("P1|SSAI::001").longValue());
+    Assertions.assertEquals(100, map.get("P2|SSAI::001").longValue());
+    Assertions.assertEquals(1000, map.get("P2|SSAI::002").longValue());
 
     List<ContentCohortConcurrencyResponse> cache =
       cacheManager.getCache(COHORT_CONCURRENCY).get("1540018990", List.class);
@@ -74,10 +73,11 @@ public class ConcurrencyControllerTest extends TestEnvConfig {
     Map<String, Long> cacheMap = cache.stream()
       .collect(Collectors.toMap(ContentCohortConcurrencyResponse::getKey,
         ContentCohortConcurrencyResponse::getConcurrencyValue));
-    Assertions.assertEquals(1, cacheMap.get("in-Hindi-Android|SSAI::001").longValue());
-    Assertions.assertEquals(10, cacheMap.get("in-English-iOS|SSAI::001").longValue());
-    Assertions.assertEquals(100, cacheMap.get("in-English-JioLyf|SSAI::001").longValue());
-    Assertions.assertEquals(1000, cacheMap.get("in-English-JioLyf|SSAI::002").longValue());
+    Assertions.assertEquals(1, map.get("P7|SSAI::001").longValue());
+    Assertions.assertEquals(10, map.get("P1|SSAI::001").longValue());
+    Assertions.assertEquals(100, map.get("P2|SSAI::001").longValue());
+    Assertions.assertEquals(1000, map.get("P2|SSAI::002").longValue());
+
   }
 
   @Test
@@ -85,14 +85,19 @@ public class ConcurrencyControllerTest extends TestEnvConfig {
     List<ContentStreamConcurrencyResponse> data =
       concurrencyController.getContentStreamWiseConcurrency("1540018990").getData();
     Assertions.assertEquals(3, data.size());
-    Assertions.assertEquals("in-Hindi-Android", data.get(0).getKey());
-    Assertions.assertEquals(1, data.get(0).getConcurrencyValue().longValue());
+    Assertions.assertEquals("P1", data.get(0).getKey());
+    Assertions.assertEquals(10, data.get(0).getConcurrencyValue().longValue());
   }
 
   @Test
   public void testGetContentSingleStreamConcurrency() {
-    Long data = concurrencyController.getContentSingleStreamConcurrency("1540018990", Tenant.India, "English",
-      Platform.iOS.toString()).getData();
+    Long data = concurrencyController.getContentStreamConcurrencyWithPlayoutId("1540018990", "P1").getData();
     Assertions.assertEquals(10L, data.longValue());
+  }
+
+  @Test
+  public void testInvalidPlayoutId() {
+    Assertions.assertThrows(ServiceException.class,
+      () -> concurrencyController.getContentStreamConcurrencyWithPlayoutId("1540018990", "1"));
   }
 }

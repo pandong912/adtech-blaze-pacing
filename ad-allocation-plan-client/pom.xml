@@ -7,7 +7,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>allocation-plan-client</artifactId>
+    <artifactId>ad-allocation-plan-client</artifactId>
 
 
     <dependencies>

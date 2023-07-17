@@ -11,7 +11,7 @@
     <modules>
         <module>ad-ingester-service</module>
         <module>ad-allocation-planner-common</module>
-        <module>allocation-plan-client</module>
+        <module>ad-allocation-plan-client</module>
         <module>ad-allocation-planner</module>
         <module>ad-data-exchanger-client</module>
         <module>ad-data-exchanger</module>
@@ -88,7 +88,7 @@
             </dependency>
             <dependency>
                 <groupId>com.hotstar.adtech.blaze</groupId>
-                <artifactId>allocation-plan-client</artifactId>
+                <artifactId>ad-allocation-plan-client</artifactId>
                 <version>${blaze-module.version}</version>
             </dependency>
             <dependency>

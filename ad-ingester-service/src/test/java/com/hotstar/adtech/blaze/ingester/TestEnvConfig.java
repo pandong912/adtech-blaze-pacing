@@ -1,4 +1,4 @@
-package com.hotstar.adtech.blaze.adserver.ingester;
+package com.hotstar.adtech.blaze.ingester;
 
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;

@@ -1,4 +1,4 @@
-package com.hotstar.adtech.blaze.adserver.ingester.entity;
+package com.hotstar.adtech.blaze.ingester.entity;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.CreativeType;
 import lombok.Builder;

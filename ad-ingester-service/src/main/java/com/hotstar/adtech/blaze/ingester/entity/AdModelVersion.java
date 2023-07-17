@@ -1,4 +1,4 @@
-package com.hotstar.adtech.blaze.adserver.ingester.entity;
+package com.hotstar.adtech.blaze.ingester.entity;
 
 import lombok.Builder;
 import lombok.Getter;

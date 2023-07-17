@@ -1,12 +1,12 @@
-package com.hotstar.adtech.blaze.adserver.ingester.service;
+package com.hotstar.adtech.blaze.ingester.service;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.CreativeCategory;
 import com.hotstar.adtech.blaze.adserver.data.redis.service.ImpressionRepository;
-import com.hotstar.adtech.blaze.adserver.ingester.entity.Ad;
-import com.hotstar.adtech.blaze.adserver.ingester.entity.AdImpression;
-import com.hotstar.adtech.blaze.adserver.ingester.entity.Match;
-import com.hotstar.adtech.blaze.adserver.ingester.metric.MetricNames;
-import com.hotstar.adtech.blaze.adserver.ingester.metric.MetricTags;
+import com.hotstar.adtech.blaze.ingester.entity.Ad;
+import com.hotstar.adtech.blaze.ingester.entity.AdImpression;
+import com.hotstar.adtech.blaze.ingester.entity.Match;
+import com.hotstar.adtech.blaze.ingester.metric.MetricNames;
+import com.hotstar.adtech.blaze.ingester.metric.MetricTags;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Metrics;
 import java.util.HashMap;
@@ -49,8 +49,8 @@ public class ImpressionService {
         }
       );
 
-      impressionRepository.setPulseAdImpressions(contentId, adImpressions);
-      impressionRepository.setPulseAdSetImpressions(contentId, adSetImpressions);
+      //impressionRepository.setPulseAdImpressions(contentId, adImpressions);
+      //impressionRepository.setPulseAdSetImpressions(contentId, adSetImpressions);
     } catch (Exception e) {
       Metrics.counter(MetricNames.IMPRESSION_UPDATE_EXCEPTION, MetricTags.EXCEPTION_CLASS, e.getClass().getName())
         .increment();

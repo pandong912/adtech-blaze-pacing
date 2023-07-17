@@ -11,7 +11,7 @@
     <description>blaze ad ingester service</description>
     <properties>
         <main.class>
-            com.hotstar.adtech.blaze.adserver.ingester.IngesterApplication
+            com.hotstar.adtech.blaze.ingester.IngesterApplication
         </main.class>
     </properties>
 

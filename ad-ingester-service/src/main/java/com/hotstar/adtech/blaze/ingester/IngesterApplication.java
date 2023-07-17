@@ -1,4 +1,4 @@
-package com.hotstar.adtech.blaze.adserver.ingester;
+package com.hotstar.adtech.blaze.ingester;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.SpringApplication;

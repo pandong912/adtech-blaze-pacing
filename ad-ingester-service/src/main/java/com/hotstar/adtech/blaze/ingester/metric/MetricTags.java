@@ -1,4 +1,4 @@
-package com.hotstar.adtech.blaze.adserver.ingester.metric;
+package com.hotstar.adtech.blaze.ingester.metric;
 
 public class MetricTags {
   public static final String EXCEPTION_CLASS = "exception_class";

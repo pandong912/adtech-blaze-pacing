@@ -1,10 +1,10 @@
-package com.hotstar.adtech.blaze.adserver.ingester.task;
+package com.hotstar.adtech.blaze.ingester.task;
 
-import com.hotstar.adtech.blaze.adserver.ingester.entity.Ad;
-import com.hotstar.adtech.blaze.adserver.ingester.entity.AdModel;
-import com.hotstar.adtech.blaze.adserver.ingester.entity.Match;
-import com.hotstar.adtech.blaze.adserver.ingester.service.AdModelLoader;
-import com.hotstar.adtech.blaze.adserver.ingester.service.ImpressionService;
+import com.hotstar.adtech.blaze.ingester.entity.Ad;
+import com.hotstar.adtech.blaze.ingester.entity.AdModel;
+import com.hotstar.adtech.blaze.ingester.entity.Match;
+import com.hotstar.adtech.blaze.ingester.service.AdModelLoader;
+import com.hotstar.adtech.blaze.ingester.service.ImpressionService;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

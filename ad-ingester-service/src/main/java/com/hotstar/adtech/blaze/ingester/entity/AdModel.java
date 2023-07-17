@@ -1,4 +1,4 @@
-package com.hotstar.adtech.blaze.adserver.ingester.entity;
+package com.hotstar.adtech.blaze.ingester.entity;
 
 import java.util.List;
 import java.util.Map;

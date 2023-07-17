@@ -1,4 +1,4 @@
-package com.hotstar.adtech.blaze.adserver.ingester.config;
+package com.hotstar.adtech.blaze.ingester.config;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;

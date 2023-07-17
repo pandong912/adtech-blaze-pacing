@@ -1,8 +1,8 @@
-package com.hotstar.adtech.blaze.adserver.ingester.service;
+package com.hotstar.adtech.blaze.ingester.service;
 
 import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
-import com.hotstar.adtech.blaze.adserver.ingester.entity.AdImpression;
-import com.hotstar.adtech.blaze.adserver.ingester.entity.ConcurrencyGroup;
+import com.hotstar.adtech.blaze.ingester.entity.AdImpression;
+import com.hotstar.adtech.blaze.ingester.entity.ConcurrencyGroup;
 import com.hotstar.platform.pulse.api.PulseClient;
 import com.hotstar.platform.pulse.api.response.AdImpressionBatchResponse;
 import com.hotstar.platform.pulse.api.response.ContentDataConcurrencyBatchResponse;

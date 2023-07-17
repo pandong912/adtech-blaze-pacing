@@ -1,4 +1,4 @@
-package com.hotstar.adtech.blaze.adserver.ingester;
+package com.hotstar.adtech.blaze.ingester;
 
 import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
 import com.hotstar.adtech.blaze.admodel.common.entity.LanguageEntity;
@@ -7,13 +7,13 @@ import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
 import com.hotstar.adtech.blaze.admodel.common.enums.Tenant;
 import com.hotstar.adtech.blaze.adserver.data.redis.service.StreamCohortConcurrencyRepository;
 import com.hotstar.adtech.blaze.adserver.data.redis.service.StreamConcurrencyRepository;
-import com.hotstar.adtech.blaze.adserver.ingester.entity.ConcurrencyGroup;
-import com.hotstar.adtech.blaze.adserver.ingester.entity.Match;
-import com.hotstar.adtech.blaze.adserver.ingester.service.ConcurrencyService;
-import com.hotstar.adtech.blaze.adserver.ingester.service.DataExchangerService;
-import com.hotstar.adtech.blaze.adserver.ingester.service.PulseService;
 import com.hotstar.adtech.blaze.exchanger.api.DataExchangerClient;
 import com.hotstar.adtech.blaze.exchanger.api.entity.StreamDefinition;
+import com.hotstar.adtech.blaze.ingester.entity.ConcurrencyGroup;
+import com.hotstar.adtech.blaze.ingester.entity.Match;
+import com.hotstar.adtech.blaze.ingester.service.ConcurrencyService;
+import com.hotstar.adtech.blaze.ingester.service.DataExchangerService;
+import com.hotstar.adtech.blaze.ingester.service.PulseService;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;

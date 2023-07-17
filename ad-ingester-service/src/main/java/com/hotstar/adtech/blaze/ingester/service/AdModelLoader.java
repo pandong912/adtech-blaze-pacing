@@ -1,4 +1,4 @@
-package com.hotstar.adtech.blaze.adserver.ingester.service;
+package com.hotstar.adtech.blaze.ingester.service;
 
 import com.hotstar.adtech.blaze.admodel.client.AdModelClient;
 import com.hotstar.adtech.blaze.admodel.client.AdModelUri;
@@ -8,13 +8,13 @@ import com.hotstar.adtech.blaze.admodel.client.entity.MatchEntities;
 import com.hotstar.adtech.blaze.admodel.client.model.AdInfo;
 import com.hotstar.adtech.blaze.admodel.common.domain.ResultCode;
 import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
-import com.hotstar.adtech.blaze.adserver.ingester.entity.Ad;
-import com.hotstar.adtech.blaze.adserver.ingester.entity.AdModel;
-import com.hotstar.adtech.blaze.adserver.ingester.entity.AdModelVersion;
-import com.hotstar.adtech.blaze.adserver.ingester.entity.Match;
-import com.hotstar.adtech.blaze.adserver.ingester.metric.MetricNames;
 import com.hotstar.adtech.blaze.exchanger.api.DataExchangerClient;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;
+import com.hotstar.adtech.blaze.ingester.entity.Ad;
+import com.hotstar.adtech.blaze.ingester.entity.AdModel;
+import com.hotstar.adtech.blaze.ingester.entity.AdModelVersion;
+import com.hotstar.adtech.blaze.ingester.entity.Match;
+import com.hotstar.adtech.blaze.ingester.metric.MetricNames;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;

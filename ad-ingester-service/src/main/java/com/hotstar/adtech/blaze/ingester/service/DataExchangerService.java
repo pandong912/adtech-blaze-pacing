@@ -1,8 +1,8 @@
-package com.hotstar.adtech.blaze.adserver.ingester.service;
+package com.hotstar.adtech.blaze.ingester.service;
 
-import com.hotstar.adtech.blaze.adserver.ingester.entity.SingleStream;
 import com.hotstar.adtech.blaze.exchanger.api.DataExchangerClient;
 import com.hotstar.adtech.blaze.exchanger.api.entity.StreamDefinition;
+import com.hotstar.adtech.blaze.ingester.entity.SingleStream;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;

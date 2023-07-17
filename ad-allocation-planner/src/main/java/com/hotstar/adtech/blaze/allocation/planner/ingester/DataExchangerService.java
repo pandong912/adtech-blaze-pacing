@@ -27,6 +27,7 @@ import com.hotstar.adtech.blaze.exchanger.api.response.BreakListResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.BreakTypeResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentCohortConcurrencyResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentStreamConcurrencyResponse;
+import com.hotstar.adtech.blaze.exchanger.api.response.MatchProgressModelResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.UnReachResponse;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Metrics;
@@ -83,13 +84,14 @@ public class DataExchangerService {
   }
 
   public List<Double> getMatchBreakProgressModel() {
-    StandardResponse<List<Double>> response = dataExchangerClient.getMatchBreakProgressModel();
+    StandardResponse<MatchProgressModelResponse> response =
+        dataExchangerClient.getLatestMatchBreakProgressModel();
 
     if (response.getCode() != ResultCode.SUCCESS) {
       throw new ServiceException("Failed to get break progress from data exchanger");
     }
 
-    return response.getData();
+    return response.getData().getDeliveryProgresses();
   }
 
   public List<BreakDetail> getBreakDefinition() {

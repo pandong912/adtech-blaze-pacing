@@ -1,4 +1,4 @@
-package com.hotstar.adtech.blaze.adserver.ingester.config;
+package com.hotstar.adtech.blaze.ingester.config;
 
 import io.micrometer.core.aop.TimedAspect;
 import io.micrometer.core.instrument.MeterRegistry;

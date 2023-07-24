@@ -22,5 +22,13 @@
       <groupId>io.github.openfeign</groupId>
       <artifactId>feign-httpclient</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-parameter-names</artifactId>
+    </dependency>
   </dependencies>
 </project>

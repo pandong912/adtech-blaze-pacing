@@ -2,6 +2,7 @@ package com.hotstar.adtech.blaze.allocation.planner.qualification;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.Tenant;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
+import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.ad.AspectRatioInspector;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.ad.LanguageInspector;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.adset.StreamTargetingRuleInspector;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Ad;
@@ -15,6 +16,7 @@ public class StreamQualificationEngine implements QualificationEngine<AdSet> {
 
   private final StreamTargetingRuleInspector streamTargetingRuleInspector;
   private final LanguageInspector languageInspector;
+  private final AspectRatioInspector aspectRatioInspector;
 
   public StreamQualificationEngine(PlayoutStream playoutStream) {
     Tenant tenant = playoutStream.getTenant();
@@ -22,6 +24,7 @@ public class StreamQualificationEngine implements QualificationEngine<AdSet> {
     List<Integer> platformIds = playoutStream.getPlatformIds();
     streamTargetingRuleInspector = new StreamTargetingRuleInspector(tenant, languageId, platformIds);
     languageInspector = new LanguageInspector(languageId);
+    aspectRatioInspector = new AspectRatioInspector(playoutStream.getLanguage().getName());
   }
 
   public List<QualifiedAdSet> qualify(List<AdSet> candidateAdSets) {
@@ -32,6 +35,7 @@ public class StreamQualificationEngine implements QualificationEngine<AdSet> {
       .filter(streamTargetingRuleInspector::qualify)
       .flatMap(adSet -> adSet.getSpotAds().stream())
       .filter(languageInspector::qualify)
+      .filter(aspectRatioInspector::qualify)
       .collect(Collectors.groupingBy(Ad::getAdSetId))
       .entrySet().stream()
       .map(entry -> QualifiedAdSet.builder()

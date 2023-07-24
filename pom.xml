@@ -27,7 +27,7 @@
 
     <properties>
         <blaze-module.version>1.7.3-SNAPSHOT</blaze-module.version>
-        <blaze-ad-model-module.version>1.7.4-SNAPSHOT</blaze-ad-model-module.version>
+        <blaze-ad-model-module.version>1.7.5-SNAPSHOT</blaze-ad-model-module.version>
         <pulse.version>2.2.4-SNAPSHOT</pulse.version>
         <shifu-common-stats-micrometer>0.1.1</shifu-common-stats-micrometer>
         <templatize.macro.version>2.0.5-RELEASE</templatize.macro.version>

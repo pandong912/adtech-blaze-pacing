@@ -3,6 +3,6 @@ spring:
     include: ad-model-client-prod, ad-redis-client-prod
 pulse:
   counter-service:
-    endpoint: https://pf-pulse-counter-service-apse1.hotstar-labs.com
+    endpoint: http://pulse-counter.internal.hotstar.com
     readTimeout: 5000
 

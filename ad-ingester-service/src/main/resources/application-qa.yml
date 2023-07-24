@@ -8,4 +8,4 @@ blaze:
       impression-sync-delay: 5000
 pulse:
   counter-service:
-    endpoint: http://pf-pulse-counter-service-qa.pp.hotstar-labs.com
+    endpoint: http://pulse-counter.internal.hotstar.com

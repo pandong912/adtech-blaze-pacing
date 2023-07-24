@@ -3,4 +3,4 @@ spring:
     include: ad-model-client-pp, ad-redis-client-pp
 pulse:
   counter-service:
-    endpoint: http://pf-pulse-counter-service-pp.pp.hotstar-labs.com
+    endpoint: http://pulse-counter.internal.hotstar.com

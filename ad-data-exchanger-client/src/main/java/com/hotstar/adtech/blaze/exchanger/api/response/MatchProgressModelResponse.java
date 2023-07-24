@@ -1,11 +1,16 @@
 package com.hotstar.adtech.blaze.exchanger.api.response;
 
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Value;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Value
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
 public class MatchProgressModelResponse {
+
   List<Double> deliveryProgresses;
 }

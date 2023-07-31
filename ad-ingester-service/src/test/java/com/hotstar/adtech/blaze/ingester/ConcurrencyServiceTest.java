@@ -1,24 +1,19 @@
 package com.hotstar.adtech.blaze.ingester;
 
-import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
-import com.hotstar.adtech.blaze.admodel.common.entity.LanguageEntity;
 import com.hotstar.adtech.blaze.admodel.common.enums.Ladder;
 import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
 import com.hotstar.adtech.blaze.admodel.common.enums.Tenant;
 import com.hotstar.adtech.blaze.adserver.data.redis.service.StreamCohortConcurrencyRepository;
 import com.hotstar.adtech.blaze.adserver.data.redis.service.StreamConcurrencyRepository;
-import com.hotstar.adtech.blaze.exchanger.api.DataExchangerClient;
-import com.hotstar.adtech.blaze.exchanger.api.entity.StreamDefinition;
 import com.hotstar.adtech.blaze.ingester.entity.ConcurrencyGroup;
 import com.hotstar.adtech.blaze.ingester.entity.Match;
+import com.hotstar.adtech.blaze.ingester.entity.SingleStream;
 import com.hotstar.adtech.blaze.ingester.service.ConcurrencyService;
-import com.hotstar.adtech.blaze.ingester.service.DataExchangerService;
 import com.hotstar.adtech.blaze.ingester.service.PulseService;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -28,7 +23,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
@@ -36,10 +30,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 public class ConcurrencyServiceTest extends TestEnvConfig {
   @Mock
   private PulseService pulseService;
-  @MockBean
-  private DataExchangerClient dataExchangerClient;
-  @Autowired
-  private DataExchangerService dataExchangerService;
   @Autowired
   private StreamConcurrencyRepository streamConcurrencyRepository;
   @Autowired
@@ -54,12 +44,11 @@ public class ConcurrencyServiceTest extends TestEnvConfig {
     Mockito
       .when(pulseService.getLiveContentStreamConcurrency(Mockito.anyString()))
       .thenReturn(getStreamConcurrency());
-    Mockito
-      .when(dataExchangerClient.getStreamDefinitionV2(Mockito.anyString()))
-      .thenReturn(getStreamMapping());
-    concurrencyService = new ConcurrencyService(pulseService, dataExchangerService, streamConcurrencyRepository,
+    concurrencyService = new ConcurrencyService(pulseService, streamConcurrencyRepository,
       streamCohortConcurrencyRepository);
-    concurrencyService.updateMatchConcurrency(new Match("123", "123"));
+    Match match = Match.builder().contentId("123").tournamentId(123L).build();
+    Map<String, String> streamMappingConverter = getStreamMappingConverter();
+    concurrencyService.updateMatchConcurrency(match, streamMappingConverter);
     Map<String, Long> contentAllStreamConcurrency = streamConcurrencyRepository.getContentAllStreamConcurrency("123");
     System.out.println("contentAllStreamConcurrency: " + contentAllStreamConcurrency);
     Assertions.assertEquals(1L, contentAllStreamConcurrency.get("in-hin--ssai"));
@@ -75,31 +64,38 @@ public class ConcurrencyServiceTest extends TestEnvConfig {
     Assertions.assertEquals(12L, contentAllStreamCohortConcurrency.get("P15|SSAI::002"));
   }
 
-  private StandardResponse<List<StreamDefinition>> getStreamMapping() {
-    List<StreamDefinition> list = Arrays.asList(
-      StreamDefinition.builder()
+  private Map<String, String> getStreamMappingConverter() {
+    return Arrays.asList(
+      SingleStream.builder()
         .playoutId("P1")
-        .streamType(StreamType.SSAI_Spot)
-        .ladders(Collections.singletonList(Ladder.phone))
-        .language(LanguageEntity.builder().abbreviation("eng").build())
-        .tenant(Tenant.India)
+        .ads(StreamType.SSAI_Spot.getAds())
+        .ladder(Ladder.phone.toString())
+        .language("eng")
+        .tenant(Tenant.India.getName())
         .build(),
-      StreamDefinition.builder()
+      SingleStream.builder()
         .playoutId("P7")
-        .streamType(StreamType.SSAI_Spot)
-        .ladders(Collections.singletonList(Ladder.phone))
-        .language(LanguageEntity.builder().abbreviation("hin").build())
-        .tenant(Tenant.India)
+        .ads(StreamType.SSAI_Spot.getAds())
+        .ladder(Ladder.phone.toString())
+        .language("hin")
+        .tenant(Tenant.India.getName())
         .build(),
-      StreamDefinition.builder()
+      SingleStream.builder()
         .playoutId("P15")
-        .streamType(StreamType.Spot)
-        .ladders(Arrays.asList(Ladder.phone, Ladder.tv))
-        .language(LanguageEntity.builder().abbreviation("tel").build())
-        .tenant(Tenant.India)
+        .ads(StreamType.Spot.getAds())
+        .ladder(Ladder.phone.toString())
+        .language("tel")
+        .tenant(Tenant.India.getName())
+        .build(),
+      SingleStream.builder()
+        .playoutId("P15")
+        .ads(StreamType.Spot.getAds())
+        .ladder(Ladder.tv.toString())
+        .language("tel")
+        .tenant(Tenant.India.getName())
         .build()
-    );
-    return StandardResponse.success(list);
+      ).stream()
+      .collect(Collectors.toMap(SingleStream::getKey, SingleStream::getPlayoutId));
   }
 
   private ConcurrencyGroup getStreamConcurrency() {

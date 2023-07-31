@@ -11,17 +11,20 @@ import com.hotstar.adtech.blaze.admodel.client.model.AudienceTargetingRuleInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.BreakTargetingRuleInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.GoalMatchInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.LanguageInfo;
+import com.hotstar.adtech.blaze.admodel.client.model.MatchInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.PlatformInfo;
+import com.hotstar.adtech.blaze.admodel.client.model.StreamMappingInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.StreamTargetingRuleClauseInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.StreamTargetingRuleInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.VideoAd;
-import com.hotstar.adtech.blaze.admodel.common.entity.LanguageEntity;
-import com.hotstar.adtech.blaze.admodel.common.entity.PlatformEntity;
 import com.hotstar.adtech.blaze.admodel.common.enums.CampaignStatus;
 import com.hotstar.adtech.blaze.admodel.common.enums.CreativeType;
 import com.hotstar.adtech.blaze.admodel.common.enums.DeliveryMode;
 import com.hotstar.adtech.blaze.admodel.common.enums.RuleType;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.AdModelVersion;
+import com.hotstar.adtech.blaze.allocation.planner.common.model.Language;
+import com.hotstar.adtech.blaze.allocation.planner.common.model.Platform;
+import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Ad;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdModel;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
@@ -54,10 +57,15 @@ public class AdModelLoader {
     LiveEntities liveEntities = adModelClient.loadLiveAdModel(adModelUri);
     MatchEntities matchEntities = adModelClient.loadMatch(adModelUri);
 
-    Map<String, Match> matchMap = getMatchMap(matchEntities);
+    Map<String, Match> matchMap = buildMatchMap(matchEntities);
 
-    Map<String, List<AdSet>> adSetGroup = buildAdSets(liveEntities.getGoalMatches()).stream().collect(
-      Collectors.groupingBy(AdSet::getContentId));
+    Map<Long, Map<String, PlayoutStream>> playoutStreamGroup =
+      buildPlayoutStreamGroup(matchEntities.getStreamMappings());
+
+    Map<String, PlayoutStream> globalPlayoutStreamMap =
+      buildPlayoutStreamMap(matchEntities.getGlobalStreamMappings());
+
+    Map<String, List<AdSet>> adSetGroup = buildAdSetGroup(liveEntities.getGoalMatches());
 
     setAdSetInternalId(adSetGroup);
 
@@ -66,9 +74,19 @@ public class AdModelLoader {
 
     return AdModel.builder()
       .matches(matchMap)
+      .playoutStreamGroup(playoutStreamGroup)
+      .globalPlayoutStreamMap(globalPlayoutStreamMap)
       .adSetGroup(adSetGroup)
       .adModelVersion(adModelVersion)
       .attributeId2TargetingTags(attributeId2TargetingTags)
+      .build();
+  }
+
+  private AdModelUri buildAdModelUri(AdModelVersion adModelVersion) {
+    return AdModelUri.builder()
+      .id(adModelVersion.getId())
+      .path(adModelVersion.getPath())
+      .version(adModelVersion.getVersion())
       .build();
   }
 
@@ -80,24 +98,60 @@ public class AdModelLoader {
     });
   }
 
-  private Map<String, Match> getMatchMap(MatchEntities matchEntities) {
-    return matchEntities.getMatches().stream().map(
-      matchInfo -> new Match(
-        matchInfo.getContentId(),
-        matchInfo.getStartTime(),
-        matchInfo.getState())
-    ).collect(Collectors.toMap(Match::getContentId, Function.identity()));
+  private Map<String, Match> buildMatchMap(MatchEntities matchEntities) {
+    return matchEntities.getMatches().stream().map(this::buildMatch)
+      .collect(Collectors.toMap(Match::getContentId, Function.identity()));
   }
 
-  private AdModelUri buildAdModelUri(AdModelVersion adModelVersion) {
-    return AdModelUri.builder()
-      .id(adModelVersion.getId())
-      .path(adModelVersion.getPath())
-      .version(adModelVersion.getVersion())
+  private Match buildMatch(MatchInfo matchInfo) {
+    return Match.builder()
+      .contentId(matchInfo.getContentId())
+      .seasonId(matchInfo.getSeasonId())
+      .startTime(matchInfo.getStartTime())
+      .state(matchInfo.getState())
       .build();
   }
 
-  private List<AdSet> buildAdSets(List<GoalMatchInfo> adSets) {
+  private Map<Long, Map<String, PlayoutStream>> buildPlayoutStreamGroup(List<StreamMappingInfo> streamMappings) {
+    return streamMappings.stream()
+      .collect(Collectors.groupingBy(StreamMappingInfo::getSeasonId,
+        Collectors.collectingAndThen(Collectors.toList(), this::buildPlayoutStreamMap)));
+  }
+
+  private Map<String, PlayoutStream> buildPlayoutStreamMap(List<StreamMappingInfo> streamMappings) {
+    return streamMappings.stream()
+      .map(this::buildPlayoutStream)
+      .collect(Collectors.toMap(PlayoutStream::getPlayoutId, Function.identity()));
+  }
+
+  private PlayoutStream buildPlayoutStream(StreamMappingInfo streamMappingInfo) {
+    return PlayoutStream.builder()
+      .playoutId(streamMappingInfo.getPlayoutId())
+      .streamType(streamMappingInfo.getStreamType())
+      .tenant(streamMappingInfo.getTenant())
+      .language(buildLanguage(streamMappingInfo.getLanguage()))
+      .platforms(streamMappingInfo.getPlatforms().stream().map(this::buildPlatform).collect(
+        Collectors.toList()))
+      .build();
+  }
+
+  private Language buildLanguage(LanguageInfo languageInfo) {
+    return Language.builder()
+      .id(languageInfo.getId())
+      .name(languageInfo.getName())
+      .tag(languageInfo.getTag())
+      .build();
+  }
+
+  private Platform buildPlatform(PlatformInfo platformInfo) {
+    return Platform.builder()
+      .id(platformInfo.getId())
+      .name(platformInfo.getName())
+      .tag(platformInfo.getTag())
+      .build();
+  }
+
+  private Map<String, List<AdSet>> buildAdSetGroup(List<GoalMatchInfo> adSets) {
     return adSets.stream()
       .filter(goalMatchInfo -> goalMatchInfo.getCampaignStatus() != CampaignStatus.PAUSED)
       .filter(GoalMatchInfo::isEnabled)
@@ -106,7 +160,7 @@ public class AdModelLoader {
       .map(this::buildAdSet)
       // make reach-enabled adSets at the top of the list, This is to reduce the size of the reach storage array.
       .sorted((a, b) -> b.getMaximizeReach() - a.getMaximizeReach())
-      .collect(Collectors.toList());
+      .collect(Collectors.groupingBy(AdSet::getContentId));
   }
 
   private AdSet buildAdSet(GoalMatchInfo adSet) {
@@ -138,22 +192,6 @@ public class AdModelLoader {
       .durationMs(ad.getDurationMs())
       .enabled(ad.isEnabled())
       .languageIds(ad.getLanguageIds())
-      .build();
-  }
-
-  private LanguageEntity buildLanguage(LanguageInfo languageInfo) {
-    return LanguageEntity.builder()
-      .id(languageInfo.getId())
-      .name(languageInfo.getName())
-      .tag(languageInfo.getTag())
-      .build();
-  }
-
-  private PlatformEntity buildPlatform(PlatformInfo platformInfo) {
-    return PlatformEntity.builder()
-      .id(platformInfo.getId())
-      .name(platformInfo.getName())
-      .tag(platformInfo.getTag())
       .build();
   }
 

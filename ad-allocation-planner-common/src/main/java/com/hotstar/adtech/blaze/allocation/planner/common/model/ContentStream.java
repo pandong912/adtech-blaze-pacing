@@ -1,6 +1,5 @@
 package com.hotstar.adtech.blaze.allocation.planner.common.model;
 
-import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
 import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.NonFinal;
@@ -17,8 +16,6 @@ public class ContentStream {
   PlayoutStream playoutStream;
   String contentId;
   long concurrency;
-  StreamType streamType;
-  String playoutId;
 
   public void setConcurrencyId(int value) {
     concurrencyId = value + OFFSET;

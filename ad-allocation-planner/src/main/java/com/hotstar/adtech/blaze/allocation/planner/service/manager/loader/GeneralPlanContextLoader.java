@@ -6,6 +6,7 @@ import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
+import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
 import com.hotstar.adtech.blaze.allocation.planner.ingester.DataExchangerService;
 import com.hotstar.adtech.blaze.allocation.planner.ingester.DataLoader;
 import com.hotstar.adtech.blaze.allocation.planner.service.manager.DataProcessService;
@@ -17,7 +18,6 @@ import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Match;
 import com.hotstar.adtech.blaze.allocation.planner.source.algomodel.StandardMatchProgressModel;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.BreakContext;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
-import com.hotstar.adtech.blaze.exchanger.api.entity.StreamDefinition;
 import io.micrometer.core.annotation.Timed;
 import java.util.Collections;
 import java.util.List;
@@ -43,7 +43,7 @@ public class GeneralPlanContextLoader {
     Integer totalBreakNumber = dataExchangerService.getTotalBreakNumber(contentId);
     Integer breakIndex = getBreakIndex(contentId);
     StandardMatchProgressModel standardMatchProgressModel = dataLoader.getStandardMatchProgressModel();
-    ConcurrencyData concurrencyData = getConcurrencyData(match.getContentId());
+    ConcurrencyData concurrencyData = getConcurrencyData(match, adModel);
 
     Map<String, Integer> attributeId2TargetingTagMap = adModel.getAttributeId2TargetingTags();
     Map<String, List<AdSet>> adSetGroup = adModel.getAdSetGroup();
@@ -77,15 +77,13 @@ public class GeneralPlanContextLoader {
       .max().orElse(0);
   }
 
-  private ConcurrencyData getConcurrencyData(String contentId) {
+  private ConcurrencyData getConcurrencyData(Match match, AdModel adModel) {
+    String contentId = match.getContentId();
+    Map<String, PlayoutStream> playoutStreamMap = adModel.getPlayoutStreamMap(match.getSeasonId());
 
-    Map<String, StreamDefinition> streamDefinition = dataExchangerService.getStreamDefinition(contentId);
+    List<ContentCohort> cohorts = getContentCohorts(contentId, playoutStreamMap);
 
-    List<ContentCohort> cohorts =
-      getContentCohorts(contentId, streamDefinition);
-
-    List<ContentStream> streams =
-      getContentStreams(contentId, streamDefinition);
+    List<ContentStream> streams = getContentStreams(contentId, playoutStreamMap);
 
     return ConcurrencyData.builder()
       .cohorts(cohorts)
@@ -93,14 +91,14 @@ public class GeneralPlanContextLoader {
       .build();
   }
 
-  private List<ContentCohort> getContentCohorts(String contentId, Map<String, StreamDefinition> streamDefinition) {
-    List<ContentCohort> cohorts = dataExchangerService.getContentCohortConcurrency(contentId, streamDefinition);
+  private List<ContentCohort> getContentCohorts(String contentId, Map<String, PlayoutStream> playoutStreamMap) {
+    List<ContentCohort> cohorts = dataExchangerService.getContentCohortConcurrency(contentId, playoutStreamMap);
     IntStream.range(0, cohorts.size()).forEach(i -> cohorts.get(i).setConcurrencyId(i));
     return cohorts;
   }
 
-  private List<ContentStream> getContentStreams(String contentId, Map<String, StreamDefinition> streamDefinition) {
-    List<ContentStream> streams = dataExchangerService.getContentStreamConcurrency(contentId, streamDefinition);
+  private List<ContentStream> getContentStreams(String contentId, Map<String, PlayoutStream> playoutStreamMap) {
+    List<ContentStream> streams = dataExchangerService.getContentStreamConcurrency(contentId, playoutStreamMap);
     IntStream.range(0, streams.size()).forEach(i -> streams.get(i).setConcurrencyId(i));
     return streams;
   }

@@ -1,9 +1,9 @@
 package com.hotstar.adtech.blaze.allocation.planner.service.manager;
 
-import com.hotstar.adtech.blaze.admodel.common.entity.PlatformEntity;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
+import com.hotstar.adtech.blaze.allocation.planner.common.model.Platform;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.diagnosis.AllocationDiagnosis;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.diagnosis.CohortConcurrencyDiagnosis;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.diagnosis.ConcurrencyDiagnosis;
@@ -53,12 +53,12 @@ public class AllocationDiagnosisService {
     return StreamConcurrencyDiagnosis.builder()
       .concurrency(contentStream.getConcurrency())
       .tenant(contentStream.getPlayoutStream().getTenant())
-      .streamType(contentStream.getStreamType())
+      .streamType(contentStream.getPlayoutStream().getStreamType())
       .cohortId(contentStream.getConcurrencyId())
       .contentId(contentStream.getContentId())
       .language(contentStream.getPlayoutStream().getLanguage().getName())
       .platforms(
-        contentStream.getPlayoutStream().getPlatforms().stream().map(PlatformEntity::getName)
+        contentStream.getPlayoutStream().getPlatforms().stream().map(Platform::getName)
           .collect(Collectors.toList()))
       .build();
   }
@@ -72,7 +72,7 @@ public class AllocationDiagnosisService {
       .streamType(contentCohort.getStreamType())
       .language(contentCohort.getPlayoutStream().getLanguage().getName())
       .platforms(
-        contentCohort.getPlayoutStream().getPlatforms().stream().map(PlatformEntity::getName)
+        contentCohort.getPlayoutStream().getPlatforms().stream().map(Platform::getName)
           .collect(Collectors.toList()))
       .ssaiTag(contentCohort.getSsaiTag())
       .build();

@@ -19,7 +19,6 @@ import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shal
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.RedisReachStorage;
 import com.hotstar.adtech.blaze.exchanger.api.DataExchangerClient;
 import com.hotstar.adtech.blaze.exchanger.api.entity.BreakId;
-import com.hotstar.adtech.blaze.exchanger.api.entity.StreamDefinition;
 import com.hotstar.adtech.blaze.exchanger.api.entity.UnReachData;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdSetImpressionResponse;
@@ -30,7 +29,6 @@ import com.hotstar.adtech.blaze.exchanger.api.response.ContentStreamConcurrencyR
 import com.hotstar.adtech.blaze.exchanger.api.response.MatchProgressModelResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.UnReachResponse;
 import io.micrometer.core.annotation.Timed;
-import io.micrometer.core.instrument.Metrics;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
@@ -71,16 +68,6 @@ public class DataExchangerService {
       .metadataMd5(adModelResultUriResponse.getMd5(Names.Meta_PB))
       .liveMatchMd5(adModelResultUriResponse.getMd5(Names.Match_PB))
       .build();
-  }
-
-  public Map<String, StreamDefinition> getStreamDefinition(String contentId) {
-    List<StreamDefinition> streamDefinitions = Optional.ofNullable(dataExchangerClient.getStreamDefinitionV2(contentId))
-      .filter(RespUtil::isSuccess)
-      .map(StandardResponse::getData)
-      .orElseThrow(() -> new ServiceException("Failed to get stream definition from data exchanger"));
-
-    return streamDefinitions.stream()
-      .collect(Collectors.toMap(StreamDefinition::getPlayoutId, Function.identity()));
   }
 
   public List<Double> getMatchBreakProgressModel() {
@@ -143,7 +130,7 @@ public class DataExchangerService {
   }
 
   public List<ContentCohort> getContentCohortConcurrency(String contentId,
-                                                         Map<String, StreamDefinition> streamDefinitionMap) {
+                                                         Map<String, PlayoutStream> playoutStreamMap) {
     StandardResponse<List<ContentCohortConcurrencyResponse>> response =
       dataExchangerClient.getContentCohortWiseConcurrency(contentId);
 
@@ -153,31 +140,29 @@ public class DataExchangerService {
 
     return response.getData()
       .stream()
-      .map(contentCohortConcurrencyResponse -> getContentCohort(contentId, streamDefinitionMap,
+      .map(contentCohortConcurrencyResponse -> getContentCohort(contentId, playoutStreamMap,
         contentCohortConcurrencyResponse))
       .filter(Objects::nonNull)
       .collect(Collectors.toList());
   }
 
-  private ContentCohort getContentCohort(String contentId, Map<String, StreamDefinition> streamDefinitionMap,
+  private ContentCohort getContentCohort(String contentId, Map<String, PlayoutStream> playoutStreamMap,
                                          ContentCohortConcurrencyResponse resp) {
-    StreamDefinition streamDefinition = streamDefinitionMap.get(resp.getPlayoutId());
-    if (streamDefinition == null) {
-      Metrics.counter("blaze.stream.definition.notfound", "content", contentId).increment();
+    PlayoutStream playoutStream = playoutStreamMap.get(resp.getPlayoutId());
+    if (playoutStream == null) {
+      log.error("playout stream can't be found, playoutId: {}", resp.getPlayoutId());
       return null;
     }
     return ContentCohort.builder()
       .contentId(contentId)
       .ssaiTag(getSsaiTag(resp.getSsaiTag()))
-      .playoutStream(buildPlayoutStream(streamDefinition))
+      .playoutStream(playoutStream)
       .concurrency(resp.getConcurrencyValue())
-      .playoutId(resp.getPlayoutId())
-      .streamType(streamDefinition.getStreamType())
       .build();
   }
 
   public List<ContentStream> getContentStreamConcurrency(String contentId,
-                                                         Map<String, StreamDefinition> streamDefinitionMap) {
+                                                         Map<String, PlayoutStream> playoutStreamMap) {
     StandardResponse<List<ContentStreamConcurrencyResponse>> response =
       dataExchangerClient.getContentStreamWiseConcurrency(contentId);
 
@@ -186,33 +171,23 @@ public class DataExchangerService {
     }
 
     return response.getData().stream()
-      .map(contentStreamConcurrencyResponse -> getContentStream(contentId, streamDefinitionMap,
+      .map(contentStreamConcurrencyResponse -> getContentStream(contentId, playoutStreamMap,
         contentStreamConcurrencyResponse))
       .filter(Objects::nonNull)
       .collect(Collectors.toList());
   }
 
-  private ContentStream getContentStream(String contentId, Map<String, StreamDefinition> streamDefinitionMap,
+  private ContentStream getContentStream(String contentId, Map<String, PlayoutStream> playoutStreamMap,
                                          ContentStreamConcurrencyResponse resp) {
-    StreamDefinition streamDefinition = streamDefinitionMap.get(resp.getPlayoutId());
-    if (streamDefinition == null) {
-      Metrics.counter("blaze.stream.definition.notfound", "content", contentId).increment();
+    PlayoutStream playoutStream = playoutStreamMap.get(resp.getPlayoutId());
+    if (playoutStream == null) {
+      log.error("playout stream can't be found, playoutId: {}", resp.getPlayoutId());
       return null;
     }
     return ContentStream.builder()
       .contentId(contentId)
-      .playoutStream(buildPlayoutStream(streamDefinition))
-      .playoutId(resp.getPlayoutId())
+      .playoutStream(playoutStream)
       .concurrency(resp.getConcurrencyValue())
-      .streamType(streamDefinition.getStreamType())
-      .build();
-  }
-
-  private PlayoutStream buildPlayoutStream(StreamDefinition streamDefinition) {
-    return PlayoutStream.builder()
-      .tenant(streamDefinition.getTenant())
-      .language(streamDefinition.getLanguage())
-      .platforms(streamDefinition.getPlatforms())
       .build();
   }
 

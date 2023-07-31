@@ -2,18 +2,15 @@ package com.hotstar.adtech.blaze.allocation.planner.source.admodel;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.MatchState;
 import java.time.Instant;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Value;
 
 
-@ToString
-@Getter
+@Value
 @Builder
-@AllArgsConstructor
 public class Match {
-  private String contentId;
-  private Instant startTime;
-  private MatchState state;
+  String contentId;
+  Long seasonId;
+  Instant startTime;
+  MatchState state;
 }

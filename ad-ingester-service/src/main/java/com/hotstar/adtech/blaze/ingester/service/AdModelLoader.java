@@ -6,6 +6,8 @@ import com.hotstar.adtech.blaze.admodel.client.common.Names;
 import com.hotstar.adtech.blaze.admodel.client.entity.LiveEntities;
 import com.hotstar.adtech.blaze.admodel.client.entity.MatchEntities;
 import com.hotstar.adtech.blaze.admodel.client.model.AdInfo;
+import com.hotstar.adtech.blaze.admodel.client.model.MatchInfo;
+import com.hotstar.adtech.blaze.admodel.client.model.StreamMappingInfo;
 import com.hotstar.adtech.blaze.admodel.common.domain.ResultCode;
 import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
 import com.hotstar.adtech.blaze.exchanger.api.DataExchangerClient;
@@ -14,6 +16,7 @@ import com.hotstar.adtech.blaze.ingester.entity.Ad;
 import com.hotstar.adtech.blaze.ingester.entity.AdModel;
 import com.hotstar.adtech.blaze.ingester.entity.AdModelVersion;
 import com.hotstar.adtech.blaze.ingester.entity.Match;
+import com.hotstar.adtech.blaze.ingester.entity.SingleStream;
 import com.hotstar.adtech.blaze.ingester.metric.MetricNames;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Counter;
@@ -76,9 +79,15 @@ public class AdModelLoader {
         AdModelUri adModelUri = buildAdModelUri(adModelResultUriResponse);
 
         MatchEntities matchEntities = adModelClient.loadMatch(adModelUri);
-        List<Match> liveMatches = matchEntities.getMatches().stream().map(
-          matchInfo -> new Match(matchInfo.getSiMatchId(), matchInfo.getContentId())
-        ).collect(Collectors.toList());
+
+        List<Match> liveMatches = matchEntities.getMatches().stream()
+          .map(this::buildMatch)
+          .collect(Collectors.toList());
+        Map<Long, Map<String, String>> streamMappingConverterGroup = matchEntities.getStreamMappings().stream()
+          .collect(Collectors.groupingBy(StreamMappingInfo::getSeasonId,
+            Collectors.collectingAndThen(Collectors.toList(), this::buildStreamMappingConverter)));
+        Map<String, String> globalStreamMappingConverter =
+          buildStreamMappingConverter(matchEntities.getGlobalStreamMappings());
 
         LiveEntities liveEntities = adModelClient.loadLiveAdModel(adModelUri);
         Map<String, Ad> adMap = liveEntities.getAds().stream().collect(
@@ -86,6 +95,8 @@ public class AdModelLoader {
 
         AdModel adModel = AdModel.builder()
           .matches(liveMatches)
+          .streamMappingConverterGroup(streamMappingConverterGroup)
+          .globalStreamMappingConverter(globalStreamMappingConverter)
           .adMap(adMap)
           .adModelVersion(AdModelVersion.builder().version(adModelUri.getVersion())
             .adModelMd5(curAdModelMd5)
@@ -115,6 +126,33 @@ public class AdModelLoader {
       .path(adModelResultUriResponse.getPath())
       .version(adModelResultUriResponse.getVersion())
       .build();
+  }
+
+  private Match buildMatch(MatchInfo matchInfo) {
+    return Match.builder()
+      .contentId(matchInfo.getContentId())
+      .tournamentId(matchInfo.getTournamentId())
+      .seasonId(matchInfo.getSeasonId())
+      .build();
+  }
+
+  private Map<String, String> buildStreamMappingConverter(List<StreamMappingInfo> streamMappings) {
+    return streamMappings.stream()
+      .flatMap(streamMappingInfo -> buildStream(streamMappingInfo).stream())
+      .collect(Collectors.toMap(SingleStream::getKey, SingleStream::getPlayoutId));
+  }
+
+  private List<SingleStream> buildStream(StreamMappingInfo streamMappingInfo) {
+    return streamMappingInfo.getLadders().stream()
+      .map(ladder ->
+        SingleStream.builder()
+          .tenant(streamMappingInfo.getTenant().getName())
+          .language(streamMappingInfo.getLanguage().getAbbreviation())
+          .ladder(ladder.name())
+          .ads(streamMappingInfo.getStreamType().getAds())
+          .playoutId(streamMappingInfo.getPlayoutId())
+          .build()
+      ).collect(Collectors.toList());
   }
 
   private Ad buildAd(AdInfo adInfo) {

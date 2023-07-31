@@ -1,21 +1,21 @@
 package com.hotstar.adtech.blaze.allocation.planner.unit;
 
 import com.google.common.collect.Sets;
-import com.hotstar.adtech.blaze.admodel.common.enums.Platform;
 import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
 import com.hotstar.adtech.blaze.admodel.common.enums.Tenant;
 import com.hotstar.adtech.blaze.allocation.planner.QualificationTestData;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
+import com.hotstar.adtech.blaze.allocation.planner.common.model.Language;
+import com.hotstar.adtech.blaze.allocation.planner.common.model.Platform;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.CohortQualificationEngine;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.QualifiedAdSet;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AudienceTargetingRule;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AudienceTargetingRuleClause;
-import com.hotstar.adtech.blaze.exchanger.api.entity.LanguageMapping;
-import com.hotstar.adtech.blaze.exchanger.api.entity.PlatformMapping;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,8 +23,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class CohortQualificationEngineTest {
-  private final LanguageMapping languageMapping = QualificationTestData.getLanguageMapping();
-  private final PlatformMapping platformMapping = QualificationTestData.getPlatformMapping();
+  private final Map<String, Language> languageMapping = QualificationTestData.getLanguageMapping();
+  private final Map<String, Platform> platformMapping = QualificationTestData.getPlatformMapping();
 
   @Test
   public void whenContainAllNeededTagsThenSuccess() {
@@ -33,10 +33,8 @@ public class CohortQualificationEngineTest {
         .streamType(StreamType.SSAI_Spot)
         .ssaiTag("SSAI:M_MUM:M_NCR")
         .playoutStream(PlayoutStream.builder()
-          .language(languageMapping.getByName("English"))
-          .platforms(Collections.singletonList(
-            platformMapping.getByName(Platform.Android.toString())
-          ))
+          .language(languageMapping.get("English"))
+          .platforms(Collections.singletonList(platformMapping.get("Android")))
           .tenant(Tenant.India)
           .build())
         .build();
@@ -81,10 +79,8 @@ public class CohortQualificationEngineTest {
         .streamType(StreamType.SSAI_Spot)
         .ssaiTag("SSAI:M_MUM:M_NCR")
         .playoutStream(PlayoutStream.builder()
-          .language(languageMapping.getByName("English"))
-          .platforms(Collections.singletonList(
-            platformMapping.getByName(Platform.Android.toString())
-          ))
+          .language(languageMapping.get("English"))
+          .platforms(Collections.singletonList(platformMapping.get("Android")))
           .tenant(Tenant.India)
           .build())
         .build();
@@ -116,10 +112,8 @@ public class CohortQualificationEngineTest {
         .streamType(StreamType.SSAI_Spot)
         .ssaiTag("SSAI::")
         .playoutStream(PlayoutStream.builder()
-          .language(languageMapping.getByName("English"))
-          .platforms(Collections.singletonList(
-            platformMapping.getByName(Platform.Android.toString())
-          ))
+          .language(languageMapping.get("English"))
+          .platforms(Collections.singletonList(platformMapping.get("Android")))
           .tenant(Tenant.India)
           .build())
         .build();
@@ -164,10 +158,8 @@ public class CohortQualificationEngineTest {
         .streamType(StreamType.SSAI_Spot)
         .ssaiTag("SSAI:M_MUM:M_NCR:S_APTG")
         .playoutStream(PlayoutStream.builder()
-          .language(languageMapping.getByName("English"))
-          .platforms(Collections.singletonList(
-            platformMapping.getByName(Platform.Android.toString())
-          ))
+          .language(languageMapping.get("English"))
+          .platforms(Collections.singletonList(platformMapping.get("Android")))
           .tenant(Tenant.India)
           .build())
         .build();

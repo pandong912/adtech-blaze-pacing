@@ -1,16 +1,16 @@
 package com.hotstar.adtech.blaze.allocation.planner;
 
 import com.google.common.collect.Sets;
-import com.hotstar.adtech.blaze.admodel.common.entity.LanguageEntity;
-import com.hotstar.adtech.blaze.admodel.common.entity.PlatformEntity;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
+import com.hotstar.adtech.blaze.allocation.planner.common.model.Language;
+import com.hotstar.adtech.blaze.allocation.planner.common.model.Platform;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Ad;
-import com.hotstar.adtech.blaze.exchanger.api.entity.LanguageMapping;
-import com.hotstar.adtech.blaze.exchanger.api.entity.PlatformMapping;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class QualificationTestData {
   public static List<BreakDetail> getBreakDetails() {
@@ -38,71 +38,66 @@ public class QualificationTestData {
     );
   }
 
-  public static LanguageMapping getLanguageMapping() {
-    List<LanguageEntity> languages = Arrays.asList(
-      LanguageEntity.builder()
-        .id(1)
-        .tag("CLAGNGUAGE_ENGLISH")
-        .name("English")
-        .build(),
-      LanguageEntity.builder()
-        .id(2)
-        .tag("CLAGNGUAGE_HINDI")
-        .name("Hindi")
-        .build()
-    );
-    return LanguageMapping.builder()
-      .languageEntities(languages)
-      .build();
-
+  public static Map<String, Language> getLanguageMapping() {
+    return Arrays.asList(
+        Language.builder()
+          .id(1)
+          .tag("CLAGNGUAGE_ENGLISH")
+          .name("English")
+          .build(),
+        Language.builder()
+          .id(2)
+          .tag("CLAGNGUAGE_HINDI")
+          .name("Hindi")
+          .build()
+      ).stream()
+      .collect(Collectors.toMap(Language::getName, Function.identity()));
   }
 
-  public static PlatformMapping getPlatformMapping() {
-    List<PlatformEntity> platforms = Arrays.asList(
-      PlatformEntity.builder()
+  public static Map<String, Platform> getPlatformMapping() {
+    return Arrays.asList(
+      Platform.builder()
         .id(1)
         .tag("android")
         .name("Android")
         .build(),
-      PlatformEntity.builder()
+      Platform.builder()
         .id(2)
         .tag("ios")
         .name("iOS")
         .build(),
-      PlatformEntity.builder()
+      Platform.builder()
         .id(3)
         .tag("web")
         .name("Web")
         .build(),
-      PlatformEntity.builder()
+      Platform.builder()
         .id(4)
         .tag("mweb")
         .name("MWeb")
         .build(),
-      PlatformEntity.builder()
+      Platform.builder()
         .id(5)
         .tag("jiolyf")
         .name("JioLyf")
         .build(),
-      PlatformEntity.builder()
+      Platform.builder()
         .id(6)
         .tag("androidtv")
         .name("AndroidTV")
         .build(),
-      PlatformEntity.builder()
+      Platform.builder()
         .id(7)
         .tag("appletv")
         .name("AppleTV")
         .build(),
-      PlatformEntity.builder()
+      Platform.builder()
         .id(8)
         .tag("firetv")
         .name("FireTV")
         .build()
-    );
-    return PlatformMapping.builder()
-      .platformEntities(platforms)
-      .build();
+    ).stream()
+      .collect(Collectors.toMap(Platform::getName, Function.identity()));
   }
 
   public static Map<String, Integer> getAttributeId2TargetingTagMap() {

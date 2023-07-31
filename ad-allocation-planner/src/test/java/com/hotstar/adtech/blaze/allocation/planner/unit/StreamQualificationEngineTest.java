@@ -1,19 +1,18 @@
 package com.hotstar.adtech.blaze.allocation.planner.unit;
 
-import com.hotstar.adtech.blaze.admodel.common.enums.Platform;
 import com.hotstar.adtech.blaze.admodel.common.enums.RuleType;
 import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
 import com.hotstar.adtech.blaze.admodel.common.enums.Tenant;
 import com.hotstar.adtech.blaze.allocation.planner.QualificationTestData;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
+import com.hotstar.adtech.blaze.allocation.planner.common.model.Language;
+import com.hotstar.adtech.blaze.allocation.planner.common.model.Platform;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.QualifiedAdSet;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.StreamQualificationEngine;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.StreamTargetingRule;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.StreamTargetingRuleClause;
-import com.hotstar.adtech.blaze.exchanger.api.entity.LanguageMapping;
-import com.hotstar.adtech.blaze.exchanger.api.entity.PlatformMapping;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -24,20 +23,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class StreamQualificationEngineTest {
-  private final LanguageMapping languageMapping = QualificationTestData.getLanguageMapping();
-  private final PlatformMapping platformMapping = QualificationTestData.getPlatformMapping();
 
   @Test
   public void whenIncludeRuleIsAllMatchThenSuccess() {
     ContentStream stream =
       ContentStream.builder()
-        .streamType(StreamType.SSAI_Spot)
         .playoutStream(PlayoutStream.builder()
-          .language(languageMapping.getByName("English"))
+          .streamType(StreamType.SSAI_Spot)
+          .language(Language.builder().name("English").build())
           .platforms(Arrays.asList(
-            platformMapping.getByName(Platform.Android.toString()),
-            platformMapping.getByName(Platform.iOS.toString())
-          ))
+              Platform.builder().name("Android").build(),
+              Platform.builder().name("iOS").build())
+          )
           .tenant(Tenant.India)
           .build())
         .build();
@@ -97,12 +94,12 @@ public class StreamQualificationEngineTest {
   public void whenExcludeRuleNoneMatchThenSuccess() {
     ContentStream stream =
       ContentStream.builder()
-        .streamType(StreamType.SSAI_Spot)
         .playoutStream(PlayoutStream.builder()
-          .language(languageMapping.getByName("English"))
+          .streamType(StreamType.SSAI_Spot)
+          .language(Language.builder().name("English").build())
           .platforms(Arrays.asList(
-            platformMapping.getByName(Platform.Android.toString()),
-            platformMapping.getByName(Platform.iOS.toString())
+            Platform.builder().name("Android").build(),
+            Platform.builder().name("iOS").build()
           ))
           .tenant(Tenant.India)
           .build())

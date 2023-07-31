@@ -25,8 +25,6 @@ public class ConcurrencyService {
 
   private final PulseService pulseService;
 
-  private final DataExchangerService dataExchangerService;
-
   private final StreamConcurrencyRepository streamConcurrencyRepository;
 
   private final StreamCohortConcurrencyRepository streamCohortConcurrencyRepository;
@@ -34,11 +32,10 @@ public class ConcurrencyService {
 
   @Async("concurrencyExecutor")
   @Timed(MetricNames.CONTENT_CONCURRENCY_SYNC)
-  public void updateMatchConcurrency(Match match) {
+  public void updateMatchConcurrency(Match match, Map<String, String> streamMappingConverter) {
     String contentId = match.getContentId();
-    Map<String, String> converter = dataExchangerService.getPlayoutStreamMapping(contentId);
-    updateStreamConcurrency(contentId, converter);
-    updateStreamCohortConcurrency(contentId, converter);
+    updateStreamConcurrency(contentId, streamMappingConverter);
+    updateCohortConcurrency(contentId, streamMappingConverter);
   }
 
 
@@ -46,14 +43,14 @@ public class ConcurrencyService {
     try {
       ConcurrencyGroup concurrencyGroup = pulseService.getLiveContentStreamConcurrency(contentId);
       String tsBucket = String.valueOf(concurrencyGroup.getTsBucket());
-      Map<String, Long> aggregatedStreamCohortConcurrency =
+      Map<String, Long> aggregatedStreamConcurrency =
         concurrencyGroup.getConcurrencyValues().entrySet()
           .stream()
           .collect(Collectors.groupingBy(entry -> mapStreamKeyToPlayoutId(contentId, converter, entry),
             Collectors.summingLong(Map.Entry::getValue)));
 
       streamConcurrencyRepository
-        .setContentAllStreamConcurrency(contentId, tsBucket, aggregatedStreamCohortConcurrency);
+        .setContentAllStreamConcurrency(contentId, tsBucket, aggregatedStreamConcurrency);
       streamConcurrencyRepository.setStreamConcurrencyBucket(contentId, tsBucket);
     } catch (Exception e) {
       Metrics.counter(MetricNames.CONCURRENCY_UPDATE_EXCEPTION, MetricTags.EXCEPTION_CLASS, e.getClass().getName())
@@ -62,7 +59,7 @@ public class ConcurrencyService {
     }
   }
 
-  private void updateStreamCohortConcurrency(String contentId, Map<String, String> converter) {
+  private void updateCohortConcurrency(String contentId, Map<String, String> converter) {
     try {
       //ConcurrencyGroup.concurrencyValues:
       //key: in-eng-phone-ssai|SSAI::xxx|English+Android
@@ -70,14 +67,14 @@ public class ConcurrencyService {
       ConcurrencyGroup concurrencyGroup = pulseService.getLiveContentStreamCohortConcurrency(contentId);
       String tsBucket = String.valueOf(concurrencyGroup.getTsBucket());
 
-      Map<String, Long> aggregatedStreamCohortConcurrency =
+      Map<String, Long> aggregatedCohortConcurrency =
         concurrencyGroup.getConcurrencyValues().entrySet()
           .stream()
           .collect(Collectors.groupingBy(entry -> mapCohortKeyToPlayoutId(contentId, converter, entry),
             Collectors.summingLong(Map.Entry::getValue)));
 
       streamCohortConcurrencyRepository
-        .setContentAllStreamCohortConcurrency(contentId, tsBucket, aggregatedStreamCohortConcurrency);
+        .setContentAllStreamCohortConcurrency(contentId, tsBucket, aggregatedCohortConcurrency);
       streamCohortConcurrencyRepository.setStreamCohortConcurrencyBucket(contentId, tsBucket);
     } catch (Exception e) {
       Metrics.counter(MetricNames.CONCURRENCY_UPDATE_EXCEPTION, MetricTags.EXCEPTION_CLASS, e.getClass().getName())

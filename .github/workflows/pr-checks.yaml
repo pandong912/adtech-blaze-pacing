@@ -9,7 +9,7 @@ jobs:
     pr-checks:
         uses: hotstar/hotstar-github-action-workflows/.github/workflows/hotstar-java-maven-pr-check-workflow.yml@main
         with:
-            MAVEN_SETTINGS_PATHS: 'secret/non-prod/adtech/nexus/release secret/non-prod/adtech/nexus/snapshot secret/non-prod/seceng/nexus/iauth secret/non-prod/adtech/self-serve/nexus/release secret/non-prod/adtech/self-serve/nexus/snapshot'
+            MAVEN_SETTINGS_PATHS: 'secret/non-prod/adtech/nexus/release secret/non-prod/adtech/nexus/snapshot secret/non-prod/adtech/nexus/launchdarkly'
             JAVA_VERSION: 8
             PR_VALIDATION: true
             COVERAGE_WORKFLOW_ENABLED: true

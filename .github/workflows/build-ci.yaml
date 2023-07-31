@@ -24,7 +24,7 @@ jobs:
       DOCKER_ARGUMENTS_STRING: ''
       TRUNK_BRANCH_NAME: master
       HARNESS_WEBHOOK: RKUICdPdce717uOns0dnh7PeaHxbKphMuavziZAV
-      MAVEN_SETTINGS_PATHS: 'secret/non-prod/adtech/nexus/release secret/non-prod/adtech/nexus/snapshot secret/non-prod/seceng/nexus/iauth secret/non-prod/adtech/self-serve/nexus/release secret/non-prod/adtech/self-serve/nexus/snapshot secret/non-prod/adtech/nexus/launchdarkly'
+      MAVEN_SETTINGS_PATHS: 'secret/non-prod/adtech/nexus/release secret/non-prod/adtech/nexus/snapshot secret/non-prod/adtech/nexus/launchdarkly'
       JAVA_VERSION: 8
       PRE_BUILD_SCRIPT_PATH: 'mvn clean package -pl ad-allocation-planner -am -Dmaven.test.skip=true'
       CUSTOM_UNIT_TEST_SCRIPT: 'mvn clean test -pl ad-allocation-planner -am'

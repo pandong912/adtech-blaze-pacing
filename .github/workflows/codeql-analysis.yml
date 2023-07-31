@@ -40,16 +40,16 @@ jobs:
     - name: Clear previous database
       run: |
         rm -rf "${{ runner.temp }}/codeql_dbs/${{ matrix.language }}"
-      
+
     - name: Fetching configs
-      run: /usr/local/bin/fetch_maven_setting secret/non-prod/adtech/nexus/release secret/non-prod/adtech/nexus/snapshot secret/non-prod/seceng/nexus/iauth secret/non-prod/adtech/self-serve/nexus/release secret/non-prod/adtech/self-serve/nexus/snapshot
-    
+      run: /usr/local/bin/fetch_maven_setting secret/non-prod/adtech/nexus/release secret/non-prod/adtech/nexus/snapshot secret/non-prod/adtech/nexus/launchdarkly
+
     - name: remove settingsxml
       run: rm ~/.m2/settings.xml
-    
+
     - name: Fetching configs
-      run: /usr/local/bin/fetch_maven_setting secret/non-prod/adtech/nexus/release secret/non-prod/adtech/nexus/snapshot secret/non-prod/seceng/nexus/iauth secret/non-prod/adtech/self-serve/nexus/release secret/non-prod/adtech/self-serve/nexus/snapshot
-    
+      run: /usr/local/bin/fetch_maven_setting secret/non-prod/adtech/nexus/release secret/non-prod/adtech/nexus/snapshot secret/non-prod/adtech/nexus/launchdarkly
+
     - name: Checkout repository
       uses: actions/checkout@v2
 

@@ -2,6 +2,7 @@ package com.hotstar.adtech.blaze.allocation.planner.service.manager;
 
 import com.google.common.collect.Streams;
 import com.hotstar.adtech.blaze.admodel.common.enums.PlanType;
+import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
 import com.hotstar.adtech.blaze.admodel.repository.AllocationPlanResultRepository;
 import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResult;
 import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResultDetail;
@@ -25,29 +26,32 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 public class HwmModeGenerator {
+
   private final HwmPlanWorker hwmPlanWorker;
-  private final GeneralPlanContextLoader generalPlanContextLoader;
   private final AllocationDiagnosisService allocationDiagnosisService;
-
+  private final GeneralPlanContextLoader generalPlanContextLoader;
   private final AllocationPlanResultRepository allocationPlanResultRepository;
-
   private final AllocationResultUploader allocationResultUploader;
 
   public void generateAndUploadAllocationPlan(Match match, AdModel adModel) {
-    GeneralPlanContext generalPlanContext = generalPlanContextLoader.getGeneralPlanContext(match, adModel);
-    List<HwmSolveResult> ssaiShaleSolveResults = hwmPlanWorker.generatePlans(generalPlanContext, PlanType.SSAI);
-    List<HwmSolveResult> spotHwmSolveResults = hwmPlanWorker.generatePlans(generalPlanContext, PlanType.SPOT);
-    Instant version = Instant.now();
-    uploadShaleAndHwmAllocationPlan(match.getContentId(), version, ssaiShaleSolveResults, spotHwmSolveResults);
-    Stream<HwmAllocationDiagnosisDetail> ssaiHwmAllocationDiagnosisDetailStream =
-      ssaiShaleSolveResults.stream().map(HwmSolveResult::getHwmAllocationDiagnosisDetail);
-    Stream<HwmAllocationDiagnosisDetail> spotHwmAllocationDiagnosisDetailStream =
-      spotHwmSolveResults.stream().map(HwmSolveResult::getHwmAllocationDiagnosisDetail);
-    List<HwmAllocationDiagnosisDetail> hwmAllocationDiagnosisDetails =
-      Streams.concat(ssaiHwmAllocationDiagnosisDetailStream, spotHwmAllocationDiagnosisDetailStream)
-        .collect(Collectors.toList());
-    allocationDiagnosisService.uploadAllocationDiagnosis(match.getContentId(), version, hwmAllocationDiagnosisDetails,
-      Collections.emptyList(), generalPlanContext.getConcurrencyData());
+    try {
+      GeneralPlanContext generalPlanContext = generalPlanContextLoader.getGeneralPlanContext(match, adModel);
+      List<HwmSolveResult> ssaiHwmSolveResults = hwmPlanWorker.generatePlans(generalPlanContext, PlanType.SSAI);
+      List<HwmSolveResult> spotHwmSolveResults = hwmPlanWorker.generatePlans(generalPlanContext, PlanType.SPOT);
+      Instant version = Instant.now();
+      uploadShaleAndHwmAllocationPlan(match.getContentId(), version, ssaiHwmSolveResults, spotHwmSolveResults);
+      Stream<HwmAllocationDiagnosisDetail> ssaiHwmAllocationDiagnosisDetailStream =
+        ssaiHwmSolveResults.stream().map(HwmSolveResult::getHwmAllocationDiagnosisDetail);
+      Stream<HwmAllocationDiagnosisDetail> spotHwmAllocationDiagnosisDetailStream =
+        spotHwmSolveResults.stream().map(HwmSolveResult::getHwmAllocationDiagnosisDetail);
+      List<HwmAllocationDiagnosisDetail> hwmAllocationDiagnosisDetails =
+        Streams.concat(ssaiHwmAllocationDiagnosisDetailStream, spotHwmAllocationDiagnosisDetailStream)
+          .collect(Collectors.toList());
+      allocationDiagnosisService.uploadAllocationDiagnosis(match.getContentId(), version, hwmAllocationDiagnosisDetails,
+        Collections.emptyList(), generalPlanContext.getConcurrencyData());
+    } catch (Exception e) {
+      throw new ServiceException("Failed to generate and upload allocation plan for match: " + match.getContentId(), e);
+    }
   }
 
   public void uploadShaleAndHwmAllocationPlan(String contentId, Instant version,

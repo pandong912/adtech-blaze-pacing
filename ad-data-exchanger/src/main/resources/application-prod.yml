@@ -1,6 +1,6 @@
 spring:
   profiles:
-    include: ad-model-repository-ro-prod, ad-redis-client-prod, allocation-plan-client-prod
+    include: ad-model-repository-ro-prod, ad-redis-client-prod, allocation-plan-client-prod, ad-model-client-prod
 blaze:
   match-progress-model:
     s3:

@@ -6,6 +6,7 @@ import com.hotstar.adtech.blaze.allocation.planner.common.response.hwm.HwmAlloca
 import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.ShaleAllocationPlan;
 import com.hotstar.adtech.blaze.allocationplan.client.AllocationPlanClient;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -47,5 +48,9 @@ public class AllocationResultUploader {
           .md5(uploadResult.getMd5())
           .algorithmType(uploadResult.getAlgorithmType())
           .build()).collect(Collectors.toList());
+  }
+
+  public void uploadConcurrencyIdMap(AllocationPlanResult result, Map<String, Integer> supplyIdMap) {
+    allocationPlanClient.uploadSupplyIdMap(result.getPath(), supplyIdMap);
   }
 }

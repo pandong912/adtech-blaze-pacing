@@ -8,13 +8,12 @@ import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.Language;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.Platform;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
-import com.hotstar.adtech.blaze.allocation.planner.qualification.CohortQualificationEngine;
-import com.hotstar.adtech.blaze.allocation.planner.qualification.QualifiedAdSet;
+import com.hotstar.adtech.blaze.allocation.planner.qualification.CohortAdSetQualificationEngine;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AudienceTargetingRule;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AudienceTargetingRuleClause;
+import java.util.BitSet;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -30,6 +29,7 @@ public class CohortQualificationEngineTest {
   public void whenContainAllNeededTagsThenSuccess() {
     ContentCohort cohort =
       ContentCohort.builder()
+        .concurrencyId(0)
         .streamType(StreamType.SSAI_Spot)
         .ssaiTag("SSAI:M_MUM:M_NCR")
         .playoutStream(PlayoutStream.builder()
@@ -38,12 +38,14 @@ public class CohortQualificationEngineTest {
           .tenant(Tenant.India)
           .build())
         .build();
-    CohortQualificationEngine cohortQualificationEngine =
-      new CohortQualificationEngine(cohort.getSsaiTag(), QualificationTestData.getAttributeId2TargetingTagMap(),
-        cohort.getPlayoutStream().getLanguage().getId());
+    BitSet bitSet = new BitSet();
+    CohortAdSetQualificationEngine cohortQualificationEngine =
+      new CohortAdSetQualificationEngine(cohort.getSsaiTag(), QualificationTestData.getAttributeId2TargetingTagMap(),
+        cohort.getConcurrencyId(), bitSet);
 
 
     AdSet adSet = AdSet.builder()
+      .demandId(0)
       .ssaiAds(QualificationTestData.getAds())
       .audienceTargetingRule(AudienceTargetingRule.builder()
         .includes(Collections.singletonList(AudienceTargetingRuleClause.builder()
@@ -54,10 +56,10 @@ public class CohortQualificationEngineTest {
         .excludes(Collections.emptyList())
         .build())
       .build();
-    List<QualifiedAdSet> qualify = cohortQualificationEngine.qualify(Collections.singletonList(adSet));
-    Assertions.assertEquals(1, qualify.size());
-    Assertions.assertEquals(2, qualify.get(0).getQualifiedAds().size());
+    cohortQualificationEngine.qualify(Collections.singletonList(adSet));
+    Assertions.assertTrue(bitSet.get(0));
     AdSet adSet1 = AdSet.builder()
+      .demandId(1)
       .ssaiAds(QualificationTestData.getAds())
       .audienceTargetingRule(AudienceTargetingRule.builder()
         .includes(Collections.singletonList(AudienceTargetingRuleClause.builder()
@@ -68,14 +70,15 @@ public class CohortQualificationEngineTest {
         .excludes(Collections.emptyList())
         .build())
       .build();
-    List<QualifiedAdSet> qualify1 = cohortQualificationEngine.qualify(Collections.singletonList(adSet1));
-    Assertions.assertEquals(0, qualify1.size());
+    cohortQualificationEngine.qualify(Collections.singletonList(adSet1));
+    Assertions.assertFalse(bitSet.get(1));
   }
 
   @Test
   public void whenContainOneNotNeededTagsThenFail() {
     ContentCohort cohort =
       ContentCohort.builder()
+        .concurrencyId(0)
         .streamType(StreamType.SSAI_Spot)
         .ssaiTag("SSAI:M_MUM:M_NCR")
         .playoutStream(PlayoutStream.builder()
@@ -85,12 +88,14 @@ public class CohortQualificationEngineTest {
           .build())
         .build();
 
-    CohortQualificationEngine cohortQualificationEngine =
-      new CohortQualificationEngine(cohort.getSsaiTag(), QualificationTestData.getAttributeId2TargetingTagMap(),
-        cohort.getPlayoutStream().getLanguage().getId());
+    BitSet bitSet = new BitSet();
+    CohortAdSetQualificationEngine cohortQualificationEngine =
+      new CohortAdSetQualificationEngine(cohort.getSsaiTag(), QualificationTestData.getAttributeId2TargetingTagMap(),
+        cohort.getConcurrencyId(), bitSet);
 
 
     AdSet adSet = AdSet.builder()
+      .demandId(0)
       .ssaiAds(QualificationTestData.getAds())
       .audienceTargetingRule(AudienceTargetingRule.builder()
         .includes(Collections.emptyList())
@@ -101,14 +106,15 @@ public class CohortQualificationEngineTest {
         ))
         .build())
       .build();
-    List<QualifiedAdSet> qualify = cohortQualificationEngine.qualify(Collections.singletonList(adSet));
-    Assertions.assertEquals(0, qualify.size());
+    cohortQualificationEngine.qualify(Collections.singletonList(adSet));
+    Assertions.assertFalse(bitSet.get(0));
   }
 
   @Test
   public void whenCohortTagEmptyThenFail() {
     ContentCohort cohort =
       ContentCohort.builder()
+        .concurrencyId(0)
         .streamType(StreamType.SSAI_Spot)
         .ssaiTag("SSAI::")
         .playoutStream(PlayoutStream.builder()
@@ -118,11 +124,13 @@ public class CohortQualificationEngineTest {
           .build())
         .build();
 
-    CohortQualificationEngine cohortQualificationEngine =
-      new CohortQualificationEngine(cohort.getSsaiTag(), QualificationTestData.getAttributeId2TargetingTagMap(),
-        cohort.getPlayoutStream().getLanguage().getId());
+    BitSet bitSet = new BitSet();
+    CohortAdSetQualificationEngine cohortQualificationEngine =
+      new CohortAdSetQualificationEngine(cohort.getSsaiTag(), QualificationTestData.getAttributeId2TargetingTagMap(),
+        cohort.getConcurrencyId(), bitSet);
 
     AdSet adSet = AdSet.builder()
+      .demandId(0)
       .ssaiAds(QualificationTestData.getAds())
       .audienceTargetingRule(AudienceTargetingRule.builder()
         .includes(Collections.emptyList())
@@ -133,10 +141,11 @@ public class CohortQualificationEngineTest {
         ))
         .build())
       .build();
-    List<QualifiedAdSet> qualify = cohortQualificationEngine.qualify(Collections.singletonList(adSet));
-    Assertions.assertEquals(0, qualify.size());
+    cohortQualificationEngine.qualify(Collections.singletonList(adSet));
+    Assertions.assertFalse(bitSet.get(0));
 
     AdSet adSet2 = AdSet.builder()
+      .demandId(1)
       .ssaiAds(QualificationTestData.getAds())
       .audienceTargetingRule(AudienceTargetingRule.builder()
         .includes(Collections.singletonList(AudienceTargetingRuleClause.builder()
@@ -147,14 +156,15 @@ public class CohortQualificationEngineTest {
         .excludes(Collections.emptyList())
         .build())
       .build();
-    List<QualifiedAdSet> qualify2 = cohortQualificationEngine.qualify(Collections.singletonList(adSet2));
-    Assertions.assertEquals(0, qualify2.size());
+    cohortQualificationEngine.qualify(Collections.singletonList(adSet2));
+    Assertions.assertFalse(bitSet.get(1));
   }
 
   @Test
   public void whenContainNeededTagAndContainNotNeededTagThenFail() {
     ContentCohort cohort =
       ContentCohort.builder()
+        .concurrencyId(0)
         .streamType(StreamType.SSAI_Spot)
         .ssaiTag("SSAI:M_MUM:M_NCR:S_APTG")
         .playoutStream(PlayoutStream.builder()
@@ -164,12 +174,14 @@ public class CohortQualificationEngineTest {
           .build())
         .build();
 
-    CohortQualificationEngine cohortQualificationEngine =
-      new CohortQualificationEngine(cohort.getSsaiTag(), QualificationTestData.getAttributeId2TargetingTagMap(),
-        cohort.getPlayoutStream().getLanguage().getId());
+    BitSet bitSet = new BitSet();
+    CohortAdSetQualificationEngine cohortQualificationEngine =
+      new CohortAdSetQualificationEngine(cohort.getSsaiTag(), QualificationTestData.getAttributeId2TargetingTagMap(),
+        cohort.getConcurrencyId(), bitSet);
 
 
     AdSet adSet = AdSet.builder()
+      .demandId(0)
       .ssaiAds(QualificationTestData.getAds())
       .audienceTargetingRule(AudienceTargetingRule.builder()
         .includes(Collections.singletonList(AudienceTargetingRuleClause.builder()
@@ -184,7 +196,7 @@ public class CohortQualificationEngineTest {
         ))
         .build())
       .build();
-    List<QualifiedAdSet> qualify = cohortQualificationEngine.qualify(Collections.singletonList(adSet));
-    Assertions.assertEquals(0, qualify.size());
+    cohortQualificationEngine.qualify(Collections.singletonList(adSet));
+    Assertions.assertFalse(bitSet.get(0));
   }
 }

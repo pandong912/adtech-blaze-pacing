@@ -41,6 +41,10 @@ blaze:
       period: 100
       maxPeriod: 1000
       maxAttempts: 3
+  redis:
+    reach-cluster:
+      enable: true
+      timeout-mills: 20000
 feign:
   client:
     config:

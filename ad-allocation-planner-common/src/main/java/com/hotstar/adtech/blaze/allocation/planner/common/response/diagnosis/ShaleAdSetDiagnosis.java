@@ -16,7 +16,6 @@ public class ShaleAdSetDiagnosis {
   double alpha;
   double sigma;
   double mean;
-  double std;
   int reachEnabled;
   int adDuration;
 }

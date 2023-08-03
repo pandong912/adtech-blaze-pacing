@@ -21,5 +21,4 @@ public class AppConfig {
   public ObjectMapper jacksonObjectMapper() {
     return MAPPER;
   }
-
 }

@@ -1,15 +1,23 @@
 package com.hotstar.adtech.blaze.exchanger.service;
 
+import com.hotstar.adtech.blaze.admodel.client.AdModelClient;
+import com.hotstar.adtech.blaze.admodel.client.AdModelUri;
+import com.hotstar.adtech.blaze.admodel.client.entity.LiveEntities;
+import com.hotstar.adtech.blaze.admodel.client.model.GoalMatchInfo;
 import com.hotstar.adtech.blaze.adserver.data.redis.service.ReachDataRepository;
 import com.hotstar.adtech.blaze.exchanger.api.entity.UnReachData;
+import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.UnReachResponse;
+import com.hotstar.adtech.blaze.exchanger.config.CacheConfig;
 import com.hotstar.adtech.blaze.exchanger.util.PlayoutIdValidator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,6 +25,8 @@ import org.springframework.stereotype.Service;
 public class UnReachService {
 
   private final ReachDataRepository reachDataRepository;
+  private final AdModelResultService adModelResultService;
+  private final AdModelClient adModelClient;
 
 
   public List<UnReachResponse> batchGetCohortReach(String contentId) {
@@ -68,5 +78,27 @@ public class UnReachService {
       .map(this::buildUnReachResponse)
       .filter(Objects::nonNull)
       .collect(Collectors.toList());
+  }
+
+  @Cacheable(cacheNames = CacheConfig.REACH_AD_SET,
+    cacheManager = CacheConfig.AD_MODEL_CACHE_MANAGER,
+    sync = true)
+  public Set<Long> getEnableReach() {
+    AdModelResultUriResponse adModelResultUriResponse = adModelResultService.queryAdModelUriByVersion(-1)
+      .orElseThrow(() -> new RuntimeException("AdModelResultUriResponse is empty"));
+    AdModelUri adModelUri = buildAdModelUri(adModelResultUriResponse);
+    LiveEntities liveEntities = adModelClient.loadLiveAdModel(adModelUri);
+    return liveEntities.getGoalMatches().stream()
+      .filter(GoalMatchInfo::isMaximiseReach)
+      .map(GoalMatchInfo::getAdSetId)
+      .collect(Collectors.toSet());
+  }
+
+  private AdModelUri buildAdModelUri(AdModelResultUriResponse adModelResultUriResponse) {
+    return AdModelUri.builder()
+      .id(adModelResultUriResponse.getId())
+      .path(adModelResultUriResponse.getPath())
+      .version(adModelResultUriResponse.getVersion())
+      .build();
   }
 }

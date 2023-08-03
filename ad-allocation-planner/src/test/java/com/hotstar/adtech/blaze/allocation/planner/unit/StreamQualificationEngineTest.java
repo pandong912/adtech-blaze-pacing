@@ -8,14 +8,14 @@ import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.Language;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.Platform;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
-import com.hotstar.adtech.blaze.allocation.planner.qualification.QualifiedAdSet;
-import com.hotstar.adtech.blaze.allocation.planner.qualification.StreamQualificationEngine;
+import com.hotstar.adtech.blaze.allocation.planner.qualification.StreamAdSetQualificationEngine;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.StreamTargetingRule;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.StreamTargetingRuleClause;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collections;
-import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,25 +24,31 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public class StreamQualificationEngineTest {
 
+  private final Map<String, Language> languageMapping = QualificationTestData.getLanguageMapping();
+  private final Map<String, Platform> platformMapping = QualificationTestData.getPlatformMapping();
+
   @Test
   public void whenIncludeRuleIsAllMatchThenSuccess() {
     ContentStream stream =
       ContentStream.builder()
+        .concurrencyId(0)
         .playoutStream(PlayoutStream.builder()
           .streamType(StreamType.SSAI_Spot)
-          .language(Language.builder().name("English").build())
+          .language(languageMapping.get("English"))
           .platforms(Arrays.asList(
-              Platform.builder().name("Android").build(),
-              Platform.builder().name("iOS").build())
+            platformMapping.get("Android"),
+            platformMapping.get("iOS"))
           )
           .tenant(Tenant.India)
           .build())
         .build();
-    StreamQualificationEngine streamQualificationEngine =
-      new StreamQualificationEngine(stream.getPlayoutStream());
+    BitSet bitSet = new BitSet();
+    StreamAdSetQualificationEngine streamQualificationEngine =
+      new StreamAdSetQualificationEngine(stream.getPlayoutStream(), stream.getConcurrencyId(), bitSet);
 
 
     AdSet adSet = AdSet.builder()
+      .demandId(0)
       .id(1)
       .spotAds(QualificationTestData.getAds())
       .streamTargetingRule(StreamTargetingRule.builder()
@@ -62,11 +68,11 @@ public class StreamQualificationEngineTest {
         ))
         .build())
       .build();
-    List<QualifiedAdSet> qualify = streamQualificationEngine.qualify(Collections.singletonList(adSet));
-    Assertions.assertEquals(1, qualify.size());
-    Assertions.assertEquals(2, qualify.get(0).getQualifiedAds().size());
+    streamQualificationEngine.qualify(Collections.singletonList(adSet));
+    Assertions.assertTrue(bitSet.get(0));
 
     AdSet adSet2 = AdSet.builder()
+      .demandId(1)
       .id(1)
       .spotAds(QualificationTestData.getAds())
       .streamTargetingRule(StreamTargetingRule.builder()
@@ -86,29 +92,32 @@ public class StreamQualificationEngineTest {
         ))
         .build())
       .build();
-    List<QualifiedAdSet> qualify2 = streamQualificationEngine.qualify(Collections.singletonList(adSet2));
-    Assertions.assertEquals(0, qualify2.size());
+    streamQualificationEngine.qualify(Collections.singletonList(adSet2));
+    Assertions.assertFalse(bitSet.get(1));
   }
 
   @Test
   public void whenExcludeRuleNoneMatchThenSuccess() {
     ContentStream stream =
       ContentStream.builder()
+        .concurrencyId(0)
         .playoutStream(PlayoutStream.builder()
           .streamType(StreamType.SSAI_Spot)
-          .language(Language.builder().name("English").build())
+          .language(languageMapping.get("English"))
           .platforms(Arrays.asList(
-            Platform.builder().name("Android").build(),
-            Platform.builder().name("iOS").build()
+            platformMapping.get("Android"),
+            platformMapping.get("iOS")
           ))
           .tenant(Tenant.India)
           .build())
         .build();
-    StreamQualificationEngine streamQualificationEngine =
-      new StreamQualificationEngine(stream.getPlayoutStream());
+    BitSet bitSet = new BitSet();
+    StreamAdSetQualificationEngine streamQualificationEngine =
+      new StreamAdSetQualificationEngine(stream.getPlayoutStream(), stream.getConcurrencyId(), bitSet);
 
 
     AdSet adSet = AdSet.builder()
+      .demandId(0)
       .id(1)
       .spotAds(QualificationTestData.getAds())
       .streamTargetingRule(StreamTargetingRule.builder()
@@ -128,11 +137,11 @@ public class StreamQualificationEngineTest {
         ))
         .build())
       .build();
-    List<QualifiedAdSet> qualify = streamQualificationEngine.qualify(Collections.singletonList(adSet));
-    Assertions.assertEquals(1, qualify.size());
-    Assertions.assertEquals(2, qualify.get(0).getQualifiedAds().size());
+    streamQualificationEngine.qualify(Collections.singletonList(adSet));
+    Assertions.assertTrue(bitSet.get(0));
 
     AdSet adSet2 = AdSet.builder()
+      .demandId(1)
       .id(1)
       .spotAds(QualificationTestData.getAds())
       .streamTargetingRule(StreamTargetingRule.builder()
@@ -153,8 +162,8 @@ public class StreamQualificationEngineTest {
         ))
         .build())
       .build();
-    List<QualifiedAdSet> qualify2 = streamQualificationEngine.qualify(Collections.singletonList(adSet2));
-    Assertions.assertEquals(1, qualify2.size());
+    streamQualificationEngine.qualify(Collections.singletonList(adSet2));
+    Assertions.assertTrue(bitSet.get(1));
   }
 
 }

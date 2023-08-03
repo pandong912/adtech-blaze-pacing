@@ -1,5 +1,5 @@
 spring:
   profiles:
-    include: ad-model-repository-prod, ad-model-client-prod, allocation-plan-client-prod, launch-darkly-prod
+    include: ad-model-repository-prod, ad-model-client-prod, allocation-plan-client-prod, launch-darkly-prod, ad-redis-client-prod-eks
 
 

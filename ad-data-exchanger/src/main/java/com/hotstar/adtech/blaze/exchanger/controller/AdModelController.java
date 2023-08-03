@@ -11,7 +11,9 @@ import com.hotstar.adtech.blaze.exchanger.api.response.TournamentInfoResponse;
 import com.hotstar.adtech.blaze.exchanger.service.AdModelResultService;
 import com.hotstar.adtech.blaze.exchanger.service.MatchService;
 import com.hotstar.adtech.blaze.exchanger.service.StreamService;
+import com.hotstar.adtech.blaze.exchanger.service.UnReachService;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +27,7 @@ public class AdModelController {
 
   private final StreamService streamService;
   private final MatchService matchService;
+  private final UnReachService unReachService;
 
   private final AdModelResultService adModelResultService;
 
@@ -39,6 +42,12 @@ public class AdModelController {
     List<StreamDefinition> streamDefinitions = streamService.getStreamDefinitionV2(contentId);
     return StandardResponse.success(streamDefinitions);
   }
+
+  @GetMapping("ad-set/enable-reach")
+  public StandardResponse<Set<Long>> isEnableReach() {
+    return StandardResponse.success(unReachService.getEnableReach());
+  }
+
 
   @GetMapping("/season-id/content/{contentId}")
   public StandardResponse<TournamentInfoResponse> getSeasonIdByContentId(@PathVariable String contentId) {

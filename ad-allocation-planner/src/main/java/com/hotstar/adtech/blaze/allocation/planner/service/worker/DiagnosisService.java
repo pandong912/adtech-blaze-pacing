@@ -6,7 +6,7 @@ import com.hotstar.adtech.blaze.allocation.planner.common.response.diagnosis.Hwm
 import com.hotstar.adtech.blaze.allocation.planner.common.response.diagnosis.PlanInfo;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.diagnosis.ShaleAdSetDiagnosis;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.HwmResult;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.ShaleResult;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.ShaleDemandResult;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.BreakContext;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GraphContext;
 import io.micrometer.core.annotation.Timed;
@@ -32,9 +32,9 @@ public class DiagnosisService {
 
   @Timed(AD_SET_DIAGNOSIS_BUILD)
   public List<ShaleAdSetDiagnosis> getShaleAdSetDiagnosisList(List<DemandDiagnosis> demandDiagnosisList,
-                                                              List<ShaleResult> shaleResults) {
-    Map<Long, ShaleResult> resultMap = shaleResults.stream()
-      .collect(Collectors.toMap(ShaleResult::getId, Function.identity()));
+                                                              List<ShaleDemandResult> shaleDemandResults) {
+    Map<Long, ShaleDemandResult> resultMap = shaleDemandResults.stream()
+      .collect(Collectors.toMap(ShaleDemandResult::getId, Function.identity()));
 
     return demandDiagnosisList.stream()
       .map(demandDiagnosis -> buildShaleAdSetDiagnosis(demandDiagnosis, resultMap))
@@ -56,7 +56,7 @@ public class DiagnosisService {
   }
 
   private ShaleAdSetDiagnosis buildShaleAdSetDiagnosis(DemandDiagnosis demandDiagnosis,
-                                                       Map<Long, ShaleResult> shaleResultMap) {
+                                                       Map<Long, ShaleDemandResult> shaleResultMap) {
     return ShaleAdSetDiagnosis.builder()
       .adSetId(demandDiagnosis.getAdSetId())
       .demand(demandDiagnosis.getDemand())
@@ -67,7 +67,6 @@ public class DiagnosisService {
       .sigma(shaleResultMap.get(demandDiagnosis.getAdSetId()).getSigma())
       .alpha(shaleResultMap.get(demandDiagnosis.getAdSetId()).getAlpha())
       .mean(shaleResultMap.get(demandDiagnosis.getAdSetId()).getMean())
-      .std(shaleResultMap.get(demandDiagnosis.getAdSetId()).getStd())
       .reachEnabled(shaleResultMap.get(demandDiagnosis.getAdSetId()).getReachEnabled())
       .target(demandDiagnosis.getTarget())
       .adDuration(demandDiagnosis.getAdDuration())

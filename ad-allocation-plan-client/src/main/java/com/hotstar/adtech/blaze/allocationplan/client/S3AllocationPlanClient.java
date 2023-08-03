@@ -12,6 +12,7 @@ import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.diagnosis.AllocationDiagnosis;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.hwm.HwmAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.ShaleAllocationPlan;
+import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.SupplyInfo;
 import com.hotstar.adtech.blaze.allocationplan.client.common.GzipUtils;
 import com.hotstar.adtech.blaze.allocationplan.client.common.PathUtils;
 import com.hotstar.adtech.blaze.allocationplan.client.common.ProtostuffUtils;
@@ -23,7 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -33,12 +34,11 @@ import org.apache.commons.io.IOUtils;
 @SuppressWarnings("unused")
 public class S3AllocationPlanClient implements AllocationPlanClient {
 
+  private static final String SUPPLY_ID_MAP_FILE_NAME = "streamCohortToSupplyId";
   private static final int S3_LOAD_BUF_SIZE = 1024 * 4;
-
   private static final int MAX_CONNECTIONS = 6;
 
   private final String bucketName;
-
   private final AmazonS3 s3Client;
 
   public S3AllocationPlanClient(String s3Region, String bucketName) {
@@ -97,6 +97,15 @@ public class S3AllocationPlanClient implements AllocationPlanClient {
       .collect(Collectors.toList());
   }
 
+  @Override
+  public void uploadSupplyIdMap(String path, Map<String, Integer> supplyIdMap) {
+    SupplyInfo supplyInfo = SupplyInfo.builder()
+      .supplyIdMap(supplyIdMap)
+      .build();
+    byte[] file = ProtostuffUtils.serialize(supplyInfo);
+    doUpload(file, path, SUPPLY_ID_MAP_FILE_NAME);
+  }
+
 
   @Override
   public List<ShaleAllocationPlan> loadShaleAllocationPlans(List<LoadRequest> loadRequests) {
@@ -122,10 +131,12 @@ public class S3AllocationPlanClient implements AllocationPlanClient {
     return loadFromS3(HwmAllocationPlan.class, loadRequest.getPath(), loadRequest.getFileName());
   }
 
+  @Override
+  public SupplyInfo loadSupplyIdMap(String path) {
+    return loadFromS3(SupplyInfo.class, path, SUPPLY_ID_MAP_FILE_NAME);
+  }
 
-  private String doUpload(byte[] file, String path, String md5) {
-    String id = UUID.randomUUID().toString();
-    String fileName = id + md5;
+  private String doUpload(byte[] file, String path, String fileName) {
     String key = Paths.get(path, fileName).toString();
     try (InputStream is = new ByteArrayInputStream(file)) {
       ObjectMetadata metadata = new ObjectMetadata();

@@ -1,6 +1,7 @@
 package com.hotstar.adtech.blaze.allocation.planner.common.response.shale;
 
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ShaleAllocationDetail;
+import com.hotstar.adtech.blaze.allocation.planner.common.model.ShaleSupplyAllocationDetail;
 import java.util.List;
 import lombok.Builder;
 import lombok.Data;
@@ -14,4 +15,5 @@ public class ShaleAllocationPlan {
   private int totalBreakNumber;
   private int duration;
   private List<ShaleAllocationDetail> shaleAllocationDetails;
+  private List<ShaleSupplyAllocationDetail> shaleSupplyAllocationDetails;
 }

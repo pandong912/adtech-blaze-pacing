@@ -3,6 +3,7 @@ package com.hotstar.adtech.blaze.allocation.planner.unit;
 import com.hotstar.adtech.blaze.allocation.planner.SolveTestData;
 import com.hotstar.adtech.blaze.allocation.planner.TestReachStorage;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.HwmResult;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.ShaleDemandResult;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.ShaleResult;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.hwm.HwmSolver;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleConstant;
@@ -26,13 +27,13 @@ public class SolverTest {
     int maxConcurrency = 500;
     ShaleSolver shaleSolver = new ShaleSolver();
     GraphContext graphContext = SolveTestData.getGraphContext(random, cohortSize, adSetSize, maxConcurrency);
-    List<ShaleResult> solve = shaleSolver.solve(graphContext, new TestReachStorage(adSetSize, cohortSize),
+    ShaleResult solve = shaleSolver.solve(graphContext, new TestReachStorage(adSetSize, cohortSize),
       ShaleConstant.PENALTY);
-    solve.forEach(System.out::println);
-    Assertions.assertEquals(20, solve.size());
-    Map<Long, ShaleResult> resultMap =
-      solve.stream().collect(Collectors.toMap(ShaleResult::getId, Function.identity()));
-    Assertions.assertEquals(0.2872281323269014, resultMap.get(3L).getStd());
+    solve.getDemandResults().forEach(System.out::println);
+    Assertions.assertEquals(20, solve.getDemandResults().size());
+    Assertions.assertEquals(200, solve.getSupplyResults().size());
+    Map<Long, ShaleDemandResult> resultMap =
+      solve.getDemandResults().stream().collect(Collectors.toMap(ShaleDemandResult::getId, Function.identity()));
     Assertions.assertEquals(0.45, resultMap.get(3L).getMean());
     Assertions.assertEquals(1.0, resultMap.get(3L).getAlpha());
     Assertions.assertEquals(0.0013526903449429257, resultMap.get(3L).getTheta());

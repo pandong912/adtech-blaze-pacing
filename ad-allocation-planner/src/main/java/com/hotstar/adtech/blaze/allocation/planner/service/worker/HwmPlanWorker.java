@@ -7,12 +7,14 @@ import com.hotstar.adtech.blaze.allocation.planner.common.response.diagnosis.Hwm
 import com.hotstar.adtech.blaze.allocation.planner.common.response.diagnosis.HwmAllocationDiagnosisDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.diagnosis.PlanInfo;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.hwm.HwmAllocationPlan;
+import com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.HwmResult;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.hwm.HwmSolver;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.QualificationExecutor;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.BreakContext;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GraphContext;
+import io.micrometer.core.annotation.Timed;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ public class HwmPlanWorker {
   private final QualificationExecutor qualificationExecutor;
   private final HwmSolver solver;
 
+  @Timed(value = MetricNames.WORKER, extraTags = {"type", "hwm"})
   public List<HwmSolveResult> generatePlans(GeneralPlanContext generalPlanContext, PlanType planType) {
     List<GraphContext> graphContexts =
       qualificationExecutor.doQualification(planType, generalPlanContext);

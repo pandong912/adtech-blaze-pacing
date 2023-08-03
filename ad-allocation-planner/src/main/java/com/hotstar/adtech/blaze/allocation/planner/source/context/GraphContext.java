@@ -4,6 +4,7 @@ import com.hotstar.adtech.blaze.admodel.common.enums.PlanType;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BreakTypeGroup;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Request;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Response;
+import java.util.BitSet;
 import java.util.List;
 import lombok.Builder;
 import lombok.Value;
@@ -16,5 +17,5 @@ public class GraphContext {
   PlanType planType;
   List<Request> requests;
   List<Response> responses;
-
+  BitSet edges;
 }

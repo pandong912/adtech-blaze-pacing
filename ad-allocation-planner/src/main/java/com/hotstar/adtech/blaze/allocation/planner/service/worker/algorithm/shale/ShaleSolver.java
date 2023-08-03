@@ -3,33 +3,33 @@ package com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.sha
 import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.GRAPH_SOLVE;
 import static com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleConstant.V;
 
-import com.hotstar.adtech.blaze.allocation.planner.qualification.QualifiedAdSet;
+import com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.ShaleDemandResult;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.ShaleResult;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.ShaleSupplyResult;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.biselector.AlphaBiSelector;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.biselector.BetaBiSelector;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.biselector.SigmaBiSelector;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.ReachStorage;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Request;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GraphContext;
 import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.Metrics;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
 public class ShaleSolver {
-  //todo dynamic calculate max iter
   private static final int MAX_ITER = 2;
 
   @Timed(value = GRAPH_SOLVE, extraTags = {"algorithm", "shale"})
-  public List<ShaleResult> solve(GraphContext context, ReachStorage reachStorage, double penalty) {
-    Map<Integer, List<Long>> supplyToDemand = context.getRequests().stream()
-      .collect(Collectors.toMap(Request::getConcurrencyId, this::collectAdSetId));
+  public ShaleResult solve(GraphContext context, ReachStorage reachStorage, double penalty) {
 
     List<ShaleSupply> supplies =
       context.getRequests().stream()
@@ -41,28 +41,38 @@ public class ShaleSolver {
         .map(ShaleDemand::new)
         .collect(Collectors.toList());
 
-    ShaleGraph shaleGraph = new ShaleGraph(demands, supplies, reachStorage, penalty);
-    shaleGraph.buildEdge(supplyToDemand);
+    ShaleGraph shaleGraph = new ShaleGraph(demands, supplies, reachStorage, penalty, context.getEdges());
     shaleGraph.initParams();
 
     stageOne(shaleGraph);
 
-    return stageTwo(shaleGraph);
-  }
-
-  private List<Long> collectAdSetId(Request request) {
-    return request.getQualifiedAdSets().stream().map(QualifiedAdSet::getId).collect(Collectors.toList());
+    List<ShaleDemandResult> shaleDemandResults = stageTwo(shaleGraph);
+    return ShaleResult.builder()
+      .demandResults(shaleDemandResults)
+      .supplyResults(shaleGraph.getSupplies().stream()
+        .map(supply -> ShaleSupplyResult.builder()
+          .id(supply.getId())
+          .beta(supply.getBeta())
+          .build())
+        .collect(Collectors.toList()))
+      .build();
   }
 
 
   private void stageOne(ShaleGraph shaleGraph) {
     int count = MAX_ITER;
     double cda = 0;
+    long totalTime = 0;
     while (count > 0) {
       count--;
+      StopWatch stopWatch = new StopWatch();
+      stopWatch.start();
       new BetaBiSelector(shaleGraph).updateParams();
       cda = new AlphaBiSelector(shaleGraph).updateParams();
-      if (cda < 0.000001) {
+      stopWatch.stop();
+      Metrics.timer(MetricNames.STAGE_ONG_LOOP).record(stopWatch.getTime(), TimeUnit.MILLISECONDS);
+      totalTime += stopWatch.getTime();
+      if (cda < 0.000001 || totalTime > 40000) {
         break;
       }
     }
@@ -71,7 +81,7 @@ public class ShaleSolver {
     }
   }
 
-  private List<ShaleResult> stageTwo(ShaleGraph shaleGraph) {
+  private List<ShaleDemandResult> stageTwo(ShaleGraph shaleGraph) {
 
     TreeMap<Integer, List<ShaleDemand>> demandGroup = shaleGraph.getDemands().stream()
       .collect(Collectors.groupingBy(ShaleDemand::getOrder, TreeMap::new, Collectors.toList()));
@@ -82,15 +92,14 @@ public class ShaleSolver {
   }
 
 
-  private Collection<ShaleResult> allocate(ShaleGraph shaleGraph, List<ShaleDemand> demands) {
+  private Collection<ShaleDemandResult> allocate(ShaleGraph shaleGraph, List<ShaleDemand> demands) {
     new SigmaBiSelector(shaleGraph).updateParams(demands);
     demands.forEach(demand -> updateInventory(shaleGraph, demand));
-    return demands.stream().map(demand -> ShaleResult.builder()
+    return demands.stream().map(demand -> ShaleDemandResult.builder()
         .id(demand.getAdSetId())
         .alpha(demand.getAlpha())
         .theta(demand.getTheta())
         .sigma(demand.getSigma())
-        .std(demand.getStd())
         .mean(demand.getReachOffset())
         .reachEnabled(demand.getReachEnabled())
         .adDuration(demand.getAdDuration())
@@ -99,11 +108,13 @@ public class ShaleSolver {
   }
 
   private void updateInventory(ShaleGraph shaleGraph, ShaleDemand demand) {
-    shaleGraph.getEdgesForDemand(demand).forEach(supply -> {
-      double prob = Math.min(1, Math.max(0, shaleGraph.getTd(demand, supply)
-        * (1 + (demand.getSigma() - supply.getBeta() + shaleGraph.getRd(demand, supply)) / V)));
-      long needs = (long) (supply.getConcurrency() * demand.getAdDuration() * prob);
-      supply.updateInventory(needs);
-    });
+    for (ShaleSupply supply : shaleGraph.getSupplies()) {
+      if (shaleGraph.isQualified(demand, supply)) {
+        double prob = Math.min(1, Math.max(0, shaleGraph.getTd(demand, supply)
+          * (1 + (demand.getSigma() - supply.getBeta() + shaleGraph.getRd(demand, supply)) / V)));
+        long needs = (long) (supply.getConcurrency() * demand.getAdDuration() * prob);
+        supply.updateInventory(needs);
+      }
+    }
   }
 }

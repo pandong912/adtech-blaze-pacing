@@ -7,7 +7,6 @@ import static com.hotstar.adtech.blaze.allocation.planner.service.worker.algorit
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleDemand;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleGraph;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleSupply;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,7 +16,7 @@ public class AlphaBiSelector {
   private final ShaleGraph shaleGraph;
 
   public double updateParams() {
-    return shaleGraph.getDemands().stream().mapToDouble(demand -> {
+    return shaleGraph.getDemands().parallelStream().mapToDouble(demand -> {
       double alphaMin = 0;
       double alphaMax = shaleGraph.getPenalty() / demand.getAdDuration();
       double alpha = bisectAlpha(alphaMin, alphaMax, demand);
@@ -28,12 +27,13 @@ public class AlphaBiSelector {
   }
 
   private double bisectAlpha(double alphaMin, double alphaMax, ShaleDemand demand) {
-    List<ShaleSupply> supplies = shaleGraph.getEdgesForDemand(demand);
     while (alphaMin + ERR < alphaMax) {
       double a = (alphaMin + alphaMax) / 2;
       double ktt = 0;
-      for (ShaleSupply supply : supplies) {
-        ktt += calculateKttForAlpha(supply, demand, a);
+      for (ShaleSupply supply : shaleGraph.getSupplies()) {
+        if (shaleGraph.isQualified(demand, supply)) {
+          ktt += calculateKttForAlpha(supply, demand, a);
+        }
       }
       if (ktt > (1 + EPS) * demand.getDemand()) {
         alphaMax = a;

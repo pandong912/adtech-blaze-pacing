@@ -7,6 +7,7 @@ import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResult;
 import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResultDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.HwmAllocationDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ShaleAllocationDetail;
+import com.hotstar.adtech.blaze.allocation.planner.common.model.ShaleSupplyAllocationDetail;
 import com.hotstar.adtech.blaze.allocationplan.client.AllocationPlanClient;
 import com.hotstar.adtech.blaze.allocationplan.client.model.LoadRequest;
 import com.hotstar.adtech.blaze.exchanger.api.entity.AllocationPlanDetail;
@@ -115,6 +116,8 @@ public class AllocationPlanService {
         .totalBreaks(allocationPlan.getTotalBreakNumber())
         .duration(allocationPlan.getDuration())
         .results(allocationPlan.getShaleAllocationDetails().stream().map(this::getDetail).collect(Collectors.toList()))
+        .cohortAllocationMap(allocationPlan.getShaleSupplyAllocationDetails().stream()
+          .collect(Collectors.toMap(ShaleSupplyAllocationDetail::getId, ShaleSupplyAllocationDetail::getBeta)))
         .build())
       .collect(Collectors.toList());
     return AllocationPlanResponse.builder()

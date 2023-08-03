@@ -22,7 +22,7 @@ public class AllocationPlanManager {
   private final BlazeDynamicConfig blazeDynamicConfig;
   private final DataLoader dataLoader;
 
-  @Scheduled(fixedDelayString = "30000", initialDelayString = "5000")
+  @Scheduled(fixedRateString = "30000", initialDelayString = "5000")
   @Timed(value = MATCH_PLAN_UPDATE, histogram = true)
   public void generatePlan() {
     AdModel adModel = dataLoader.getAdModel();

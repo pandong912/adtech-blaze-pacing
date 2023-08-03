@@ -1,5 +1,6 @@
 package com.hotstar.adtech.blaze.reach.synchronizer.service;
 
+import com.google.common.base.Stopwatch;
 import com.hotstar.adtech.blaze.adserver.data.redis.service.DecisionReachDataRepository;
 import com.hotstar.adtech.blaze.adserver.data.redis.service.ReachDataRepository;
 import com.hotstar.adtech.blaze.reach.synchronizer.entity.Match;
@@ -24,7 +25,7 @@ public class ReachService {
 
   private final DecisionReachDataRepository decisionReachDataRepository;
   private final ReachDataRepository originReachDataRepository;
-  private final ForkJoinPool customThreadPool = new ForkJoinPool(1);
+  private final ForkJoinPool customThreadPool = new ForkJoinPool(8);
 
   @Timed(MetricNames.CONTENT_REACH_SHARD_SYNC)
   public void updateMatchReachMatch(Match match, Map<Long, Boolean> adSetMaximiseReach) {
@@ -40,6 +41,7 @@ public class ReachService {
 
   private void syncReachData(Map<Long, Boolean> adSetMaximiseReach, String contentId) {
     String defaultTsBucket = getDefaultTsBucket();
+    Stopwatch stopwatch = Stopwatch.createStarted();
     int sum = IntStream.range(0, SHARD)
       .parallel()
       .mapToObj(shard -> originReachDataRepository.batchGetContentCohortReachRatio(contentId, shard))
@@ -47,7 +49,9 @@ public class ReachService {
       .mapToInt(entry -> writeToRedis(contentId, defaultTsBucket, entry, adSetMaximiseReach))
       .sum();
     if (sum > 0) {
-      log.info("Synced reach data for content id: {}, cohort * adSet number: {}", contentId, sum);
+      stopwatch.stop();
+      log.info("Synced reach data for content id: {}, cohort * adSet number: {}, time cost: {} ms", contentId, sum,
+        stopwatch.elapsed().toMillis());
       decisionReachDataRepository.setContentReachBucket(contentId, defaultTsBucket);
     }
   }

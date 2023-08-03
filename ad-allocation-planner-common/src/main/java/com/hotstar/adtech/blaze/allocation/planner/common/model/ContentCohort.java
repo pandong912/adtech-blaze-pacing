@@ -10,6 +10,7 @@ import lombok.experimental.NonFinal;
 @Builder
 public class ContentCohort {
   // internal id for supplies
+  // concurrencyId should be same as the index in the List<ContentCohort>!
   @NonFinal
   @Setter
   int concurrencyId;

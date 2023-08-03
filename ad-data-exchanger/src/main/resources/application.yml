@@ -46,3 +46,4 @@ blaze:
       enable: true
     reach-cluster:
       enable: true
+      timeout-mills: 6000

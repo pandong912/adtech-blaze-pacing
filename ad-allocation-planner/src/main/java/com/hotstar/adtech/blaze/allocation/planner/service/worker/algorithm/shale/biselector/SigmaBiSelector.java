@@ -17,15 +17,25 @@ public class SigmaBiSelector {
   private final ShaleGraph graph;
 
   public void updateParams(List<ShaleDemand> demands) {
-    demands.forEach(demand -> {
-      double sigmaMin = 0;
-      double sigmaMax = 0;
-      double calculatedZMax =
-        graph.getEdgesForDemand(demand).stream().mapToDouble(supply -> calculateZMax(supply, demand)).max().orElse(0d);
-      sigmaMax = Math.max(calculatedZMax, sigmaMax);
-      double sigma = bisectSigma(sigmaMin, sigmaMax + 1, demand);
-      demand.setSigma(sigma);
-    });
+    demands.parallelStream()
+      .forEach(demand -> {
+        double sigmaMin = 0;
+        double sigmaMax = 0;
+        double calculatedZMax = getCalculatedZMax(demand);
+        sigmaMax = Math.max(calculatedZMax, sigmaMax);
+        double sigma = bisectSigma(sigmaMin, sigmaMax + 1, demand);
+        demand.setSigma(sigma);
+      });
+  }
+
+  private double getCalculatedZMax(ShaleDemand demand) {
+    double max = 0;
+    for (ShaleSupply supply : graph.getSupplies()) {
+      if (graph.isQualified(demand, supply)) {
+        max = Math.max(max, calculateZMax(supply, demand));
+      }
+    }
+    return max;
   }
 
   private double calculateZMax(ShaleSupply supply, ShaleDemand demand) {
@@ -34,12 +44,13 @@ public class SigmaBiSelector {
   }
 
   private double bisectSigma(double sigmaMin, double sigmaMax, ShaleDemand demand) {
-    List<ShaleSupply> supplies = graph.getEdgesForDemand(demand);
     while (sigmaMin + ERR < sigmaMax) {
       double z = (sigmaMin + sigmaMax) / 2;
       double ktt = 0;
-      for (ShaleSupply supply : supplies) {
-        ktt += calculateKttForSigma(supply, z, demand);
+      for (ShaleSupply supply : graph.getSupplies()) {
+        if (graph.isQualified(demand, supply)) {
+          ktt += calculateKttForSigma(supply, z, demand);
+        }
       }
       if (ktt > (1 + EPS) * demand.getDemand() * demand.getAdDuration()) {
         sigmaMax = z;

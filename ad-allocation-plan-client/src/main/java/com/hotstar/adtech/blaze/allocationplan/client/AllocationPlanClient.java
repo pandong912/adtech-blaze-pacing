@@ -3,9 +3,11 @@ package com.hotstar.adtech.blaze.allocationplan.client;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.diagnosis.AllocationDiagnosis;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.hwm.HwmAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.ShaleAllocationPlan;
+import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.SupplyInfo;
 import com.hotstar.adtech.blaze.allocationplan.client.model.LoadRequest;
 import com.hotstar.adtech.blaze.allocationplan.client.model.UploadResult;
 import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("unused")
 public interface AllocationPlanClient {
@@ -17,6 +19,8 @@ public interface AllocationPlanClient {
 
   List<UploadResult> batchUploadHwmPlan(String path, List<HwmAllocationPlan> allocationPlans);
 
+  void uploadSupplyIdMap(String path, Map<String, Integer> supplyIdMap);
+
   List<ShaleAllocationPlan> loadShaleAllocationPlans(List<LoadRequest> loadRequests);
 
   List<HwmAllocationPlan> loadHwmAllocationPlans(List<LoadRequest> loadRequests);
@@ -24,6 +28,8 @@ public interface AllocationPlanClient {
   ShaleAllocationPlan loadShaleAllocationPlan(LoadRequest loadRequest);
 
   HwmAllocationPlan loadHwmAllocationPlan(LoadRequest loadRequest);
+
+  SupplyInfo loadSupplyIdMap(String path);
 
   void uploadAllocationDiagnosis(AllocationDiagnosis allocationDiagnosis);
 

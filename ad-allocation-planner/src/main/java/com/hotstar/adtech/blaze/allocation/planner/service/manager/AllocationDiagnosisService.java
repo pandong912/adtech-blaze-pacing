@@ -1,5 +1,7 @@
 package com.hotstar.adtech.blaze.allocation.planner.service.manager;
 
+import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.DIAGNOSIS;
+
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
@@ -11,6 +13,7 @@ import com.hotstar.adtech.blaze.allocation.planner.common.response.diagnosis.Hwm
 import com.hotstar.adtech.blaze.allocation.planner.common.response.diagnosis.ShaleAllocationDiagnosisDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.diagnosis.StreamConcurrencyDiagnosis;
 import com.hotstar.adtech.blaze.allocationplan.client.AllocationPlanClient;
+import io.micrometer.core.annotation.Timed;
 import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +28,7 @@ public class AllocationDiagnosisService {
 
   private final AllocationPlanClient allocationPlanClient;
 
+  @Timed(DIAGNOSIS)
   public void uploadAllocationDiagnosis(String contentId, Instant version,
                                         List<HwmAllocationDiagnosisDetail> hwmAllocationDiagnosisDetails,
                                         List<ShaleAllocationDiagnosisDetail> shaleAllocationDiagnosisDetails,

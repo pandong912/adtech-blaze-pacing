@@ -27,9 +27,17 @@ public class ReachDataUpdater {
     AdModel adModel = adModelLoader.get();
     for (Match match : adModel.getMatches()) {
       List<AdSet> adSets = adModel.getAdSetGroup().get(match.getContentId());
+      if (adSets == null || adSets.isEmpty()) {
+        log.info("no adSet found for match: {}", match);
+        continue;
+      }
       Map<Long, Boolean> adSetMaximiseReach =
-        adSets.stream().collect(Collectors.toMap(AdSet::getId, AdSet::getMaximiseReach));
+        adSets.stream().collect(Collectors.toMap(AdSet::getId, this::getMaximiseReach));
       reachService.updateMatchReachMatch(match, adSetMaximiseReach);
     }
+  }
+
+  private Boolean getMaximiseReach(AdSet adSet) {
+    return adSet.getMaximiseReach() != null && adSet.getMaximiseReach();
   }
 }

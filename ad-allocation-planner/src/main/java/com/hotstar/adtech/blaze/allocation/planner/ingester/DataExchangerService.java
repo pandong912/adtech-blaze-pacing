@@ -1,7 +1,7 @@
 package com.hotstar.adtech.blaze.allocation.planner.ingester;
 
+import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.MATCH_CONCURRENCY_FETCH;
 import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.MATCH_IMPRESSION_FETCH;
-import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.MATCH_REACH_FETCH;
 import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.MATCH_TOTAL_BREAK_FETCH;
 
 import com.hotstar.adtech.blaze.admodel.client.common.Names;
@@ -14,12 +14,8 @@ import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.DegradationReachStorage;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.ReachStorage;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.RedisReachStorage;
 import com.hotstar.adtech.blaze.exchanger.api.DataExchangerClient;
 import com.hotstar.adtech.blaze.exchanger.api.entity.BreakId;
-import com.hotstar.adtech.blaze.exchanger.api.entity.UnReachData;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdSetImpressionResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.BreakListResponse;
@@ -27,17 +23,13 @@ import com.hotstar.adtech.blaze.exchanger.api.response.BreakTypeResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentCohortConcurrencyResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentStreamConcurrencyResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.MatchProgressModelResponse;
-import com.hotstar.adtech.blaze.exchanger.api.response.UnReachResponse;
 import io.micrometer.core.annotation.Timed;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -48,7 +40,7 @@ import org.springframework.stereotype.Service;
 public class DataExchangerService {
   private static final String DEFAULT_SSAI_TAG = "SSAI::";
   private static final String SPOT_BREAK = "Spot";
-  public static final int SHARD = 50;
+
   private final DataExchangerClient dataExchangerClient;
 
   public AdModelVersion getLatestAdModelVersion(AdModelVersion adModelVersion) {
@@ -72,7 +64,7 @@ public class DataExchangerService {
 
   public List<Double> getMatchBreakProgressModel() {
     StandardResponse<MatchProgressModelResponse> response =
-        dataExchangerClient.getLatestMatchBreakProgressModel();
+      dataExchangerClient.getLatestMatchBreakProgressModel();
 
     if (response.getCode() != ResultCode.SUCCESS) {
       throw new ServiceException("Failed to get break progress from data exchanger");
@@ -129,6 +121,7 @@ public class DataExchangerService {
         AdSetImpressionResponse::getImpression));
   }
 
+  @Timed(MATCH_CONCURRENCY_FETCH)
   public List<ContentCohort> getContentCohortConcurrency(String contentId,
                                                          Map<String, PlayoutStream> playoutStreamMap) {
     StandardResponse<List<ContentCohortConcurrencyResponse>> response =
@@ -210,66 +203,4 @@ public class DataExchangerService {
     return ssaiTag.length() < 6 ? DEFAULT_SSAI_TAG : ssaiTag;
   }
 
-  @Timed(MATCH_REACH_FETCH)
-  public ReachStorage getUnReachRatio(String contentId, Map<String, Integer> concurrencyIdMap,
-                                      Map<Long, Integer> adSetIdToDemandId) {
-    if (adSetIdToDemandId.size() == 0) {
-      return new DegradationReachStorage();
-    }
-    List<UnReachResponse> unReachResponses = fetchUnReachData(contentId);
-    int supplySize = concurrencyIdMap.values().stream().mapToInt(Integer::intValue).max().orElse(0) + 1;
-    double[][] unReachStore = new double[adSetIdToDemandId.size()][supplySize];
-
-    for (double[] row : unReachStore) {
-      Arrays.fill(row, 1.0);
-    }
-
-    for (UnReachResponse unReachResponse : unReachResponses) {
-      Integer supplyId = concurrencyIdMap.get(unReachResponse.getKey());
-      if (supplyId == null) {
-        continue;
-      }
-      for (UnReachData unReachData : unReachResponse.getUnReachDataList()) {
-        Integer demandId = adSetIdToDemandId.get(unReachData.getAdSetId());
-        if (demandId == null) {
-          continue;
-        }
-        unReachStore[demandId][supplyId] = unReachData.getUnReachRatio();
-      }
-    }
-
-    doStatistics(unReachStore, contentId);
-    return new RedisReachStorage(unReachStore);
-  }
-
-  private void doStatistics(double[][] unReachStore, String contentId) {
-    log.info("{}: unReachStore size is {} * {}", contentId, unReachStore.length, unReachStore[0].length);
-    int totalCount = 0;
-    for (int supply = 0; supply < unReachStore[0].length; supply++) {
-      for (double[] doubles : unReachStore) {
-        if (doubles[supply] < 1.0) {
-          totalCount++;
-        }
-      }
-    }
-    log.info("{}: percentage of unReachRatio smaller than 1 is {}", contentId,
-      (double) totalCount / (unReachStore.length * unReachStore[0].length));
-  }
-
-  private List<UnReachResponse> fetchUnReachData(String contentId) {
-    return IntStream.range(0, SHARD)
-      .mapToObj(shard -> dataExchangerClient.batchGetUnReachDataInShard(contentId, shard))
-      .filter(response -> filterResponse(response, contentId))
-      .map(StandardResponse::getData)
-      .flatMap(Collection::stream)
-      .collect(Collectors.toList());
-  }
-
-  private boolean filterResponse(StandardResponse<List<UnReachResponse>> response, String contentId) {
-    if (!RespUtil.isSuccess(response)) {
-      log.error("fail to get reach data for contentId: {}, message: {}", contentId, response.getMessage());
-      return false;
-    }
-    return true;
-  }
 }

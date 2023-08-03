@@ -14,6 +14,7 @@ public class Ad {
   private int durationMs;
   private Set<Integer> languageIds;
   private boolean enabled;
+  private String aspectRatio;
 
 }
 

@@ -192,6 +192,7 @@ public class AdModelLoader {
       .durationMs(ad.getDurationMs())
       .enabled(ad.isEnabled())
       .languageIds(ad.getLanguageIds())
+      .aspectRatio(ad.getAspectRatio())
       .build();
   }
 

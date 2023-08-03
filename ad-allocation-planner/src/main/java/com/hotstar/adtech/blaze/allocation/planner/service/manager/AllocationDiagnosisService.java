@@ -73,7 +73,7 @@ public class AllocationDiagnosisService {
       .tenant(contentCohort.getPlayoutStream().getTenant())
       .cohortId(contentCohort.getConcurrencyId())
       .contentId(contentCohort.getContentId())
-      .streamType(contentCohort.getStreamType())
+      .streamType(contentCohort.getPlayoutStream().getStreamType())
       .language(contentCohort.getPlayoutStream().getLanguage().getName())
       .platforms(
         contentCohort.getPlayoutStream().getPlatforms().stream().map(Platform::getName)

@@ -57,8 +57,9 @@ public class GeneralPlanContextLoader {
     List<DemandDiagnosis> demandDiagnosisList =
       dataProcessService.getDemandDiagnosisList(adSets, breakContext, adSetImpression);
 
-    long count =
-      concurrencyData.getCohorts().stream().filter(c -> StreamType.SSAI_Spot.equals(c.getStreamType())).count();
+    long count = concurrencyData.getCohorts().stream()
+      .filter(c -> StreamType.SSAI_Spot.equals(c.getPlayoutStream().getStreamType()))
+      .count();
     log.info("total cohort size: {} ,ssai cohorts size: {}", concurrencyData.getCohorts().size(), count);
     log.info("break index: {}, total break number: {}", breakIndex, totalBreakNumber);
     log.info("adSet size: {}", adSets.size());
@@ -126,7 +127,7 @@ public class GeneralPlanContextLoader {
   private List<ContentCohort> getContentCohorts(String contentId, Map<String, PlayoutStream> playoutStreamMap) {
     List<ContentCohort> cohorts = dataExchangerService.getContentCohortConcurrency(contentId, playoutStreamMap);
     List<ContentCohort> ssaiCohorts = cohorts.stream()
-      .filter(cohort -> cohort.getStreamType() == StreamType.SSAI_Spot)
+      .filter(cohort -> cohort.getPlayoutStream().getStreamType() == StreamType.SSAI_Spot)
       .collect(Collectors.toList());
 
     IntStream.range(0, ssaiCohorts.size()).forEach(i -> ssaiCohorts.get(i).setConcurrencyId(i));

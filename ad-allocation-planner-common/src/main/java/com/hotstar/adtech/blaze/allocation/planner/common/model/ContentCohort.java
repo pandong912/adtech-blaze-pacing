@@ -1,6 +1,5 @@
 package com.hotstar.adtech.blaze.allocation.planner.common.model;
 
-import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
 import lombok.Builder;
 import lombok.Setter;
 import lombok.Value;
@@ -18,8 +17,6 @@ public class ContentCohort {
   String ssaiTag;
   PlayoutStream playoutStream;
   long concurrency;
-  StreamType streamType;
-  String playoutId;
 
 
   public String getKey() {
@@ -27,6 +24,6 @@ public class ContentCohort {
   }
 
   public String getPlayoutIdKey() {
-    return playoutId + "|" + ssaiTag;
+    return getPlayoutStream().getPlayoutId() + "|" + ssaiTag;
   }
 }

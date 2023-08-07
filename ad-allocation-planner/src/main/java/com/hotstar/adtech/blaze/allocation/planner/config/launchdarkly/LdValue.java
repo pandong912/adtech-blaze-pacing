@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum LdValue {
   EnableMaximiseReach("blaze.pacing.maximise.reach.enable", "false"),
-  EnableShale("blaze.pacing.shale.enable", "false");
+  PacingMode("blaze.pacing.mode", "SHALE");
 
   private final String ldKey;
   private final String ldDefaultValue;

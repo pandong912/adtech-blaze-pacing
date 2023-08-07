@@ -29,10 +29,11 @@ import org.springframework.stereotype.Component;
 public class AllocationPlanManager {
 
   private final HwmModePublisher hwmModePublisher;
-  private final ShaleAndHwmModePublisher shaleAndHwmModePublisher;
+  private final ShaleModePublisher shaleModePublisher;
   private final BlazeDynamicConfig blazeDynamicConfig;
   private final DataLoader dataLoader;
   private final AllocationPlanTaskService allocationPlanTaskService;
+  private final ShaleAndHwmModePublisher shaleAndHwmModePublisher;
 
   @Scheduled(fixedRateString = "${blaze.ad-allocation-planner.schedule.manager:3000}", initialDelayString = "1000")
   @Timed(value = MATCH_PLAN_UPDATE, histogram = true)
@@ -91,10 +92,19 @@ public class AllocationPlanManager {
   }
 
   private void publishNewTask(Match match, AdModel adModel) {
-    if (blazeDynamicConfig.getEnableShale()) {
-      shaleAndHwmModePublisher.publishPlan(match, adModel);
-    } else {
-      hwmModePublisher.publishPlan(match, adModel);
+    AllocationPlanMode allocationPlanMode = blazeDynamicConfig.getAllocationPlanMode();
+    switch (allocationPlanMode) {
+      case HWM:
+        hwmModePublisher.publishPlan(match, adModel);
+        break;
+      case SHALE:
+        shaleModePublisher.publishPlan(match, adModel);
+        break;
+      case SHALE_HWM:
+        shaleAndHwmModePublisher.publishPlan(match, adModel);
+        break;
+      default:
+        throw new IllegalArgumentException("unknown allocation plan mode:" + allocationPlanMode);
     }
   }
 }

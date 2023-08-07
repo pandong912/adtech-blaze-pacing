@@ -30,14 +30,14 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @Profile("!sim && !worker")
-public class ShaleAndHwmModePublisher {
+public class ShaleModePublisher {
 
   private final ShalePlanContextLoader shalePlanContextLoader;
   private final TaskPublisher taskPublisher;
   private final AllocationDataClient allocationDataClient;
   private final AllocationPlanClient allocationPlanClient;
 
-  @Timed(value = MetricNames.GENERATOR, extraTags = {"type", "shale-hwm"})
+  @Timed(value = MetricNames.GENERATOR, extraTags = {"type", "shale"})
   public void publishPlan(Match match, AdModel adModel) {
     try {
       Pair<Map<String, Integer>, ShalePlanContext> result =
@@ -55,16 +55,14 @@ public class ShaleAndHwmModePublisher {
       allocationDataClient.uploadHwmData(match.getContentId(), version.toString(),
         shalePlanContext.getGeneralPlanContext());
 
-      taskPublisher.publish(match, generalPlanContext, version, this::buildSsaiShaleAllocationPlanResultDetail,
-        this::buildHwmSpotAllocationPlanResultDetail);
-      taskPublisher.publish(match, generalPlanContext, version, this::buildSsaiHwmAllocationPlanResultDetail,
-        this::buildEmpty);
+      taskPublisher.publish(match, generalPlanContext, version, this::buildSsaiAllocationPlanResultDetail,
+        this::buildSpotAllocationPlanResultDetail);
     } catch (Exception e) {
       throw new ServiceException("Failed to publish task for match: " + match.getContentId(), e);
     }
   }
 
-  private Stream<AllocationPlanResultDetail> buildHwmSpotAllocationPlanResultDetail(BreakTypeGroup breakTypeGroup) {
+  private Stream<AllocationPlanResultDetail> buildSpotAllocationPlanResultDetail(BreakTypeGroup breakTypeGroup) {
     return breakTypeGroup.getAllBreakDurations().stream().map(duration ->
       AllocationPlanResultDetail.builder()
         .algorithmType(AlgorithmType.HWM)
@@ -76,7 +74,7 @@ public class ShaleAndHwmModePublisher {
   }
 
 
-  private Stream<AllocationPlanResultDetail> buildSsaiShaleAllocationPlanResultDetail(BreakTypeGroup breakTypeGroup) {
+  private Stream<AllocationPlanResultDetail> buildSsaiAllocationPlanResultDetail(BreakTypeGroup breakTypeGroup) {
     return breakTypeGroup.getAllBreakDurations().stream().map(duration ->
       AllocationPlanResultDetail.builder()
         .algorithmType(AlgorithmType.SHALE)
@@ -86,21 +84,5 @@ public class ShaleAndHwmModePublisher {
         .taskStatus(TaskStatus.PUBLISHED)
         .build());
   }
-
-  private Stream<AllocationPlanResultDetail> buildSsaiHwmAllocationPlanResultDetail(BreakTypeGroup breakTypeGroup) {
-    return breakTypeGroup.getAllBreakDurations().stream().map(duration ->
-      AllocationPlanResultDetail.builder()
-        .algorithmType(AlgorithmType.HWM)
-        .breakTypeIds(breakTypeGroup.getBreakTypeIds().stream().map(String::valueOf).collect(Collectors.joining(",")))
-        .planType(PlanType.SSAI)
-        .duration(duration)
-        .taskStatus(TaskStatus.PUBLISHED)
-        .build());
-  }
-
-  private Stream<AllocationPlanResultDetail> buildEmpty(BreakTypeGroup breakTypeGroup) {
-    return Stream.empty();
-  }
-
 
 }

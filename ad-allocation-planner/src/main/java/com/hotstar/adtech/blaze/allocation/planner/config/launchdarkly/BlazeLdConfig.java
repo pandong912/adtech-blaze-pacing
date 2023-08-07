@@ -1,5 +1,6 @@
 package com.hotstar.adtech.blaze.allocation.planner.config.launchdarkly;
 
+import com.hotstar.adtech.blaze.allocation.planner.service.manager.AllocationPlanMode;
 import com.hotstar.launchdarkly.LdConfigStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,8 @@ public class BlazeLdConfig implements BlazeDynamicConfig {
   }
 
   @Override
-  public Boolean getEnableShale() {
-    return getBooleanValue(LdValue.EnableShale);
+  public AllocationPlanMode getAllocationPlanMode() {
+    String stringValue = getStringValue(LdValue.PacingMode);
+    return AllocationPlanMode.valueOf(stringValue.toUpperCase());
   }
 }

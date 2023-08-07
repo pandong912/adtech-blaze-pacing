@@ -7,6 +7,8 @@ import com.hotstar.adtech.blaze.admodel.repository.AllocationPlanResultRepositor
 import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResult;
 import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResultDetail;
 import com.hotstar.adtech.blaze.allocationplan.client.model.UploadResult;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +27,12 @@ public class AllocationPlanTaskService {
 
   public AllocationPlanResult getLatestTask(String contentId) {
     return allocationPlanResultRepository.findFirstByContentIdOrderByVersionDesc(contentId);
+  }
+
+  public AllocationPlanResult getTask(AllocationPlanResultDetail subtask) {
+    return allocationPlanResultRepository
+      .findById(subtask.getAllocationPlanResultId())
+      .orElseThrow(() -> new RuntimeException("task not found"));
   }
 
   public List<AllocationPlanResultDetail> getSubTaskList(Long allocationPlanResultId) {
@@ -76,7 +84,8 @@ public class AllocationPlanTaskService {
   @Transactional(isolation = Isolation.REPEATABLE_READ, rollbackFor = Exception.class)
   public Optional<AllocationPlanResultDetail> takeOneSubTask() {
     List<AllocationPlanResultDetail> allocationPlanResultDetails =
-      allocationPlanResultDetailRepository.findAllByTaskStatus(TaskStatus.PUBLISHED);
+      allocationPlanResultDetailRepository
+        .findAllByCreatedAtAfterAndTaskStatus(Instant.now().minus(8, ChronoUnit.MINUTES), TaskStatus.PUBLISHED);
     if (CollectionUtils.isNullOrEmpty(allocationPlanResultDetails)) {
       return Optional.empty();
     } else {

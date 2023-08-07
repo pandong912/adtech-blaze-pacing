@@ -17,6 +17,8 @@ import com.hotstar.adtech.blaze.exchanger.api.response.AllocationPlanUriResponse
 import com.hotstar.adtech.blaze.exchanger.api.response.HwmAllocationPlanResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ShaleAllocationPlanResponse;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -64,12 +66,19 @@ public class AllocationPlanService {
       .duration(allocationPlanResultDetail.getDuration())
       .fileName(allocationPlanResultDetail.getFileName())
       .md5(allocationPlanResultDetail.getMd5())
-      .breakTypeIds(allocationPlanResultDetail.getBreakTypeIds())
+      .breakTypeIds(getBreakTypeIds(allocationPlanResultDetail.getBreakTypeIds()))
       .totalBreakNumber(allocationPlanResultDetail.getTotalBreakNumber())
       .nextBreakIndex(allocationPlanResultDetail.getNextBreakIndex())
       .planId(allocationPlanResultDetail.getId())
       .algorithmType(allocationPlanResultDetail.getAlgorithmType())
       .build();
+  }
+
+  private List<Integer> getBreakTypeIds(String breakTypeIds) {
+    if (breakTypeIds == null) {
+      return Collections.emptyList();
+    }
+    return Arrays.stream(breakTypeIds.split(",")).map(Integer::parseInt).collect(Collectors.toList());
   }
 
   public Optional<AllocationPlanResponse> getAllocationPlanResult(String contentId, Long version) {

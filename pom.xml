@@ -20,13 +20,13 @@
 
     <groupId>com.hotstar.adtech.blaze</groupId>
     <artifactId>blaze-pacing</artifactId>
-    <version>1.7.4-SNAPSHOT</version>
+    <version>1.7.4</version>
     <packaging>pom</packaging>
     <name>blaze pacing</name>
     <description>hotstar adtech blaze pacing</description>
 
     <properties>
-        <blaze-module.version>1.7.4-SNAPSHOT</blaze-module.version>
+        <blaze-module.version>1.7.4</blaze-module.version>
         <blaze-ad-model-module.version>1.7.6</blaze-ad-model-module.version>
         <pulse.version>2.2.4</pulse.version>
         <shifu-common-stats-micrometer>0.1.1</shifu-common-stats-micrometer>
@@ -61,7 +61,7 @@
         <developerConnection>
             scm:git:git@github.com:hotstar/adtech-blaze-pacing.git
         </developerConnection>
-        <tag>HEAD</tag>
+        <tag>blaze-pacing-1.7.4</tag>
     </scm>
 
     <dependencyManagement>

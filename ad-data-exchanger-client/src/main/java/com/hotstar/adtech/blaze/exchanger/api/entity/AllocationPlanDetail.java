@@ -12,7 +12,7 @@ public class AllocationPlanDetail {
   PlanType planType;
   Integer totalBreakNumber;
   Integer nextBreakIndex;
-  List<Long> breakTypeIds;
+  List<Integer> breakTypeIds;
   Integer duration;
   String fileName;
   String md5;

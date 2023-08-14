@@ -1,3 +1,4 @@
 spring:
   profiles:
-    include: ad-model-repository-dev, ad-model-client-dev, allocation-plan-client-dev, launch-darkly-dev, ad-redis-client-dev
+    include: ad-model-repository-dev, ad-model-client-dev, allocation-plan-client-dev, launch-darkly-dev, ad-redis-client-dev, allocation-data-client-dev
+

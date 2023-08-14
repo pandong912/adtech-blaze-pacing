@@ -3,26 +3,38 @@ package com.hotstar.adtech.blaze.allocation.planner.service.manager;
 import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.BUILD_FAILING;
 import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.MATCH_PLAN_UPDATE;
 
+import com.hotstar.adtech.blaze.admodel.common.enums.TaskStatus;
+import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResult;
+import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResultDetail;
 import com.hotstar.adtech.blaze.allocation.planner.config.launchdarkly.BlazeDynamicConfig;
 import com.hotstar.adtech.blaze.allocation.planner.ingester.DataLoader;
+import com.hotstar.adtech.blaze.allocation.planner.service.AllocationPlanTaskService;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdModel;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Match;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Metrics;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 @Slf4j
+@Component
+@Profile("!sim && !worker")
 public class AllocationPlanManager {
 
-  private final HwmModeGenerator hwmModeGenerator;
-  private final ShaleAndHwmModeGenerator shaleAndHwmModeGenerator;
+  private final HwmModePublisher hwmModePublisher;
+  private final ShaleAndHwmModePublisher shaleAndHwmModePublisher;
   private final BlazeDynamicConfig blazeDynamicConfig;
   private final DataLoader dataLoader;
+  private final AllocationPlanTaskService allocationPlanTaskService;
 
-  @Scheduled(fixedRateString = "30000", initialDelayString = "5000")
+  @Scheduled(fixedRateString = "${blaze.ad-allocation-planner.schedule.manager:3000}", initialDelayString = "1000")
   @Timed(value = MATCH_PLAN_UPDATE, histogram = true)
   public void generatePlan() {
     AdModel adModel = dataLoader.getAdModel();
@@ -32,18 +44,57 @@ public class AllocationPlanManager {
 
   private void generateAndUploadAllocationPlan(Match match, AdModel adModel) {
     try {
-      doGeneratePlan(match, adModel);
+      AllocationPlanResult latestTask = allocationPlanTaskService.getLatestTask(match.getContentId());
+      checkTaskStatus(latestTask);
+      if (shouldPublishNew(latestTask)) {
+        publishNewTask(match, adModel);
+      }
     } catch (Exception e) {
       log.error("fail to build plan for content:" + match.getContentId(), e);
       Metrics.counter(BUILD_FAILING, "contentId", match.getContentId()).increment();
     }
   }
 
-  private void doGeneratePlan(Match match, AdModel adModel) {
-    if (blazeDynamicConfig.getEnableShale()) {
-      shaleAndHwmModeGenerator.generateAndUploadAllocationPlan(match, adModel);
+  private void checkTaskStatus(AllocationPlanResult latestTask) {
+    if (latestTask == null) {
+      return;
+    }
+
+    List<AllocationPlanResultDetail> details = allocationPlanTaskService.getSubTaskList(latestTask.getId());
+    boolean pending = details.stream().anyMatch(detail -> detail.getTaskStatus().isPending());
+    boolean success = details.stream().allMatch(detail -> detail.getTaskStatus().isSuccess());
+
+    if (pending) {
+      if (latestTask.getVersion().plus(8, ChronoUnit.MINUTES).isBefore(Instant.now())) {
+        log.error("task is pending for more than 8 minutes, task:{}, subTask size: {}", latestTask, details.size());
+        allocationPlanTaskService.expirePendingSubTask(details);
+        allocationPlanTaskService.taskExpired(latestTask);
+      }
     } else {
-      hwmModeGenerator.generateAndUploadAllocationPlan(match, adModel);
+      if (success) {
+        allocationPlanTaskService.taskSuccess(latestTask);
+      } else {
+        allocationPlanTaskService.taskFailed(latestTask);
+        log.error("task is failed, task:{}, subTask size: {}", latestTask, details.size());
+      }
+    }
+  }
+
+  private boolean shouldPublishNew(AllocationPlanResult latestTask) {
+    if (latestTask == null) {
+      return true;
+    }
+    if (latestTask.getVersion().plus(30, ChronoUnit.SECONDS).isAfter(Instant.now())) {
+      return false;
+    }
+    return latestTask.getTaskStatus() != TaskStatus.PUBLISHED;
+  }
+
+  private void publishNewTask(Match match, AdModel adModel) {
+    if (blazeDynamicConfig.getEnableShale()) {
+      shaleAndHwmModePublisher.publishPlan(match, adModel);
+    } else {
+      hwmModePublisher.publishPlan(match, adModel);
     }
   }
 }

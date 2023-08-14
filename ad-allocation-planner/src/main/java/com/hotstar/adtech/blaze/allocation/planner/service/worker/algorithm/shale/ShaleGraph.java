@@ -1,8 +1,7 @@
 package com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale;
 
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.ReachStorage;
-import com.hotstar.adtech.blaze.allocation.planner.util.MemoryAlignment;
-import java.util.BitSet;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.QualificationResult;
 import java.util.List;
 import lombok.Value;
 
@@ -11,24 +10,19 @@ public class ShaleGraph {
 
   List<ShaleDemand> demands;
   List<ShaleSupply> supplies;
-  BitSet edges;
+  QualificationResult edges;
   ReachStorage reachStorage;
   double penalty;
-  int alignedDemandSize;
 
   public ShaleGraph(List<ShaleDemand> demands, List<ShaleSupply> supplies, ReachStorage reachStorage, double penalty,
-                    BitSet edges) {
+                    QualificationResult edges) {
     this.demands = demands;
     this.supplies = supplies;
     this.reachStorage = reachStorage;
     this.penalty = penalty;
     this.edges = edges;
-    this.alignedDemandSize = MemoryAlignment.getSize(demands);
   }
 
-  public int getIndex(int supplyIndex, int demandIndex) {
-    return supplyIndex * alignedDemandSize + demandIndex;
-  }
 
   public void initParams() {
     demands.parallelStream().forEach(demand -> {
@@ -46,12 +40,12 @@ public class ShaleGraph {
       }
 
       demand.setReachOffset(count == 0 ? 0 : unReachSum / count);
-      demand.setTheta(totalSupply == 0 ? 1 : Math.min(1, demand.getDemand() / totalSupply));
+      demand.setTheta(totalSupply == 0 ? 1 : Math.max(0.000001, Math.min(1, demand.getDemand() / totalSupply)));
     });
   }
 
   public boolean isQualified(ShaleDemand demand, ShaleSupply supply) {
-    return edges.get(getIndex(supply.getId(), demand.getId()));
+    return edges.get(supply.getId(), demand.getId());
   }
 
   public double getTd(ShaleDemand demand, ShaleSupply supply) {

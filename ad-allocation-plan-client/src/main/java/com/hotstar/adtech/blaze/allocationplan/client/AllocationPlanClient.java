@@ -1,6 +1,5 @@
 package com.hotstar.adtech.blaze.allocationplan.client;
 
-import com.hotstar.adtech.blaze.allocation.planner.common.response.diagnosis.AllocationDiagnosis;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.hwm.HwmAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.ShaleAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.SupplyInfo;
@@ -31,8 +30,5 @@ public interface AllocationPlanClient {
 
   SupplyInfo loadSupplyIdMap(String path);
 
-  void uploadAllocationDiagnosis(AllocationDiagnosis allocationDiagnosis);
-
-  AllocationDiagnosis loadAllocationDiagnosis(String path);
 }
 

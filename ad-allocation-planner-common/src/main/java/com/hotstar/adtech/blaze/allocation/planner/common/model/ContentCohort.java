@@ -24,6 +24,6 @@ public class ContentCohort {
   }
 
   public String getPlayoutIdKey() {
-    return getPlayoutStream().getPlayoutId() + "|" + ssaiTag;
+    return playoutStream.getPlayoutId() + "|" + ssaiTag;
   }
 }

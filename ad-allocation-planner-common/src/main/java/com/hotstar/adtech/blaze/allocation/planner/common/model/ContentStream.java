@@ -1,7 +1,6 @@
 package com.hotstar.adtech.blaze.allocation.planner.common.model;
 
 import lombok.Builder;
-import lombok.Setter;
 import lombok.Value;
 import lombok.experimental.NonFinal;
 
@@ -11,14 +10,20 @@ public class ContentStream {
   // internal id for supplies
   // concurrencyId should be same as the index in the List<ContentStream>!
   @NonFinal
-  @Setter
-  int concurrencyId;
+  int concurrencyIdInStream;
+  @NonFinal
+  int concurrencyIdInCohort;
   PlayoutStream playoutStream;
   String contentId;
   long concurrency;
 
   public String getKey() {
     return playoutStream.getKey();
+  }
+
+  public void setConcurrencyId(int i, int cohortSize) {
+    this.concurrencyIdInStream = i;
+    this.concurrencyIdInCohort = i + cohortSize;
   }
 
 }

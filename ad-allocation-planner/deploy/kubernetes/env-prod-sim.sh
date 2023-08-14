@@ -1,4 +1,4 @@
-export PROFILE="prod,worker"
+export PROFILE="prod,sim"
 export JVM_OPTS="-Xms12288m -Xmx12288m -XX:+UseG1GC"
 export ADS_ENV_NAMESPACE_NAME="adtech-in-prod-apse1"
 export ADS_ENV_SERVICE_HOSTNAME="adtech-blaze-allocation-planner-sim-apse1.hotstar-labs.com"

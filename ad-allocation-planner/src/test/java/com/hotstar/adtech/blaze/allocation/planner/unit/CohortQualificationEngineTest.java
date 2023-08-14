@@ -9,10 +9,11 @@ import com.hotstar.adtech.blaze.allocation.planner.common.model.Language;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.Platform;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.CohortAdSetQualificationEngine;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BitSetQualificationResult;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.QualificationResult;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AudienceTargetingRule;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AudienceTargetingRuleClause;
-import java.util.BitSet;
 import java.util.Collections;
 import java.util.Map;
 import org.junit.jupiter.api.Assertions;
@@ -30,15 +31,15 @@ public class CohortQualificationEngineTest {
     ContentCohort cohort =
       ContentCohort.builder()
         .concurrencyId(0)
-        .streamType(StreamType.SSAI_Spot)
         .ssaiTag("SSAI:M_MUM:M_NCR")
         .playoutStream(PlayoutStream.builder()
+          .streamType(StreamType.SSAI_Spot)
           .language(languageMapping.get("English"))
           .platforms(Collections.singletonList(platformMapping.get("Android")))
           .tenant(Tenant.India)
           .build())
         .build();
-    BitSet bitSet = new BitSet();
+    QualificationResult bitSet = new BitSetQualificationResult(10, 2);
     CohortAdSetQualificationEngine cohortQualificationEngine =
       new CohortAdSetQualificationEngine(cohort.getSsaiTag(), QualificationTestData.getAttributeId2TargetingTagMap(),
         cohort.getConcurrencyId(), bitSet);
@@ -57,7 +58,7 @@ public class CohortQualificationEngineTest {
         .build())
       .build();
     cohortQualificationEngine.qualify(Collections.singletonList(adSet));
-    Assertions.assertTrue(bitSet.get(0));
+    Assertions.assertTrue(bitSet.get(0, 0));
     AdSet adSet1 = AdSet.builder()
       .demandId(1)
       .ssaiAds(QualificationTestData.getAds())
@@ -71,7 +72,7 @@ public class CohortQualificationEngineTest {
         .build())
       .build();
     cohortQualificationEngine.qualify(Collections.singletonList(adSet1));
-    Assertions.assertFalse(bitSet.get(1));
+    Assertions.assertFalse(bitSet.get(0, 1));
   }
 
   @Test
@@ -79,16 +80,16 @@ public class CohortQualificationEngineTest {
     ContentCohort cohort =
       ContentCohort.builder()
         .concurrencyId(0)
-        .streamType(StreamType.SSAI_Spot)
         .ssaiTag("SSAI:M_MUM:M_NCR")
         .playoutStream(PlayoutStream.builder()
+          .streamType(StreamType.SSAI_Spot)
           .language(languageMapping.get("English"))
           .platforms(Collections.singletonList(platformMapping.get("Android")))
           .tenant(Tenant.India)
           .build())
         .build();
 
-    BitSet bitSet = new BitSet();
+    QualificationResult bitSet = new BitSetQualificationResult(10, 2);
     CohortAdSetQualificationEngine cohortQualificationEngine =
       new CohortAdSetQualificationEngine(cohort.getSsaiTag(), QualificationTestData.getAttributeId2TargetingTagMap(),
         cohort.getConcurrencyId(), bitSet);
@@ -107,7 +108,7 @@ public class CohortQualificationEngineTest {
         .build())
       .build();
     cohortQualificationEngine.qualify(Collections.singletonList(adSet));
-    Assertions.assertFalse(bitSet.get(0));
+    Assertions.assertFalse(bitSet.get(0, 0));
   }
 
   @Test
@@ -115,16 +116,16 @@ public class CohortQualificationEngineTest {
     ContentCohort cohort =
       ContentCohort.builder()
         .concurrencyId(0)
-        .streamType(StreamType.SSAI_Spot)
         .ssaiTag("SSAI::")
         .playoutStream(PlayoutStream.builder()
+          .streamType(StreamType.SSAI_Spot)
           .language(languageMapping.get("English"))
           .platforms(Collections.singletonList(platformMapping.get("Android")))
           .tenant(Tenant.India)
           .build())
         .build();
 
-    BitSet bitSet = new BitSet();
+    QualificationResult bitSet = new BitSetQualificationResult(10, 2);
     CohortAdSetQualificationEngine cohortQualificationEngine =
       new CohortAdSetQualificationEngine(cohort.getSsaiTag(), QualificationTestData.getAttributeId2TargetingTagMap(),
         cohort.getConcurrencyId(), bitSet);
@@ -142,7 +143,7 @@ public class CohortQualificationEngineTest {
         .build())
       .build();
     cohortQualificationEngine.qualify(Collections.singletonList(adSet));
-    Assertions.assertFalse(bitSet.get(0));
+    Assertions.assertFalse(bitSet.get(0, 0));
 
     AdSet adSet2 = AdSet.builder()
       .demandId(1)
@@ -157,7 +158,7 @@ public class CohortQualificationEngineTest {
         .build())
       .build();
     cohortQualificationEngine.qualify(Collections.singletonList(adSet2));
-    Assertions.assertFalse(bitSet.get(1));
+    Assertions.assertFalse(bitSet.get(0, 1));
   }
 
   @Test
@@ -165,16 +166,16 @@ public class CohortQualificationEngineTest {
     ContentCohort cohort =
       ContentCohort.builder()
         .concurrencyId(0)
-        .streamType(StreamType.SSAI_Spot)
         .ssaiTag("SSAI:M_MUM:M_NCR:S_APTG")
         .playoutStream(PlayoutStream.builder()
+          .streamType(StreamType.SSAI_Spot)
           .language(languageMapping.get("English"))
           .platforms(Collections.singletonList(platformMapping.get("Android")))
           .tenant(Tenant.India)
           .build())
         .build();
 
-    BitSet bitSet = new BitSet();
+    QualificationResult bitSet = new BitSetQualificationResult(10, 2);
     CohortAdSetQualificationEngine cohortQualificationEngine =
       new CohortAdSetQualificationEngine(cohort.getSsaiTag(), QualificationTestData.getAttributeId2TargetingTagMap(),
         cohort.getConcurrencyId(), bitSet);
@@ -197,6 +198,6 @@ public class CohortQualificationEngineTest {
         .build())
       .build();
     cohortQualificationEngine.qualify(Collections.singletonList(adSet));
-    Assertions.assertFalse(bitSet.get(0));
+    Assertions.assertFalse(bitSet.get(0, 0));
   }
 }

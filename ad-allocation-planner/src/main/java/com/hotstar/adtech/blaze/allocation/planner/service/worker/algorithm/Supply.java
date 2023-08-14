@@ -4,7 +4,7 @@ import lombok.Getter;
 
 public class Supply {
   @Getter
-  private final Integer id;
+  private final int id;
   private long inventory;
   @Getter
   private final long concurrency;

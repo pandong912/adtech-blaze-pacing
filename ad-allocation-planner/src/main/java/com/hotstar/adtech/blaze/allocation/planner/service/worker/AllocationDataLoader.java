@@ -1,0 +1,33 @@
+package com.hotstar.adtech.blaze.allocation.planner.service.worker;
+
+import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.WORKER_DATA_LOAD;
+
+import com.hotstar.adtech.blaze.allocation.planner.config.CacheConfig;
+import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
+import com.hotstar.adtech.blaze.allocation.planner.source.context.ShalePlanContext;
+import com.hotstar.adtech.blaze.allocation.planner.source.s3.AllocationDataClient;
+import io.micrometer.core.annotation.Timed;
+import java.time.Instant;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class AllocationDataLoader {
+  private final AllocationDataClient allocationDataClient;
+
+  @Cacheable(cacheNames = CacheConfig.SHALE_DATA,
+    cacheManager = CacheConfig.CACHE_MANAGER, sync = true)
+  @Timed(value = WORKER_DATA_LOAD, extraTags = {"algorithm", "shale"})
+  public ShalePlanContext loadShaleData(String contentId, Instant version) {
+    return allocationDataClient.loadShaleData(contentId, version.toString());
+  }
+
+  @Timed(value = WORKER_DATA_LOAD, extraTags = {"algorithm", "hwm"})
+  @Cacheable(cacheNames = CacheConfig.HWM_DATA,
+    cacheManager = CacheConfig.CACHE_MANAGER, sync = true)
+  public GeneralPlanContext loadGeneralData(String contentId, Instant version) {
+    return allocationDataClient.loadHwmData(contentId, version.toString());
+  }
+}

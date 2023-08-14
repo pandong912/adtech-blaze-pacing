@@ -26,7 +26,7 @@ public class SolverTest {
     int adSetSize = 20;
     int maxConcurrency = 500;
     ShaleSolver shaleSolver = new ShaleSolver();
-    GraphContext graphContext = SolveTestData.getGraphContext(random, cohortSize, adSetSize, maxConcurrency);
+    GraphContext graphContext = SolveTestData.getGraphContext(random, cohortSize, adSetSize, maxConcurrency, adSetSize);
     ShaleResult solve = shaleSolver.solve(graphContext, new TestReachStorage(adSetSize, cohortSize),
       ShaleConstant.PENALTY);
     solve.getDemandResults().forEach(System.out::println);
@@ -50,7 +50,7 @@ public class SolverTest {
     int adSetSize = 20;
     int maxConcurrency = 500;
     HwmSolver hwmSolver = new HwmSolver();
-    GraphContext graphContext = SolveTestData.getGraphContext(random, cohortSize, adSetSize, maxConcurrency);
+    GraphContext graphContext = SolveTestData.getGraphContext(random, cohortSize, adSetSize, maxConcurrency, adSetSize);
     List<HwmResult> solve = hwmSolver.solve(graphContext);
     solve.forEach(System.out::println);
     Assertions.assertEquals(20, solve.size());

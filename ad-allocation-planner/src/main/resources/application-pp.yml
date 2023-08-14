@@ -1,3 +1,4 @@
 spring:
   profiles:
-    include: ad-model-repository-pp, ad-model-client-pp, allocation-plan-client-pp, launch-darkly-nonprod, ad-redis-client-pp
+    include: ad-model-repository-pp, ad-model-client-pp, allocation-plan-client-pp, launch-darkly-nonprod, ad-redis-client-pp, allocation-data-client-pp
+

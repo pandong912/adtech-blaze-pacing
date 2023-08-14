@@ -17,21 +17,22 @@ import org.junit.jupiter.api.Test;
 public class SolverBenchTest {
   private static final int PARALLELISM = 1;
 
-  //  @Test
+  @Test
   public void testShaleSolver() {
     Random random = new Random();
     random.setSeed(934280);
     int cohortSize = 50000;
     int adSetSize = 4500;
+    int edgeSize = 2000;
     int maxConcurrency = 5000;
     StopWatch stopWatch = new StopWatch();
     List<GraphContext> graphContexts =
       IntStream.range(0, PARALLELISM)
-        .mapToObj(i -> getGraphContext(random, cohortSize, adSetSize, maxConcurrency))
+        .mapToObj(i -> getGraphContext(random, cohortSize, adSetSize, maxConcurrency, edgeSize))
         .collect(Collectors.toList());
     TestReachStorage testReachStorage = new TestReachStorage(adSetSize, cohortSize);
     long sum = 0;
-    for (int j = 0; j < 200; j++) {
+    for (int j = 0; j < 2; j++) {
       stopWatch.reset();
       stopWatch.start();
       ShaleSolver shaleSolver = new ShaleSolver();
@@ -41,7 +42,7 @@ public class SolverBenchTest {
       sum += stopWatch.getTime();
       System.out.println(stopWatch.getTime());
     }
-    System.out.println(sum / 200);
+    System.out.println(sum / 2);
   }
 
   @Test
@@ -55,7 +56,7 @@ public class SolverBenchTest {
     StopWatch stopWatch = new StopWatch();
     List<GraphContext> graphContexts =
       IntStream.range(0, PARALLELISM)
-        .mapToObj(i -> getGraphContext(random, cohortSize, adSetSize, maxConcurrency))
+        .mapToObj(i -> getGraphContext(random, cohortSize, adSetSize, maxConcurrency, edgeSize))
         .collect(Collectors.toList());
     stopWatch.start();
     HwmSolver hwmSolver = new HwmSolver();

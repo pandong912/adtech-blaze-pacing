@@ -9,6 +9,5 @@ import lombok.Value;
 @Builder
 public class BreakTypeGroup {
   List<Integer> breakTypeIds;
-  List<String> breakTypes;
   Set<Integer> allBreakDurations;
 }

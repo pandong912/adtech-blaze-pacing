@@ -3,10 +3,6 @@ package com.hotstar.adtech.blaze.allocation.planner.service.worker;
 import com.hotstar.adtech.blaze.admodel.common.enums.PlanType;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ShaleAllocationDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ShaleSupplyAllocationDetail;
-import com.hotstar.adtech.blaze.allocation.planner.common.response.ShaleSolveResult;
-import com.hotstar.adtech.blaze.allocation.planner.common.response.diagnosis.PlanInfo;
-import com.hotstar.adtech.blaze.allocation.planner.common.response.diagnosis.ShaleAdSetDiagnosis;
-import com.hotstar.adtech.blaze.allocation.planner.common.response.diagnosis.ShaleAllocationDiagnosisDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.ShaleAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.ShaleDemandResult;
@@ -14,7 +10,8 @@ import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.Shal
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.ShaleSupplyResult;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleSolver;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.ReachStorage;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.QualificationExecutor;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.SpotQualificationExecutor;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.SsaiQualificationExecutor;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.BreakContext;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GraphContext;
@@ -28,40 +25,20 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class ShalePlanWorker {
-  private final DiagnosisService diagnosisService;
-  private final QualificationExecutor qualificationExecutor;
+  private final SsaiQualificationExecutor ssaiQualificationExecutor;
+  private final SpotQualificationExecutor spotQualificationExecutor;
   private final ShaleSolver solver;
 
-  @Timed(value = MetricNames.WORKER, extraTags = {"type", "shale"})
-  public List<ShaleSolveResult> generatePlans(ShalePlanContext shalePlanContext, PlanType planType) {
-    List<GraphContext> graphContexts =
-      qualificationExecutor.doQualification(planType, shalePlanContext.getGeneralPlanContext());
-
-    return graphContexts.parallelStream()
-      .map(graphContext -> solveGraph(shalePlanContext, graphContext))
-      .collect(Collectors.toList());
-  }
-
-
-  private ShaleSolveResult solveGraph(ShalePlanContext shalePlanContext, GraphContext graphContext) {
+  @Timed(value = MetricNames.PLAN_WORKER, extraTags = {"type", "shale"})
+  public ShaleAllocationPlan generatePlans(ShalePlanContext shalePlanContext, PlanType planType,
+                                           List<Integer> breakTypeIds, Integer duration) {
+    GraphContext graphContext = planType == PlanType.SSAI
+      ? ssaiQualificationExecutor.executeQualify(shalePlanContext.getGeneralPlanContext(), breakTypeIds, duration) :
+      spotQualificationExecutor.executeQualify(shalePlanContext.getGeneralPlanContext(), breakTypeIds, duration);
     GeneralPlanContext generalPlanContext = shalePlanContext.getGeneralPlanContext();
     ReachStorage reachStorage = shalePlanContext.getReachStorage();
     ShaleResult shaleResult = solver.solve(graphContext, reachStorage, shalePlanContext.getPenalty());
-
-    List<DemandDiagnosis> demandDiagnosisList = generalPlanContext.getDemandDiagnosisList();
-
-    List<ShaleAdSetDiagnosis> adSetDiagnoses =
-      diagnosisService.getShaleAdSetDiagnosisList(demandDiagnosisList, shaleResult.getDemandResults());
-    PlanInfo planInfo = diagnosisService.buildPlanInfo(graphContext, generalPlanContext.getBreakContext());
-    ShaleAllocationPlan shaleAllocationPlan =
-      buildShaleAllocationResult(generalPlanContext, graphContext, shaleResult);
-    return ShaleSolveResult.builder()
-      .shaleAllocationPlan(shaleAllocationPlan)
-      .shaleAllocationDiagnosisDetail(ShaleAllocationDiagnosisDetail.builder()
-        .adSetDiagnoses(adSetDiagnoses)
-        .planInfo(planInfo)
-        .build())
-      .build();
+    return buildShaleAllocationResult(generalPlanContext, graphContext, shaleResult);
   }
 
   private ShaleAllocationDetail buildShaleAllocationDetail(ShaleDemandResult shaleDemandResult) {
@@ -83,7 +60,7 @@ public class ShalePlanWorker {
     BreakContext breakContext = generalPlanContext.getBreakContext();
     return ShaleAllocationPlan.builder()
       .contentId(contentId)
-      .breakTypeIds(graphContext.getBreakTypeGroup().getBreakTypeIds())
+      .breakTypeIds(graphContext.getBreakTypeIds())
       .nextBreakIndex(breakContext.getNextBreakIndex())
       .totalBreakNumber(breakContext.getTotalBreakNumber())
       .duration(graphContext.getBreakDuration())

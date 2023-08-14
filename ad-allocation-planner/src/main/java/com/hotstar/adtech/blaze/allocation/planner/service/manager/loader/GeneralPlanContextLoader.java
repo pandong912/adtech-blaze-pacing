@@ -11,7 +11,7 @@ import com.hotstar.adtech.blaze.allocation.planner.ingester.DataExchangerService
 import com.hotstar.adtech.blaze.allocation.planner.ingester.DataLoader;
 import com.hotstar.adtech.blaze.allocation.planner.service.manager.DataProcessService;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.DemandDiagnosis;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Request;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.RequestData;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Response;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdModel;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
@@ -27,11 +27,13 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
 @Slf4j
+@Profile("!sim && !worker")
 public class GeneralPlanContextLoader {
   private final DataExchangerService dataExchangerService;
   private final DataLoader dataLoader;
@@ -57,24 +59,18 @@ public class GeneralPlanContextLoader {
     List<DemandDiagnosis> demandDiagnosisList =
       dataProcessService.getDemandDiagnosisList(adSets, breakContext, adSetImpression);
 
-    long count = concurrencyData.getCohorts().stream()
-      .filter(c -> StreamType.SSAI_Spot.equals(c.getPlayoutStream().getStreamType()))
-      .count();
-    log.info("total cohort size: {} ,ssai cohorts size: {}", concurrencyData.getCohorts().size(), count);
+    log.info("total cohort size: {}", concurrencyData.getCohorts().size());
+    log.info("total stream size: {}", concurrencyData.getStreams().size());
     log.info("break index: {}, total break number: {}", breakIndex, totalBreakNumber);
-    log.info("adSet size: {}", adSets.size());
+    log.info("ssai adSet size: {}", adSets.stream().filter(adSet -> adSet.getSsaiAds().size() > 0).count());
+    log.info("spot adSet size: {}", adSets.stream().filter(adSet -> adSet.getSpotAds().size() > 0).count());
 
     List<Response> responses = demandDiagnosisList.stream()
       .map(dataProcessService::convertFromDemand)
       .collect(Collectors.toList());
     Map<String, Integer> attributeId2TargetingTagMap = adModel.getAttributeId2TargetingTags();
-    List<Request> ssaiAndSpotRequests = concurrencyData.getCohorts().stream()
-      .map(this::buildRequest)
-      .collect(Collectors.toList());
-    List<Request> spotRequests = concurrencyData.getStreams().stream()
-      .map(this::buildRequest)
-      .collect(Collectors.toList());
 
+    RequestData requestData = new RequestData(concurrencyData);
 
     return GeneralPlanContext.builder()
       .contentId(contentId)
@@ -82,25 +78,10 @@ public class GeneralPlanContextLoader {
       .adSets(adSets)
       .attributeId2TargetingTagMap(attributeId2TargetingTagMap)
       .demandDiagnosisList(demandDiagnosisList)
-      .ssaiAndSpotRequests(ssaiAndSpotRequests)
-      .spotRequests(spotRequests)
+      .requestData(requestData)
       .responses(responses)
       .breakContext(breakContext)
       .breakDetails(dataLoader.getBreakDetail())
-      .build();
-  }
-
-  private Request buildRequest(ContentCohort contentCohort) {
-    return Request.builder()
-      .concurrency(contentCohort.getConcurrency())
-      .concurrencyId(contentCohort.getConcurrencyId())
-      .build();
-  }
-
-  private Request buildRequest(ContentStream contentStream) {
-    return Request.builder()
-      .concurrency(contentStream.getConcurrency())
-      .concurrencyId(contentStream.getConcurrencyId())
       .build();
   }
 
@@ -116,7 +97,7 @@ public class GeneralPlanContextLoader {
 
     List<ContentCohort> cohorts = getContentCohorts(contentId, playoutStreamMap);
 
-    List<ContentStream> streams = getContentStreams(contentId, playoutStreamMap);
+    List<ContentStream> streams = getContentStreams(contentId, playoutStreamMap, cohorts.size());
 
     return ConcurrencyData.builder()
       .cohorts(cohorts)
@@ -134,9 +115,10 @@ public class GeneralPlanContextLoader {
     return ssaiCohorts;
   }
 
-  private List<ContentStream> getContentStreams(String contentId, Map<String, PlayoutStream> playoutStreamMap) {
+  private List<ContentStream> getContentStreams(String contentId, Map<String, PlayoutStream> playoutStreamMap,
+                                                int size) {
     List<ContentStream> streams = dataExchangerService.getContentStreamConcurrency(contentId, playoutStreamMap);
-    IntStream.range(0, streams.size()).forEach(i -> streams.get(i).setConcurrencyId(i));
+    IntStream.range(0, streams.size()).forEach(i -> streams.get(i).setConcurrencyId(i, size));
     return streams;
   }
 

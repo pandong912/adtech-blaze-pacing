@@ -5,10 +5,11 @@ import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shal
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleGraph;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleSupply;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.ReachStorage;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BitSetQualificationResult;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.QualificationResult;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Request;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Response;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,12 +35,13 @@ public class ShaleGraphTestData {
     List<ShaleSupply> shaleSupplies = requests.stream()
       .map(shaleSupply -> new ShaleSupply(shaleSupply, 20000))
       .collect(Collectors.toList());
-    BitSet bitSet = new BitSet();
-    bitSet.set(0);
-    bitSet.set(1);
-    bitSet.set(2);
-    bitSet.set(64);
-    bitSet.set(129);
+    QualificationResult bitSet = new BitSetQualificationResult(requests.size(), responses.size());
+    bitSet.set(0, 0);
+    bitSet.set(0, 1);
+    bitSet.set(0, 2);
+    bitSet.set(1, 0);
+    bitSet.set(2, 1);
+
 
     ShaleGraph shaleGraph =
       new ShaleGraph(shaleDemands, shaleSupplies, new MockReachStorage(), ShaleConstant.PENALTY, bitSet);

@@ -3,12 +3,9 @@ package com.hotstar.adtech.blaze.allocationplan.client;
 import com.hotstar.adtech.blaze.admodel.common.enums.AlgorithmType;
 import com.hotstar.adtech.blaze.admodel.common.enums.PlanType;
 import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
-import com.hotstar.adtech.blaze.allocation.planner.common.response.diagnosis.AllocationDiagnosis;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.hwm.HwmAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.ShaleAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.SupplyInfo;
-import com.hotstar.adtech.blaze.allocationplan.client.common.GzipUtils;
-import com.hotstar.adtech.blaze.allocationplan.client.common.PathUtils;
 import com.hotstar.adtech.blaze.allocationplan.client.common.ProtostuffUtils;
 import com.hotstar.adtech.blaze.allocationplan.client.model.LoadRequest;
 import com.hotstar.adtech.blaze.allocationplan.client.model.UploadResult;
@@ -145,28 +142,5 @@ public class LocalAllocationPlanClient implements AllocationPlanClient {
       throw new ServiceException("Failed to upload allocation plan to:" + filePath, e);
     }
     return fileName;
-  }
-
-  public void uploadAllocationDiagnosis(AllocationDiagnosis allocationDiagnosis) {
-    Path path = Paths.get(baseDir,
-      PathUtils.joinToDiagnosisPath(allocationDiagnosis.getContentId(), allocationDiagnosis.getVersion()));
-    try {
-      byte[] value = ProtostuffUtils.serialize(allocationDiagnosis);
-      Path parentDir = path.getParent();
-      Files.createDirectories(parentDir);
-      Files.write(path, GzipUtils.compress(value));
-    } catch (IOException e) {
-      throw new ServiceException("fail upload allocation diagnosis to:" + path, e);
-    }
-  }
-
-  public AllocationDiagnosis loadAllocationDiagnosis(String path) {
-    try {
-      byte[] bytes = Files.readAllBytes(Paths.get(path));
-      byte[] decompressed = GzipUtils.decompress(bytes);
-      return ProtostuffUtils.deserialize(decompressed, AllocationDiagnosis.class);
-    } catch (Exception e) {
-      throw new ServiceException("fail get allocation diagnosis from:" + path, e);
-    }
   }
 }

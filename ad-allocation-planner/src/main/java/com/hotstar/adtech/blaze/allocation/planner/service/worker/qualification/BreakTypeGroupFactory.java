@@ -1,37 +1,20 @@
 package com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification;
 
-import com.hotstar.adtech.blaze.admodel.common.enums.PlanType;
 import com.hotstar.adtech.blaze.admodel.common.enums.RuleType;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.BreakTargetingRule;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.GraphContext;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
-public class QualificationExecutor {
-  private final SpotQualificationExecutor spotQualificationExecutor;
-  private final SsaiQualificationExecutor ssaiQualificationExecutor;
+public class BreakTypeGroupFactory {
 
-  public List<GraphContext> doQualification(PlanType planType, GeneralPlanContext generalPlanContext) {
-    List<BreakTypeGroup> breakTypeGroups =
-      getBreakTypeList(generalPlanContext.getAdSets(), generalPlanContext.getBreakDetails());
-    if (PlanType.SPOT == planType) {
-      return spotQualificationExecutor.executeQualify(generalPlanContext, breakTypeGroups);
-    } else {
-      return ssaiQualificationExecutor.executeQualify(generalPlanContext, breakTypeGroups);
-    }
-  }
-
-  private List<BreakTypeGroup> getBreakTypeList(List<AdSet> adSets, List<BreakDetail> breakDetails) {
+  public List<BreakTypeGroup> getBreakTypeList(List<AdSet> adSets, List<BreakDetail> breakDetails) {
     Map<BreakDetail, String> breakTypeId2AdSetIdList = breakDetails.stream()
       .collect(Collectors.toMap(Function.identity(),
         breakDetail -> getQualifiedAdSet(breakDetail.getBreakTypeId(), adSets)));
@@ -49,7 +32,6 @@ public class QualificationExecutor {
   private BreakTypeGroup buildBreakTypeGroup(List<BreakDetail> list) {
     return BreakTypeGroup.builder()
       .breakTypeIds(list.stream().map(BreakDetail::getBreakTypeId).sorted().collect(Collectors.toList()))
-      .breakTypes(list.stream().map(BreakDetail::getBreakType).collect(Collectors.toList()))
       .allBreakDurations(
         list.stream().map(BreakDetail::getBreakDuration).flatMap(List::stream).collect(Collectors.toSet()))
       .build();

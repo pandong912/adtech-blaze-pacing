@@ -1,8 +1,9 @@
 spring:
   profiles:
-    include: ad-model-repository-prod, ad-model-client-prod, allocation-plan-client-prod, launch-darkly-prod, ad-redis-client-prod
+    include: ad-model-repository-prod, ad-model-client-prod, allocation-plan-client-prod, launch-darkly-prod, ad-redis-client-prod, allocation-data-client-prod
 blaze:
   data-exchanger:
     endpoint: adtech-blaze-data-exchanger-apse1.hotstar-labs.com
+
 
 

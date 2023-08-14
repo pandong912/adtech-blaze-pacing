@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class Demand {
-  private final Integer id;
+  private final int id;
   private final double demand;
   private final int adDuration;
 

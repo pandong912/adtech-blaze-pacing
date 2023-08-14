@@ -1,6 +1,7 @@
 package com.hotstar.adtech.blaze.exchanger.service;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.AlgorithmType;
+import com.hotstar.adtech.blaze.admodel.common.enums.TaskStatus;
 import com.hotstar.adtech.blaze.admodel.repository.AllocationPlanResultDetailRepository;
 import com.hotstar.adtech.blaze.admodel.repository.AllocationPlanResultRepository;
 import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResult;
@@ -41,7 +42,8 @@ public class AllocationPlanService {
 
   public Optional<AllocationPlanUriResponse> getAllocationPlanUri(String contentId, Long version) {
     return allocationPlanResultRepository
-      .findFirstByContentIdAndVersionGreaterThanOrderByVersionDesc(contentId, Instant.ofEpochMilli(version))
+      .findFirstByContentIdAndTaskStatusAndVersionGreaterThanOrderByVersionDesc(contentId, TaskStatus.SUCCESS,
+        Instant.ofEpochMilli(version))
       .map(this::buildAllocationPlanUriResponse);
   }
 
@@ -49,6 +51,7 @@ public class AllocationPlanService {
     List<AllocationPlanDetail> allocationPlanDetails =
       allocationPlanResultDetailRepository.findAllByAllocationPlanResultId(allocationPlanResult.getId())
         .stream()
+        .filter(detail -> detail.getTaskStatus() == TaskStatus.SUCCESS)
         .map(this::buildAllocationPlanDetailResponse)
         .collect(Collectors.toList());
 
@@ -91,6 +94,7 @@ public class AllocationPlanService {
 
   private List<LoadRequest> buildLoadRequests(AllocationPlanResult allocationPlanResult) {
     return allocationPlanResult.getAllocationPlanResultDetails().stream()
+      .filter(allocationPlanResultDetail -> allocationPlanResultDetail.getTaskStatus() == TaskStatus.SUCCESS)
       .map(allocationPlanResultDetail -> LoadRequest.builder()
         .path(allocationPlanResult.getPath())
         .fileName(allocationPlanResultDetail.getFileName())

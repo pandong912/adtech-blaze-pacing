@@ -11,11 +11,8 @@ import com.hotstar.adtech.blaze.allocation.planner.qualification.StreamAdSetQual
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GraphContext;
-import com.hotstar.adtech.blaze.allocation.planner.util.MemoryAlignment;
 import io.micrometer.core.annotation.Timed;
-import java.util.BitSet;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,58 +20,46 @@ public class SpotQualificationExecutor {
 
 
   @Timed(value = QUALIFICATION, extraTags = {"type", "spot"})
-  public List<GraphContext> executeQualify(GeneralPlanContext generalPlanContext,
-                                           List<BreakTypeGroup> breakTypeGroups) {
+  public GraphContext executeQualify(GeneralPlanContext generalPlanContext,
+                                     List<Integer> breakTypeIds, Integer duration) {
 
     List<AdSet> adSets = generalPlanContext.getAdSets();
     List<ContentStream> streams = generalPlanContext.getConcurrencyData().getStreams();
 
-    BitSet firstQualified = new BitSet(MemoryAlignment.getSize(adSets) * streams.size());
+    QualificationResult firstQualified = new BitSetQualificationResult(streams.size(), adSets.size());
 
     streams.forEach(contentStream -> qualifyByConcurrency(contentStream, adSets, firstQualified));
 
-    return breakTypeGroups.parallelStream()
-      .flatMap(breakTypeGroup -> breakTypeGroup.getAllBreakDurations()
-        .parallelStream()
-        .map(breakDuration -> buildGraphContextForEachPlan(generalPlanContext, breakTypeGroup, firstQualified,
-          breakDuration)))
-      .collect(Collectors.toList());
-
-  }
-
-  private GraphContext buildGraphContextForEachPlan(GeneralPlanContext generalPlanContext,
-                                                    BreakTypeGroup breakTypeGroup, BitSet firstQualified,
-                                                    Integer breakDuration) {
-    BitSet secondQualified = new BitSet(firstQualified.size());
+    QualificationResult secondQualified = new BitSetQualificationResult(streams.size(), adSets.size());
     generalPlanContext.getConcurrencyData().getStreams()
-      .forEach(
-        request -> qualifyByBreak(generalPlanContext.getAdSets(), request, breakTypeGroup.getBreakTypeIds().get(0),
-          breakDuration, firstQualified,
-          secondQualified));
+      .forEach(request -> qualifyByBreak(generalPlanContext.getAdSets(), request, breakTypeIds.get(0),
+        duration, firstQualified, secondQualified));
+
 
     return GraphContext.builder()
-      .breakDuration(breakDuration)
-      .breakTypeGroup(breakTypeGroup)
+      .breakDuration(duration)
       .planType(PlanType.SPOT)
-      .requests(generalPlanContext.getSpotRequests())
+      .requests(generalPlanContext.getRequestData().getSpotRequests())
       .edges(secondQualified)
       .responses(generalPlanContext.getResponses())
+      .breakTypeIds(breakTypeIds)
       .build();
+
   }
 
-
-  private void qualifyByConcurrency(ContentStream contentStream, List<AdSet> adSets, BitSet firstQualified) {
+  private void qualifyByConcurrency(ContentStream contentStream, List<AdSet> adSets,
+                                    QualificationResult firstQualified) {
     QualificationEngine qualificationEngine =
-      new StreamAdSetQualificationEngine(contentStream.getPlayoutStream(), contentStream.getConcurrencyId(),
+      new StreamAdSetQualificationEngine(contentStream.getPlayoutStream(), contentStream.getConcurrencyIdInStream(),
         firstQualified);
     qualificationEngine.qualify(adSets);
   }
 
   private void qualifyByBreak(List<AdSet> adSets, ContentStream request, Integer breakTypeId, Integer breakDuration,
-                              BitSet firstQualified, BitSet secondQualified) {
+                              QualificationResult firstQualified, QualificationResult secondQualified) {
     Language language = request.getPlayoutStream().getLanguage();
     QualificationEngine qualificationEngine =
-      new StreamAdQualificationEngine(breakDuration, breakTypeId, language, request.getConcurrencyId(),
+      new StreamAdQualificationEngine(breakDuration, breakTypeId, language, request.getConcurrencyIdInStream(),
         firstQualified, secondQualified);
 
     qualificationEngine.qualify(adSets);

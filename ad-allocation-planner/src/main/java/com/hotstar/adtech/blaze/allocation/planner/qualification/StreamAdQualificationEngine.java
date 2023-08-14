@@ -5,9 +5,8 @@ import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.ad.As
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.ad.DurationInspector;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.ad.LanguageInspector;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.adset.BreakTargetingRuleInspector;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.QualificationResult;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
-import com.hotstar.adtech.blaze.allocation.planner.util.MemoryAlignment;
-import java.util.BitSet;
 import java.util.List;
 
 public class StreamAdQualificationEngine implements QualificationEngine {
@@ -17,11 +16,11 @@ public class StreamAdQualificationEngine implements QualificationEngine {
   private final LanguageInspector languageInspector;
   private final AspectRatioInspector aspectRatioInspector;
   private final int supplyId;
-  private final BitSet secondQualified;
-  private final BitSet firstQualified;
+  private final QualificationResult secondQualified;
+  private final QualificationResult firstQualified;
 
   public StreamAdQualificationEngine(Integer breakDuration, Integer breakTypeId, Language language, int supplyId,
-                                     BitSet firstQualified, BitSet secondQualified) {
+                                     QualificationResult firstQualified, QualificationResult secondQualified) {
     durationInspector = new DurationInspector(breakDuration);
     breakTargetingRuleInspector = new BreakTargetingRuleInspector(breakTypeId);
     languageInspector = new LanguageInspector(language.getId());
@@ -33,9 +32,8 @@ public class StreamAdQualificationEngine implements QualificationEngine {
   }
 
   public void qualify(List<AdSet> candidateAdSets) {
-    int size = MemoryAlignment.getSize(candidateAdSets);
     for (AdSet candidateAdSet : candidateAdSets) {
-      if (!firstQualified.get(supplyId * size + candidateAdSet.getDemandId())) {
+      if (!firstQualified.get(supplyId, candidateAdSet.getDemandId())) {
         continue;
       }
       if (!breakTargetingRuleInspector.qualify(candidateAdSet)) {
@@ -45,7 +43,7 @@ public class StreamAdQualificationEngine implements QualificationEngine {
         .anyMatch(
           ad -> languageInspector.qualify(ad) && durationInspector.qualify(ad) && aspectRatioInspector.qualify(ad));
       if (qualified) {
-        secondQualified.set(supplyId * size + candidateAdSet.getDemandId());
+        secondQualified.set(supplyId, candidateAdSet.getDemandId());
       }
     }
   }

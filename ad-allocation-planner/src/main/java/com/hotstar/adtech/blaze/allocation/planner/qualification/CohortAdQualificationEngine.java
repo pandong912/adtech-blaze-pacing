@@ -2,10 +2,9 @@ package com.hotstar.adtech.blaze.allocation.planner.qualification;
 
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.ad.DurationInspector;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.ad.LanguageInspector;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.QualificationResult;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Ad;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
-import com.hotstar.adtech.blaze.allocation.planner.util.MemoryAlignment;
-import java.util.BitSet;
 import java.util.List;
 
 public class CohortAdQualificationEngine implements QualificationEngine {
@@ -13,11 +12,12 @@ public class CohortAdQualificationEngine implements QualificationEngine {
   private final DurationInspector durationInspector;
   private final LanguageInspector languageInspector;
   private final int supplyId;
-  private final BitSet secondQualified;
-  private final BitSet firstQualified;
+  private final QualificationResult secondQualified;
+  private final QualificationResult firstQualified;
 
-  public CohortAdQualificationEngine(Integer breakDuration, Integer languageId, int supplyId, BitSet firstQualified,
-                                     BitSet secondQualified) {
+  public CohortAdQualificationEngine(Integer breakDuration, Integer languageId, int supplyId,
+                                     QualificationResult firstQualified,
+                                     QualificationResult secondQualified) {
     durationInspector = new DurationInspector(breakDuration);
     languageInspector = new LanguageInspector(languageId);
     this.supplyId = supplyId;
@@ -26,13 +26,12 @@ public class CohortAdQualificationEngine implements QualificationEngine {
   }
 
   public void qualify(List<AdSet> candidateAdSets) {
-    int size = MemoryAlignment.getSize(candidateAdSets);
     for (AdSet candidateAdSet : candidateAdSets) {
-      if (!firstQualified.get(supplyId * size + candidateAdSet.getDemandId())) {
+      if (!firstQualified.get(supplyId, candidateAdSet.getDemandId())) {
         continue;
       }
       if (isQualified(candidateAdSet)) {
-        secondQualified.set(supplyId * size + candidateAdSet.getDemandId());
+        secondQualified.set(supplyId, candidateAdSet.getDemandId());
       }
     }
   }

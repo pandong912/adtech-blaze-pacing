@@ -9,12 +9,9 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.hotstar.adtech.blaze.admodel.common.enums.AlgorithmType;
 import com.hotstar.adtech.blaze.admodel.common.enums.PlanType;
 import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
-import com.hotstar.adtech.blaze.allocation.planner.common.response.diagnosis.AllocationDiagnosis;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.hwm.HwmAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.ShaleAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.SupplyInfo;
-import com.hotstar.adtech.blaze.allocationplan.client.common.GzipUtils;
-import com.hotstar.adtech.blaze.allocationplan.client.common.PathUtils;
 import com.hotstar.adtech.blaze.allocationplan.client.common.ProtostuffUtils;
 import com.hotstar.adtech.blaze.allocationplan.client.model.LoadRequest;
 import com.hotstar.adtech.blaze.allocationplan.client.model.UploadResult;
@@ -163,34 +160,5 @@ public class S3AllocationPlanClient implements AllocationPlanClient {
     S3Object s3Object = s3Client.getObject(bucketName, keyName);
     S3ObjectInputStream s3is = s3Object.getObjectContent();
     return new BufferedInputStream(s3is, S3_LOAD_BUF_SIZE);
-  }
-
-
-  public void uploadAllocationDiagnosis(AllocationDiagnosis allocationDiagnosis) {
-    String path = Paths.get(PathUtils.joinToDiagnosisPath(allocationDiagnosis.getContentId(),
-      allocationDiagnosis.getVersion())).toString();
-    try {
-      byte[] value = ProtostuffUtils.serialize(allocationDiagnosis);
-      byte[] compressed = GzipUtils.compress(value);
-      ObjectMetadata metadata = new ObjectMetadata();
-      metadata.setContentLength(compressed.length);
-      ByteArrayInputStream buf = new ByteArrayInputStream(compressed);
-      s3Client.putObject(this.bucketName, path, buf, metadata);
-    } catch (Exception e) {
-      throw new ServiceException("fail upload allocation diagnosis to:" + bucketName + "/" + path, e);
-    }
-  }
-
-  public AllocationDiagnosis loadAllocationDiagnosis(String path) {
-    try {
-      S3Object s3Object = s3Client.getObject(bucketName, path);
-      S3ObjectInputStream s3is = s3Object.getObjectContent();
-      BufferedInputStream buf = new BufferedInputStream(s3is, S3_LOAD_BUF_SIZE);
-      byte[] bytes = IOUtils.toByteArray(buf);
-      byte[] decompressed = GzipUtils.decompress(bytes);
-      return ProtostuffUtils.deserialize(decompressed, AllocationDiagnosis.class);
-    } catch (Exception e) {
-      throw new ServiceException("fail get allocation diagnosis from:" + bucketName + "/" + path, e);
-    }
   }
 }

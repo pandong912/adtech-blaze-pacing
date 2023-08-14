@@ -18,13 +18,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
-@Component
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Profile("!sim && !worker")
 public class ShalePlanContextLoader {
 
   private final GeneralPlanContextLoader generalPlanContextLoader;
@@ -32,7 +33,7 @@ public class ShalePlanContextLoader {
   private final BlazeDynamicConfig blazeDynamicConfig;
 
   @Timed(value = PLAN_DATA_LOAD, extraTags = {"algorithm", "shale"})
-  public ShalePlanContext getShalePlanContext(Match match, AdModel adModel) {
+  public Pair<Map<String, Integer>, ShalePlanContext> getShalePlanContext(Match match, AdModel adModel) {
     GeneralPlanContext generalPlanContext = generalPlanContextLoader.getGeneralPlanContext(match, adModel);
 
     Map<String, Integer> supplyIdMap = generalPlanContext.getConcurrencyData().getCohorts()
@@ -43,12 +44,12 @@ public class ShalePlanContextLoader {
     Map<Long, Integer> adSetIdToDemandId = generalPlanContext.getAdSets().stream()
       .filter(adSet -> adSet.getMaximizeReach() == 1)
       .collect(Collectors.toMap(AdSet::getId, AdSet::getDemandId));
-    return ShalePlanContext.builder()
+    ShalePlanContext shalePlanContext = ShalePlanContext.builder()
       .generalPlanContext(generalPlanContext)
       .reachStorage(loadReach(match.getContentId(), supplyIdMap, adSetIdToDemandId))
       .penalty(ShaleConstant.PENALTY)
-      .supplyIdMap(supplyIdMap)
       .build();
+    return Pair.of(supplyIdMap, shalePlanContext);
   }
 
   private Integer processDuplicateStreamKey(Integer a, Integer b) {

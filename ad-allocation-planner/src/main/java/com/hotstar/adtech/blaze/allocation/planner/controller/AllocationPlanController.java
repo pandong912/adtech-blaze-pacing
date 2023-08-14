@@ -6,8 +6,8 @@ import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
 import com.hotstar.adtech.blaze.allocation.planner.common.request.AllocationRequest;
 import com.hotstar.adtech.blaze.allocation.planner.common.request.ShaleAllocationRequest;
 import com.hotstar.adtech.blaze.allocation.planner.common.request.UnReachData;
-import com.hotstar.adtech.blaze.allocation.planner.common.response.HwmSolveResult;
-import com.hotstar.adtech.blaze.allocation.planner.common.response.ShaleSolveResult;
+import com.hotstar.adtech.blaze.allocation.planner.common.response.hwm.HwmAllocationPlan;
+import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.ShaleAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.ingester.AdModelLoader;
 import com.hotstar.adtech.blaze.allocation.planner.service.manager.DataProcessService;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.DemandDiagnosis;
@@ -15,6 +15,9 @@ import com.hotstar.adtech.blaze.allocation.planner.service.worker.HwmPlanWorker;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.ShalePlanWorker;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.ReachStorage;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.RedisReachStorage;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BreakTypeGroup;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BreakTypeGroupFactory;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.RequestData;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Response;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdModel;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
@@ -43,18 +46,26 @@ public class AllocationPlanController {
   private final ShalePlanWorker shalePlanWorker;
   private final AdModelLoader adModelLoader;
   private final DataProcessService dataProcessService;
+  private final BreakTypeGroupFactory breakTypeGroupFactory;
 
   @PostMapping("/hwm")
-  public StandardResponse<List<HwmSolveResult>> generateHwmPlan(@RequestBody AllocationRequest allocationRequest) {
+  public StandardResponse<List<HwmAllocationPlan>> generateHwmPlan(@RequestBody AllocationRequest allocationRequest) {
     GeneralPlanContext generalPlanContext = buildGeneralPlanContext(allocationRequest, Collections.emptyList());
     setConcurrencyId(generalPlanContext);
-    List<HwmSolveResult> ssaiHwmSolveResults =
-      hwmPlanWorker.generatePlans(generalPlanContext, allocationRequest.getPlanType());
-    return StandardResponse.success(ssaiHwmSolveResults);
+    List<BreakTypeGroup> breakTypeList =
+      breakTypeGroupFactory.getBreakTypeList(generalPlanContext.getAdSets(), generalPlanContext.getBreakDetails());
+    List<HwmAllocationPlan> hwmSolveResults = breakTypeList.stream()
+      .flatMap(breakTypeGroup -> breakTypeGroup
+        .getAllBreakDurations()
+        .stream()
+        .map(duration -> hwmPlanWorker.generatePlans(generalPlanContext, allocationRequest.getPlanType(),
+          breakTypeGroup.getBreakTypeIds(), duration)))
+      .collect(Collectors.toList());
+    return StandardResponse.success(hwmSolveResults);
   }
 
   @PostMapping("/shale")
-  public StandardResponse<List<ShaleSolveResult>> generateShalePlan(
+  public StandardResponse<ShaleResponse> generateShalePlan(
     @RequestBody ShaleAllocationRequest shaleAllocationRequest) {
     GeneralPlanContext generalPlanContext = buildGeneralPlanContext(shaleAllocationRequest.getAllocationRequest(),
       shaleAllocationRequest.getReachAdSetIds());
@@ -70,9 +81,21 @@ public class AllocationPlanController {
       .penalty(shaleAllocationRequest.getPenalty())
       .build();
 
-    List<ShaleSolveResult> ssaiHwmSolveResults =
-      shalePlanWorker.generatePlans(shalePlanContext, shaleAllocationRequest.getAllocationRequest().getPlanType());
-    return StandardResponse.success(ssaiHwmSolveResults);
+    List<BreakTypeGroup> breakTypeList =
+      breakTypeGroupFactory.getBreakTypeList(generalPlanContext.getAdSets(), generalPlanContext.getBreakDetails());
+    List<ShaleAllocationPlan> shaleSolveResults = breakTypeList.stream()
+      .flatMap(breakTypeGroup -> breakTypeGroup
+        .getAllBreakDurations()
+        .stream()
+        .map(duration -> shalePlanWorker.generatePlans(shalePlanContext,
+          shaleAllocationRequest.getAllocationRequest().getPlanType(),
+          breakTypeGroup.getBreakTypeIds(), duration)))
+      .collect(Collectors.toList());
+
+    return StandardResponse.success(ShaleResponse.builder()
+      .allocationPlans(shaleSolveResults)
+      .concurrencyIdMap(concurrencyIdMap)
+      .build());
   }
 
 
@@ -112,6 +135,9 @@ public class AllocationPlanController {
     List<Response> responses = demandDiagnosisList.stream()
       .map(dataProcessService::convertFromDemand)
       .collect(Collectors.toList());
+
+    RequestData requestData = new RequestData(request.getConcurrencyData());
+
     return GeneralPlanContext.builder()
       .contentId(contentId)
       .concurrencyData(request.getConcurrencyData())
@@ -121,13 +147,14 @@ public class AllocationPlanController {
       .responses(responses)
       .breakContext(breakContext)
       .breakDetails(request.getBreakDetails())
+      .requestData(requestData)
       .build();
   }
 
   private void setConcurrencyId(GeneralPlanContext generalPlanContext) {
     List<ContentStream> streams = generalPlanContext.getConcurrencyData().getStreams();
     List<ContentCohort> cohorts = generalPlanContext.getConcurrencyData().getCohorts();
-    IntStream.range(0, streams.size()).forEach(i -> streams.get(i).setConcurrencyId(i));
+    IntStream.range(0, streams.size()).forEach(i -> streams.get(i).setConcurrencyId(i, cohorts.size()));
     IntStream.range(0, cohorts.size()).forEach(i -> cohorts.get(i).setConcurrencyId(i));
   }
 }

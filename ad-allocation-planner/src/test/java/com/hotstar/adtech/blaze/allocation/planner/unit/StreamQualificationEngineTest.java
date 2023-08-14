@@ -9,11 +9,12 @@ import com.hotstar.adtech.blaze.allocation.planner.common.model.Language;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.Platform;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.StreamAdSetQualificationEngine;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BitSetQualificationResult;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.QualificationResult;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.StreamTargetingRule;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.StreamTargetingRuleClause;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.Collections;
 import java.util.Map;
 import org.junit.jupiter.api.Assertions;
@@ -31,7 +32,7 @@ public class StreamQualificationEngineTest {
   public void whenIncludeRuleIsAllMatchThenSuccess() {
     ContentStream stream =
       ContentStream.builder()
-        .concurrencyId(0)
+        .concurrencyIdInStream(0)
         .playoutStream(PlayoutStream.builder()
           .streamType(StreamType.SSAI_Spot)
           .language(languageMapping.get("English"))
@@ -42,9 +43,9 @@ public class StreamQualificationEngineTest {
           .tenant(Tenant.India)
           .build())
         .build();
-    BitSet bitSet = new BitSet();
+    QualificationResult bitSet = new BitSetQualificationResult(10, 2);
     StreamAdSetQualificationEngine streamQualificationEngine =
-      new StreamAdSetQualificationEngine(stream.getPlayoutStream(), stream.getConcurrencyId(), bitSet);
+      new StreamAdSetQualificationEngine(stream.getPlayoutStream(), stream.getConcurrencyIdInStream(), bitSet);
 
 
     AdSet adSet = AdSet.builder()
@@ -69,7 +70,7 @@ public class StreamQualificationEngineTest {
         .build())
       .build();
     streamQualificationEngine.qualify(Collections.singletonList(adSet));
-    Assertions.assertTrue(bitSet.get(0));
+    Assertions.assertTrue(bitSet.get(0, 0));
 
     AdSet adSet2 = AdSet.builder()
       .demandId(1)
@@ -93,14 +94,14 @@ public class StreamQualificationEngineTest {
         .build())
       .build();
     streamQualificationEngine.qualify(Collections.singletonList(adSet2));
-    Assertions.assertFalse(bitSet.get(1));
+    Assertions.assertFalse(bitSet.get(0, 1));
   }
 
   @Test
   public void whenExcludeRuleNoneMatchThenSuccess() {
     ContentStream stream =
       ContentStream.builder()
-        .concurrencyId(0)
+        .concurrencyIdInStream(0)
         .playoutStream(PlayoutStream.builder()
           .streamType(StreamType.SSAI_Spot)
           .language(languageMapping.get("English"))
@@ -111,9 +112,9 @@ public class StreamQualificationEngineTest {
           .tenant(Tenant.India)
           .build())
         .build();
-    BitSet bitSet = new BitSet();
+    QualificationResult bitSet = new BitSetQualificationResult(10, 2);
     StreamAdSetQualificationEngine streamQualificationEngine =
-      new StreamAdSetQualificationEngine(stream.getPlayoutStream(), stream.getConcurrencyId(), bitSet);
+      new StreamAdSetQualificationEngine(stream.getPlayoutStream(), stream.getConcurrencyIdInStream(), bitSet);
 
 
     AdSet adSet = AdSet.builder()
@@ -138,7 +139,7 @@ public class StreamQualificationEngineTest {
         .build())
       .build();
     streamQualificationEngine.qualify(Collections.singletonList(adSet));
-    Assertions.assertTrue(bitSet.get(0));
+    Assertions.assertTrue(bitSet.get(0, 0));
 
     AdSet adSet2 = AdSet.builder()
       .demandId(1)
@@ -163,7 +164,7 @@ public class StreamQualificationEngineTest {
         .build())
       .build();
     streamQualificationEngine.qualify(Collections.singletonList(adSet2));
-    Assertions.assertTrue(bitSet.get(1));
+    Assertions.assertTrue(bitSet.get(0, 1));
   }
 
 }

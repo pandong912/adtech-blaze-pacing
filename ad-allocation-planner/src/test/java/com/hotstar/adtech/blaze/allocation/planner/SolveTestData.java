@@ -1,22 +1,25 @@
 package com.hotstar.adtech.blaze.allocation.planner;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.PlanType;
+import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.ArrayQualificationResult;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.QualificationResult;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Request;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Response;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GraphContext;
-import com.hotstar.adtech.blaze.allocation.planner.util.MemoryAlignment;
-import java.util.BitSet;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class SolveTestData {
-  public static GraphContext getGraphContext(Random random, int cohortSize, int adSetSize, int maxConcurrency) {
+  public static GraphContext getGraphContext(Random random, int cohortSize, int adSetSize, int maxConcurrency,
+                                             int edge) {
 
     List<Request> requests = IntStream.range(0, cohortSize)
       .mapToObj(id -> Request.builder()
         .concurrencyId(id)
+        .streamType(StreamType.SSAI_Spot)
         .concurrency(random.nextInt(maxConcurrency))
         .build())
       .collect(Collectors.toList());
@@ -31,18 +34,16 @@ public class SolveTestData {
         .build()
     ).collect(Collectors.toList());
 
-    BitSet bitSet = new BitSet();
-    int size = MemoryAlignment.getSize(responses);
+    QualificationResult bitSet = new ArrayQualificationResult(requests.size(), adSetSize);
     for (Request request : requests) {
-      for (int i = 0; i < 2000; i++) {
-        bitSet.set(request.getConcurrencyId() * size + i);
+      for (int i = 0; i < edge; i++) {
+        bitSet.set(request.getConcurrencyId(), i);
       }
     }
 
 
     return GraphContext.builder()
       .breakDuration(20000)
-      .breakTypeGroup(null)
       .requests(requests)
       .responses(responses)
       .edges(bitSet)

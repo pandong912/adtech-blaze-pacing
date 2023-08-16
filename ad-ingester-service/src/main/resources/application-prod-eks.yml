@@ -1,8 +1,11 @@
 spring:
   profiles:
     include: ad-model-client-prod, ad-redis-client-prod
+blaze:
+  ad-ingester-service:
+    swagger:
+      enable: false
 pulse:
   counter-service:
     endpoint: http://pulse-counter.internal.hotstar.com
     readTimeout: 5000
-

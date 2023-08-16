@@ -21,7 +21,7 @@ public class SwaggerConfig {
   @Value("${blaze.ad-ingester-service.swagger.package:com.hotstar.adtech.blaze.ingester.controller}")
   private String basePackage;
 
-  @Value("${blaze.ad-asset-service.swagger.enable:true}")
+  @Value("${blaze.ad-ingester-service.swagger.enable:true}")
   private boolean enableSwagger;
 
   @Bean

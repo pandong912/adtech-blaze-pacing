@@ -42,6 +42,9 @@ blaze:
       maxAttempts: 3
   ad-ingester-service:
     metrics-prefix: blaze.ingester.service
+    swagger:
+      package: com.hotstar.adtech.blaze.ingester.controller
+      enable: true
     executor:
       core-pool-size: 4
       max-pool-size: 16

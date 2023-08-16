@@ -12,6 +12,7 @@ import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Match;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
 import com.hotstar.adtech.blaze.allocation.planner.source.s3.AllocationDataClient;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
@@ -35,8 +36,8 @@ public class HwmModePublisher {
       }
       Instant version = Instant.now();
       allocationDataClient.uploadHwmData(match.getContentId(), version.toString(), generalPlanContext);
-      taskPublisher.publish(match, generalPlanContext, version, this::buildSsaiAllocationPlanResultDetail,
-        this::buildSpotAllocationPlanResultDetail);
+      taskPublisher.publish(match, generalPlanContext, version, this::buildSpotAllocationPlanResultDetail,
+        Collections.singletonList(this::buildSsaiAllocationPlanResultDetail));
     } catch (Exception e) {
       throw new ServiceException("Failed to publish task for match: " + match.getContentId(), e);
     }

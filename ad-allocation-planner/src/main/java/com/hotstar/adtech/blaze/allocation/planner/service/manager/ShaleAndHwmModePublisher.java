@@ -17,6 +17,7 @@ import com.hotstar.adtech.blaze.allocationplan.client.AllocationPlanClient;
 import com.hotstar.adtech.blaze.allocationplan.client.common.PathUtils;
 import io.micrometer.core.annotation.Timed;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -55,10 +56,8 @@ public class ShaleAndHwmModePublisher {
       allocationDataClient.uploadHwmData(match.getContentId(), version.toString(),
         shalePlanContext.getGeneralPlanContext());
 
-      taskPublisher.publish(match, generalPlanContext, version, this::buildSsaiShaleAllocationPlanResultDetail,
-        this::buildHwmSpotAllocationPlanResultDetail);
-      taskPublisher.publish(match, generalPlanContext, version, this::buildSsaiHwmAllocationPlanResultDetail,
-        this::buildEmpty);
+      taskPublisher.publish(match, generalPlanContext, version, this::buildHwmSpotAllocationPlanResultDetail,
+        Arrays.asList(this::buildSsaiShaleAllocationPlanResultDetail, this::buildSsaiHwmAllocationPlanResultDetail));
     } catch (Exception e) {
       throw new ServiceException("Failed to publish task for match: " + match.getContentId(), e);
     }

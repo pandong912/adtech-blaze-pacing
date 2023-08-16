@@ -29,8 +29,8 @@ public class TaskPublisher {
 
   @Timed(value = MANAGER_PUBLISH)
   public void publish(Match match, GeneralPlanContext generalPlanContext, Instant version,
-                      Function<BreakTypeGroup, Stream<AllocationPlanResultDetail>> ssaiTaskBuilder,
-                      Function<BreakTypeGroup, Stream<AllocationPlanResultDetail>> spotTaskBuilder) {
+                      Function<BreakTypeGroup, Stream<AllocationPlanResultDetail>> spotTaskBuilder,
+                      List<Function<BreakTypeGroup, Stream<AllocationPlanResultDetail>>> ssaiTaskBuilders) {
     AllocationPlanResult allocationPlanResult = AllocationPlanResult.builder()
       .contentId(match.getContentId())
       .version(version)
@@ -41,8 +41,10 @@ public class TaskPublisher {
 
     List<BreakTypeGroup> breakTypeList =
       breakTypeGroupFactory.getBreakTypeList(generalPlanContext.getAdSets(), generalPlanContext.getBreakDetails());
-    List<AllocationPlanResultDetail> ssaiAllocationPlanResultDetails =
-      breakTypeList.stream().flatMap(ssaiTaskBuilder).collect(Collectors.toList());
+
+    List<AllocationPlanResultDetail> ssaiAllocationPlanResultDetails = ssaiTaskBuilders.stream()
+      .flatMap(ssaiTaskBuilder -> breakTypeList.stream().flatMap(ssaiTaskBuilder))
+      .collect(Collectors.toList());
     List<AllocationPlanResultDetail> spotAllocationPlanResultDetails =
       breakTypeList.stream().flatMap(spotTaskBuilder).collect(Collectors.toList());
 

@@ -57,6 +57,6 @@ public class ShaleGraph {
   }
 
   public double getUnReachRatio(ShaleDemand demand, ShaleSupply supply) {
-    return reachStorage.getUnReachRatio(demand.getId(), supply.getId());
+    return reachStorage.getUnReachRatio(demand, supply);
   }
 }

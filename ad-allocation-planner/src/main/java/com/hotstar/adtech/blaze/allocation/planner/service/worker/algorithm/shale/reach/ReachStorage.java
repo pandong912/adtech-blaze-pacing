@@ -6,23 +6,24 @@ import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shal
 
 public interface ReachStorage {
   default double getTd(ShaleDemand demand, ShaleSupply supply) {
-    if (demand.getReachEnabled() == 1 && supply.getStreamType() == StreamType.SSAI_Spot) {
-      double reachRatio = getUnReachRatio(demand.getId(), supply.getId());
-      return demand.getTheta() + Math.max(0, reachRatio - demand.getReachOffset());
-    } else {
-      return demand.getTheta();
-    }
+    double reachRatio = getUnReachRatio(demand, supply);
+    return demand.getTheta() + Math.max(0, reachRatio - demand.getReachOffset());
   }
 
   default double getRd(ShaleDemand demand, ShaleSupply supply) {
+    double reachRatio = getUnReachRatio(demand, supply);
+    return Math.min(1, Math.max(reachRatio - demand.getReachOffset(), 0) / (demand.getReachOffset() + 0.000001));
+  }
+
+  default double getUnReachRatio(ShaleDemand demand, ShaleSupply supply) {
     if (demand.getReachEnabled() == 1 && supply.getStreamType() == StreamType.SSAI_Spot) {
-      double reachRatio = getUnReachRatio(demand.getId(), supply.getId());
+      double reachRatio = getUnReachRatioFromStorage(demand.getId(), supply.getId());
       return Math.min(1, Math.max(reachRatio - demand.getReachOffset(), 0) / (demand.getReachOffset() + 0.000001));
     } else {
       return 0;
     }
   }
 
-  double getUnReachRatio(int demandId, int concurrencyId);
+  double getUnReachRatioFromStorage(int demandId, int concurrencyId);
 }
 

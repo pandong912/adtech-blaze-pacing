@@ -9,7 +9,7 @@ public class RedisReachStorage implements ReachStorage {
   private final double[][] unReachRatio;
 
   @Override
-  public double getUnReachRatio(int demandId, int concurrencyId) {
+  public double getUnReachRatioFromStorage(int demandId, int concurrencyId) {
     //    return unReachRatio.getOrDefault(concurrencyId, Collections.emptyMap()).getOrDefault(adSetId, 1d);
     return unReachRatio[demandId][concurrencyId];
   }

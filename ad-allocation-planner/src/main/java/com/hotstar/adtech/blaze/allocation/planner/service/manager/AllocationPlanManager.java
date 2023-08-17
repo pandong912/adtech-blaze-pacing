@@ -67,7 +67,8 @@ public class AllocationPlanManager {
 
     if (pending) {
       if (latestTask.getVersion().plus(8, ChronoUnit.MINUTES).isBefore(Instant.now())) {
-        log.error("task is pending for more than 8 minutes, task:{}, subTask size: {}", latestTask, details.size());
+        log.error("task is pending for more than 8 minutes, task:{}, subTask size: {}", latestTask.getVersion(),
+          details.size());
         allocationPlanTaskService.expirePendingSubTask(details);
         allocationPlanTaskService.taskExpired(latestTask);
       }
@@ -76,7 +77,7 @@ public class AllocationPlanManager {
         allocationPlanTaskService.taskSuccess(latestTask);
       } else {
         allocationPlanTaskService.taskFailed(latestTask);
-        log.error("task is failed, task:{}, subTask size: {}", latestTask, details.size());
+        log.error("task is failed, task:{}, subTask size: {}", latestTask.getVersion(), details.size());
       }
     }
   }

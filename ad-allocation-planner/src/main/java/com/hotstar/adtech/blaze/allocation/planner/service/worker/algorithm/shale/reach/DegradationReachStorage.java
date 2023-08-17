@@ -17,7 +17,7 @@ public class DegradationReachStorage implements ReachStorage {
   }
 
   @Override
-  public double getUnReachRatio(int demandId, int concurrencyId) {
+  public double getUnReachRatioFromStorage(int demandId, int concurrencyId) {
     return 0;
   }
 }

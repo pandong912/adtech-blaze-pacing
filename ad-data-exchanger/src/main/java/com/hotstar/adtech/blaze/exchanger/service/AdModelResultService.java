@@ -31,7 +31,7 @@ public class AdModelResultService {
 
   public Optional<AdModelResultUriResponse> queryAdModelUriByVersion(long version) {
     return adModelResultRepository
-      .findByVersion(Instant.ofEpochMilli(version))
+      .findFirstByVersionGreaterThanOrderByVersionDesc(Instant.ofEpochMilli(version))
       .map(this::buildAdModelResultResponse);
   }
 

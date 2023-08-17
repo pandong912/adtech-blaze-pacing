@@ -51,7 +51,7 @@ public class ShaleGraphTestData {
 
   public static class MockReachStorage implements ReachStorage {
     @Override
-    public double getUnReachRatio(int adSetId, int concurrencyId) {
+    public double getUnReachRatioFromStorage(int adSetId, int concurrencyId) {
       return 0.5;
     }
   }

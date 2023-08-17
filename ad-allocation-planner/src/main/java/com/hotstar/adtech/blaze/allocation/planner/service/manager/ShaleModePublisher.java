@@ -20,22 +20,22 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @Profile("!sim && !worker")
-public class ShaleAndHwmModePublisher {
+public class ShaleModePublisher {
 
   private final ShalePlanContextLoader shalePlanContextLoader;
   private final TaskPublisher taskPublisher;
 
-
-  @Timed(value = MetricNames.GENERATOR, extraTags = {"type", "shale-hwm"})
+  @Timed(value = MetricNames.GENERATOR, extraTags = {"type", "shale"})
   public void publishPlan(Match match, AdModel adModel) {
     try {
       Instant version = Instant.now();
       Pair<Map<String, Integer>, ShalePlanContext> planContext =
         shalePlanContextLoader.getShalePlanContext(match, adModel);
+
       taskPublisher.uploadAndPublish(match, planContext.getRight(), planContext.getLeft(), version, AlgorithmType.HWM,
-        AlgorithmType.SHALE, AlgorithmType.HWM);
+        AlgorithmType.SHALE);
     } catch (Exception e) {
-      throw new ServiceException("Failed to publish shale-hwm mode task for match: " + match.getContentId(), e);
+      throw new ServiceException("Failed to publish shale mode task for match: " + match.getContentId(), e);
     }
   }
 }

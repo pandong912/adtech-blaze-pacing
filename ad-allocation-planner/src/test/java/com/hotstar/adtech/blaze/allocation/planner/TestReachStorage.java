@@ -24,7 +24,7 @@ public class TestReachStorage implements ReachStorage {
   }
 
   @Override
-  public double getUnReachRatio(int adSetId, int concurrencyId) {
+  public double getUnReachRatioFromStorage(int adSetId, int concurrencyId) {
     // return unReachData.getOrDefault(adSetId, Collections.emptyMap()).getOrDefault(concurrencyId,reachRatio);
     return reachData[adSetId][concurrencyId];
   }

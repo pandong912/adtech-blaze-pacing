@@ -43,9 +43,9 @@ public class AdModelController {
     return StandardResponse.success(streamDefinitions);
   }
 
-  @GetMapping("ad-set/enable-reach")
-  public StandardResponse<Set<Long>> isEnableReach() {
-    return StandardResponse.success(unReachService.getEnableReach());
+  @GetMapping("ad-set/enable-reach/content/{contentId}")
+  public StandardResponse<Set<Long>> isEnableReach(@PathVariable String contentId) {
+    return StandardResponse.success(unReachService.getEnableReach(contentId));
   }
 
 

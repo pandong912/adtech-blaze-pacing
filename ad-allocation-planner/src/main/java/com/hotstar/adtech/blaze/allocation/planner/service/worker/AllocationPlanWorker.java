@@ -49,7 +49,7 @@ public class AllocationPlanWorker {
   }
 
   public void buildPlan(AllocationPlanResultDetail subtask) {
-    AllocationPlanResult task = subtask.getAllocationPlanResult();
+    AllocationPlanResult task = allocationPlanTaskService.getTask(subtask);
     try {
       if (task.getVersion().plus(4, ChronoUnit.MINUTES).isBefore(Instant.now())) {
         allocationPlanTaskService.subTaskExpired(subtask);

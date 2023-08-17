@@ -1,4 +1,8 @@
 spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 1
   application:
     name: blaze-allocation-planner
   profiles:

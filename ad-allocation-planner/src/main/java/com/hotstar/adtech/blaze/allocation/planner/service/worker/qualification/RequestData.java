@@ -1,5 +1,6 @@
 package com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification;
 
+import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
@@ -31,7 +32,7 @@ public class RequestData {
     return Request.builder()
       .concurrency(contentCohort.getConcurrency())
       .concurrencyId(contentCohort.getConcurrencyId())
-      .streamType(contentCohort.getPlayoutStream().getStreamType())
+      .streamType(StreamType.SSAI_Spot)
       .build();
   }
 
@@ -39,7 +40,7 @@ public class RequestData {
     return Request.builder()
       .concurrency(contentStream.getConcurrency())
       .concurrencyId(contentStream.getConcurrencyIdInCohort())
-      .streamType(contentStream.getPlayoutStream().getStreamType())
+      .streamType(StreamType.Spot)
       .build();
   }
 
@@ -47,7 +48,7 @@ public class RequestData {
     return Request.builder()
       .concurrency(contentStream.getConcurrency())
       .concurrencyId(contentStream.getConcurrencyIdInStream())
-      .streamType(contentStream.getPlayoutStream().getStreamType())
+      .streamType(StreamType.Spot)
       .build();
   }
 }

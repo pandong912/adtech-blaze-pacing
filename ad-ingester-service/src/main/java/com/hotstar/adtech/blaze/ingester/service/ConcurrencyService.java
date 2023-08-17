@@ -1,7 +1,6 @@
 package com.hotstar.adtech.blaze.ingester.service;
 
 import static com.hotstar.adtech.blaze.ingester.metric.MetricNames.INVALID_CONCURRENCY;
-import static com.hotstar.adtech.blaze.ingester.metric.MetricNames.TOTAL_CONCURRENCY;
 
 import com.hotstar.adtech.blaze.adserver.data.redis.service.StreamCohortConcurrencyRepository;
 import com.hotstar.adtech.blaze.adserver.data.redis.service.StreamConcurrencyRepository;
@@ -12,8 +11,11 @@ import com.hotstar.adtech.blaze.ingester.metric.MetricTags;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Metrics;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -46,8 +48,10 @@ public class ConcurrencyService {
       Map<String, Long> aggregatedStreamConcurrency =
         concurrencyGroup.getConcurrencyValues().entrySet()
           .stream()
-          .collect(Collectors.groupingBy(entry -> mapStreamKeyToPlayoutId(contentId, converter, entry),
-            Collectors.summingLong(Map.Entry::getValue)));
+          .map(entry -> mapStreamKeyToPlayoutId(contentId, converter, entry.getKey(), entry.getValue()))
+          .filter(Objects::nonNull)
+          .collect(Collectors.groupingBy(ConcurrencyValue::getConcurrencyKey,
+            Collectors.summingLong(ConcurrencyValue::getConcurrency)));
 
       streamConcurrencyRepository
         .setContentAllStreamConcurrency(contentId, tsBucket, aggregatedStreamConcurrency);
@@ -70,8 +74,10 @@ public class ConcurrencyService {
       Map<String, Long> aggregatedCohortConcurrency =
         concurrencyGroup.getConcurrencyValues().entrySet()
           .stream()
-          .collect(Collectors.groupingBy(entry -> mapCohortKeyToPlayoutId(contentId, converter, entry),
-            Collectors.summingLong(Map.Entry::getValue)));
+          .map(entry -> mapCohortKeyToPlayoutId(contentId, converter, entry.getKey(), entry.getValue()))
+          .filter(Objects::nonNull)
+          .collect(Collectors.groupingBy(ConcurrencyValue::getConcurrencyKey,
+            Collectors.summingLong(ConcurrencyValue::getConcurrency)));
 
       streamCohortConcurrencyRepository
         .setContentAllStreamCohortConcurrency(contentId, tsBucket, aggregatedCohortConcurrency);
@@ -83,34 +89,55 @@ public class ConcurrencyService {
     }
   }
 
-  private String mapCohortKeyToPlayoutId(String contentId, Map<String, String> converter,
-                                         Map.Entry<String, Long> entry) {
-    String[] tags = entry.getKey().split("\\|", -1);
+  private ConcurrencyValue mapCohortKeyToPlayoutId(String contentId, Map<String, String> converter,
+                                                   String cohort, Long concurrency) {
+    String[] tags = cohort.split("\\|", -1);
     String stream = tags.length > 0 ? tags[0] : "";
     String ssaiTag = tags.length > 1 ? tags[1] : "";
-    if (notRecognizable(contentId, converter, entry, stream)) {
-      return stream + STREAM_COHORT_HASH_KEY_SPLITTER + ssaiTag;
+
+    String playoutId = converter.get(stream);
+    if (playoutId == null) {
+      record(contentId, concurrency, stream, 1000);
+      return null;
     }
-    return converter.get(stream) + STREAM_COHORT_HASH_KEY_SPLITTER + ssaiTag;
+
+    return ConcurrencyValue.builder()
+      .concurrencyKey(playoutId + STREAM_COHORT_HASH_KEY_SPLITTER + ssaiTag)
+      .concurrency(concurrency)
+      .build();
   }
 
-  private String mapStreamKeyToPlayoutId(String contentId, Map<String, String> converter,
-                                         Map.Entry<String, Long> entry) {
-    String[] tags = entry.getKey().split("\\|", -1);
+  private ConcurrencyValue mapStreamKeyToPlayoutId(String contentId, Map<String, String> converter,
+                                                   String streamKey, Long concurrency) {
+    String[] tags = streamKey.split("\\|", -1);
     String stream = tags.length > 0 ? tags[0] : "";
-    if (notRecognizable(contentId, converter, entry, stream)) {
-      return stream;
+
+    String playoutId = converter.get(stream);
+    if (playoutId == null) {
+      record(contentId, concurrency, stream, 20000);
+      return null;
     }
-    return converter.get(stream);
+    return ConcurrencyValue.builder()
+      .concurrencyKey(playoutId)
+      .concurrency(concurrency)
+      .build();
   }
 
-  private boolean notRecognizable(String contentId, Map<String, String> converter, Map.Entry<String, Long> entry,
-                                  String stream) {
-    Metrics.counter(TOTAL_CONCURRENCY, "contentId", contentId).increment(entry.getValue());
-    if (!converter.containsKey(stream)) {
-      Metrics.counter(INVALID_CONCURRENCY, "stream", stream, "contentId", contentId).increment(entry.getValue());
-      return true;
+  private static void record(String contentId, Long concurrency, String stream, long threshold) {
+    if (concurrency > threshold) {
+      log.error("content stream mapping converter is not existed, contentId: {}, concurrency: {}", contentId,
+        concurrency);
+    } else {
+      log.info("content stream mapping converter is not existed, contentId: {}, concurrency: {}", contentId,
+        concurrency);
     }
-    return false;
+    Metrics.counter(INVALID_CONCURRENCY, "stream", stream, "contentId", contentId).increment(concurrency);
+  }
+
+  @Value
+  @Builder
+  private static class ConcurrencyValue {
+    String concurrencyKey;
+    Long concurrency;
   }
 }

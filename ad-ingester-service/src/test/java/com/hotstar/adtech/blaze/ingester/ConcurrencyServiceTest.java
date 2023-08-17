@@ -51,17 +51,17 @@ public class ConcurrencyServiceTest extends TestEnvConfig {
     concurrencyService.updateMatchConcurrency(match, streamMappingConverter);
     Map<String, Long> contentAllStreamConcurrency = streamConcurrencyRepository.getContentAllStreamConcurrency("123");
     System.out.println("contentAllStreamConcurrency: " + contentAllStreamConcurrency);
-    Assertions.assertEquals(1L, contentAllStreamConcurrency.get("in-hin--ssai"));
+    Assertions.assertNull(contentAllStreamConcurrency.get("in-hin--ssai"));
     Assertions.assertEquals(3L, contentAllStreamConcurrency.get("P15"));
     Assertions.assertEquals(10L, contentAllStreamConcurrency.get("P7"));
 
     Map<String, Long> contentAllStreamCohortConcurrency =
       streamCohortConcurrencyRepository.getContentStreamAllCohortConcurrency("123");
     System.out.println("contentAllStreamCohortConcurrency: " + contentAllStreamCohortConcurrency);
-    Assertions.assertEquals(1L, contentAllStreamCohortConcurrency.get("in--eng|SSAI::001"));
+    Assertions.assertNull(contentAllStreamCohortConcurrency.get("in--eng|SSAI::001"));
     Assertions.assertEquals(1L, contentAllStreamCohortConcurrency.get("P15|SSAI::001"));
     Assertions.assertEquals(11L, contentAllStreamCohortConcurrency.get("P1|SSAI::001"));
-    Assertions.assertEquals(12L, contentAllStreamCohortConcurrency.get("P15|SSAI::002"));
+    Assertions.assertEquals(13L, contentAllStreamCohortConcurrency.get("P15|SSAI::002"));
   }
 
   private Map<String, String> getStreamMappingConverter() {
@@ -116,7 +116,7 @@ public class ConcurrencyServiceTest extends TestEnvConfig {
     concurrencyValues.put("in-eng-phone-ssai|SSAI::001|English+Android", 1L);
     concurrencyValues.put("in-eng-phone-ssai|SSAI::001|English+iOS", 10L);
     concurrencyValues.put("in-eng-phone-ssai|SSAI::002", 1L);
-    concurrencyValues.put("in-tel-phone-non_ssai|SSAI::002", 1L);
+    concurrencyValues.put("in-tel-phone-non_ssai|SSAI::002", 2L);
     concurrencyValues.put("in-tel-tv-non_ssai|SSAI::002", 11L);
     concurrencyValues.put("in-tel-tv-non_ssai|SSAI::001", 1L);
     return ConcurrencyGroup.builder()

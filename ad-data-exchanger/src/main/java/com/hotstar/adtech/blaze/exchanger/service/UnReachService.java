@@ -4,12 +4,15 @@ import com.hotstar.adtech.blaze.admodel.client.AdModelClient;
 import com.hotstar.adtech.blaze.admodel.client.AdModelUri;
 import com.hotstar.adtech.blaze.admodel.client.entity.LiveEntities;
 import com.hotstar.adtech.blaze.admodel.client.model.GoalMatchInfo;
+import com.hotstar.adtech.blaze.admodel.common.enums.CampaignStatus;
+import com.hotstar.adtech.blaze.admodel.common.enums.DeliveryMode;
 import com.hotstar.adtech.blaze.adserver.data.redis.service.ReachDataRepository;
 import com.hotstar.adtech.blaze.exchanger.api.entity.UnReachData;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.UnReachResponse;
 import com.hotstar.adtech.blaze.exchanger.config.CacheConfig;
 import com.hotstar.adtech.blaze.exchanger.util.PlayoutIdValidator;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -83,15 +86,20 @@ public class UnReachService {
   @Cacheable(cacheNames = CacheConfig.REACH_AD_SET,
     cacheManager = CacheConfig.AD_MODEL_CACHE_MANAGER,
     sync = true)
-  public Set<Long> getEnableReach() {
-    AdModelResultUriResponse adModelResultUriResponse = adModelResultService.queryAdModelUriByVersion(-1)
+  public Set<Long> getEnableReach(String contentId) {
+    AdModelResultUriResponse adModelResultUriResponse = adModelResultService.queryAdModelUriByVersionGreaterThan(-1)
       .orElseThrow(() -> new RuntimeException("AdModelResultUriResponse is empty"));
     AdModelUri adModelUri = buildAdModelUri(adModelResultUriResponse);
     LiveEntities liveEntities = adModelClient.loadLiveAdModel(adModelUri);
-    return liveEntities.getGoalMatches().stream()
+    Map<String, Set<Long>> adSetIdGroup = liveEntities.getGoalMatches().stream()
       .filter(GoalMatchInfo::isMaximiseReach)
-      .map(GoalMatchInfo::getAdSetId)
-      .collect(Collectors.toSet());
+      .filter(goalMatchInfo -> goalMatchInfo.getCampaignStatus() != CampaignStatus.PAUSED)
+      .filter(GoalMatchInfo::isEnabled)
+      .filter(goalMatchInfo -> goalMatchInfo.getDeliveryMode() == DeliveryMode.SSAI
+        || goalMatchInfo.getDeliveryMode() == DeliveryMode.SSAI_SPOT)
+      .collect(Collectors.groupingBy(GoalMatchInfo::getContentId,
+        Collectors.mapping(GoalMatchInfo::getAdSetId, Collectors.toSet())));
+    return adSetIdGroup.getOrDefault(contentId, Collections.emptySet());
   }
 
   private AdModelUri buildAdModelUri(AdModelResultUriResponse adModelResultUriResponse) {

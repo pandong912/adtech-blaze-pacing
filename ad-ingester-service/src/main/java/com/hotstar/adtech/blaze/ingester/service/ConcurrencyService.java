@@ -1,7 +1,6 @@
 package com.hotstar.adtech.blaze.ingester.service;
 
 import static com.hotstar.adtech.blaze.ingester.metric.MetricNames.INVALID_CONCURRENCY;
-import static com.hotstar.adtech.blaze.ingester.metric.MetricNames.TOTAL_CONCURRENCY;
 
 import com.hotstar.adtech.blaze.adserver.data.redis.service.StreamCohortConcurrencyRepository;
 import com.hotstar.adtech.blaze.adserver.data.redis.service.StreamConcurrencyRepository;
@@ -88,29 +87,25 @@ public class ConcurrencyService {
     String[] tags = entry.getKey().split("\\|", -1);
     String stream = tags.length > 0 ? tags[0] : "";
     String ssaiTag = tags.length > 1 ? tags[1] : "";
-    if (notRecognizable(contentId, converter, entry, stream)) {
-      return stream + STREAM_COHORT_HASH_KEY_SPLITTER + ssaiTag;
-    }
-    return converter.get(stream) + STREAM_COHORT_HASH_KEY_SPLITTER + ssaiTag;
+    return getPlayoutId(contentId, converter, stream, entry.getValue()) + STREAM_COHORT_HASH_KEY_SPLITTER + ssaiTag;
   }
 
   private String mapStreamKeyToPlayoutId(String contentId, Map<String, String> converter,
                                          Map.Entry<String, Long> entry) {
     String[] tags = entry.getKey().split("\\|", -1);
     String stream = tags.length > 0 ? tags[0] : "";
-    if (notRecognizable(contentId, converter, entry, stream)) {
-      return stream;
-    }
-    return converter.get(stream);
+    return getPlayoutId(contentId, converter, stream, entry.getValue());
   }
 
-  private boolean notRecognizable(String contentId, Map<String, String> converter, Map.Entry<String, Long> entry,
-                                  String stream) {
-    Metrics.counter(TOTAL_CONCURRENCY, "contentId", contentId).increment(entry.getValue());
-    if (!converter.containsKey(stream)) {
-      Metrics.counter(INVALID_CONCURRENCY, "stream", stream, "contentId", contentId).increment(entry.getValue());
-      return true;
+  private String getPlayoutId(String contentId, Map<String, String> converter, String stream, Long concurrency) {
+    String playoutId = converter.get(stream);
+    if (playoutId == null) {
+      log.warn("content stream mapping converter is not existed, contentId: {}, concurrency: {}", contentId,
+        concurrency);
+      Metrics.counter(INVALID_CONCURRENCY, "stream", stream, "contentId", contentId).increment();
+      return stream;
     }
-    return false;
+
+    return playoutId;
   }
 }

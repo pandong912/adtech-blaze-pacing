@@ -11,6 +11,5 @@ public class MetricNames {
   public static final String LOAD_AD_MODEL_STATUS = PREFIX + "load.ad.model.status";
   public static final String LOAD_AD_MODEL = PREFIX + "load.ad.model";
   public static final String INVALID_CONCURRENCY = PREFIX + "ingester.concurrency.invalid";
-  public static final String TOTAL_CONCURRENCY = PREFIX + "ingester.concurrency.total";
 
 }

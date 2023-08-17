@@ -143,7 +143,7 @@ public class DataExchangerService {
                                          ContentCohortConcurrencyResponse resp) {
     PlayoutStream playoutStream = playoutStreamMap.get(resp.getPlayoutId());
     if (playoutStream == null) {
-      log.error("playout stream can't be found, playoutId: {}", resp.getPlayoutId());
+      log.warn("playout stream can't be found, playoutId: {}", resp.getPlayoutId());
       return null;
     }
     return ContentCohort.builder()
@@ -174,7 +174,7 @@ public class DataExchangerService {
                                          ContentStreamConcurrencyResponse resp) {
     PlayoutStream playoutStream = playoutStreamMap.get(resp.getPlayoutId());
     if (playoutStream == null) {
-      log.error("playout stream can't be found, playoutId: {}", resp.getPlayoutId());
+      log.warn("playout stream can't be found, playoutId: {}", resp.getPlayoutId());
       return null;
     }
     return ContentStream.builder()

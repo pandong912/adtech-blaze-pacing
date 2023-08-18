@@ -17,8 +17,7 @@ public interface ReachStorage {
 
   default double getUnReachRatio(ShaleDemand demand, ShaleSupply supply) {
     if (demand.getReachEnabled() == 1 && supply.getStreamType() == StreamType.SSAI_Spot) {
-      double reachRatio = getUnReachRatioFromStorage(demand.getId(), supply.getId());
-      return Math.min(1, Math.max(reachRatio - demand.getReachOffset(), 0) / (demand.getReachOffset() + 0.000001));
+      return getUnReachRatioFromStorage(demand.getId(), supply.getId());
     } else {
       return 0;
     }

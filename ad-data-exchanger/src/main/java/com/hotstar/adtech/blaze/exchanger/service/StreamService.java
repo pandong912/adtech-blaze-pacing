@@ -3,6 +3,7 @@ package com.hotstar.adtech.blaze.exchanger.service;
 import com.hotstar.adtech.blaze.admodel.common.enums.Ladder;
 import com.hotstar.adtech.blaze.admodel.common.exception.ResourceNotFoundException;
 import com.hotstar.adtech.blaze.admodel.repository.ContentStreamRepository;
+import com.hotstar.adtech.blaze.admodel.repository.GlobalStreamMappingRepository;
 import com.hotstar.adtech.blaze.admodel.repository.MatchRepository;
 import com.hotstar.adtech.blaze.admodel.repository.StreamMappingRepository;
 import com.hotstar.adtech.blaze.admodel.repository.model.ContentStream;
@@ -33,6 +34,7 @@ public class StreamService {
   private final ContentStreamRepository contentStreamRepository;
   private final MetaDataService metaDataService;
   private final StreamMappingRepository streamMappingRepository;
+  private final GlobalStreamMappingRepository globalStreamMappingRepository;
   private final MatchRepository matchRepository;
 
 
@@ -53,7 +55,7 @@ public class StreamService {
     List<StreamMapping> streamMappings = matchRepository.findByContentId(contentId)
       .map(this::getContentStreamDefinition)
       .filter(streamMapping -> !streamMapping.isEmpty())
-      .orElseGet(this::getDefaultStreamDefinition);
+      .orElseGet(this::getGlobalStreamDefinition);
 
     LanguageMapping languageMapping = metaDataService.getLanguageMapping();
     PlatformMapping platformMapping = metaDataService.getPlatformMapping();
@@ -67,8 +69,17 @@ public class StreamService {
     return streamMappingRepository.findAllByTournamentIdAndSeasonId(match.getTournamentId(), match.getSeasonId());
   }
 
-  private List<StreamMapping> getDefaultStreamDefinition() {
-    return streamMappingRepository.findAllByTournamentIdAndSeasonId(-1L, -1L);
+  private List<StreamMapping> getGlobalStreamDefinition() {
+    return globalStreamMappingRepository.findAll().stream()
+      .map(globalStreamMapping -> StreamMapping.builder()
+        .streamType(globalStreamMapping.getStreamType())
+        .tenant(globalStreamMapping.getTenant())
+        .playoutId(globalStreamMapping.getPlayoutId())
+        .ladders(globalStreamMapping.getLadders())
+        .languageId(globalStreamMapping.getLanguageId())
+        .platformIds(globalStreamMapping.getPlatformIds())
+        .build())
+      .collect(Collectors.toList());
   }
 
   private StreamDefinition buildStreamDefinition(StreamMapping streamMapping, LanguageMapping languageMapping,

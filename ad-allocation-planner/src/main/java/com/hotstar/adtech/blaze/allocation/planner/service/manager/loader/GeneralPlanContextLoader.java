@@ -117,10 +117,10 @@ public class GeneralPlanContextLoader {
 
   private List<ContentStream> getContentStreams(String contentId, Map<String, PlayoutStream> playoutStreamMap,
                                                 int size) {
-    List<ContentStream> streams = dataExchangerService.getContentStreamConcurrency(contentId, playoutStreamMap);
+    List<ContentStream> streams = dataExchangerService.getContentStreamConcurrency(contentId, playoutStreamMap).stream()
+      .sorted((a, b) -> b.getPlayoutStream().getStreamType().compareTo(a.getPlayoutStream().getStreamType()))
+      .collect(Collectors.toList());
     IntStream.range(0, streams.size()).forEach(i -> streams.get(i).setConcurrencyId(i, size));
     return streams;
   }
-
-
 }

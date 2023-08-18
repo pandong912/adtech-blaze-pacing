@@ -40,7 +40,7 @@ public class ShaleGraph {
       }
 
       demand.setReachOffset(count == 0 ? 0 : unReachSum / count);
-      demand.setTheta(totalSupply == 0 ? 1 : Math.max(0.000001, Math.min(1, demand.getDemand() / totalSupply)));
+      demand.setTheta(Math.max(0.000001, Math.min(1, demand.getDemand() / totalSupply)));
     });
   }
 

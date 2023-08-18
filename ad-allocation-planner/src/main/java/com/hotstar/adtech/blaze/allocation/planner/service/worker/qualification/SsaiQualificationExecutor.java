@@ -3,6 +3,7 @@ package com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification
 import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.QUALIFICATION;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.PlanType;
+import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
@@ -18,6 +19,7 @@ import com.hotstar.adtech.blaze.allocation.planner.source.context.GraphContext;
 import io.micrometer.core.annotation.Timed;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -29,7 +31,9 @@ public class SsaiQualificationExecutor {
     List<AdSet> adSets = generalPlanContext.getAdSets();
     ConcurrencyData concurrency = generalPlanContext.getConcurrencyData();
     List<ContentCohort> mixedStreamCohorts = concurrency.getCohorts();
-    List<ContentStream> streams = concurrency.getStreams();
+    List<ContentStream> streams = concurrency.getStreams().stream()
+      .filter(stream -> stream.getPlayoutStream().getStreamType() == StreamType.Spot)
+      .collect(Collectors.toList());
 
     RequestData requestData = generalPlanContext.getRequestData();
     QualificationResult firstQualified =

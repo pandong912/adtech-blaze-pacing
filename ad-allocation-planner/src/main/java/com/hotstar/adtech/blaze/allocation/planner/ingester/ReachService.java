@@ -51,7 +51,7 @@ public class ReachService {
 
   private Map<String, Map<String, Double>> getReachRatio(String contentId, int shard) {
     try {
-      return reachDataRepository.batchGetContentCohortReachRatio(contentId, "1689145200", shard);
+      return reachDataRepository.batchGetContentCohortReachRatio(contentId, shard);
     } catch (QueryTimeoutException timeoutException) {
       log.warn("Failed to fetch reach data from redis due to timeout", timeoutException);
       Metrics.counter(MetricNames.REDIS_TIMEOUT_EXCEPTION, "operation", "getUnReach").increment();

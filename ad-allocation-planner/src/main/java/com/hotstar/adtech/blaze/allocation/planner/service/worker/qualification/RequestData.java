@@ -21,6 +21,7 @@ public class RequestData {
       .map(this::buildRequestInsStream)
       .collect(Collectors.toList());
     List<Request> spotRequestsInCohort = concurrencyData.getStreams().stream()
+      .filter(contentStream -> contentStream.getPlayoutStream().getStreamType() == StreamType.Spot)
       .map(this::buildRequestInCohort)
       .collect(Collectors.toList());
     ssaiAndSpotRequests.addAll(spotRequestsInCohort);
@@ -32,7 +33,7 @@ public class RequestData {
     return Request.builder()
       .concurrency(contentCohort.getConcurrency())
       .concurrencyId(contentCohort.getConcurrencyId())
-      .streamType(StreamType.SSAI_Spot)
+      .streamType(contentCohort.getPlayoutStream().getStreamType())
       .build();
   }
 
@@ -40,7 +41,7 @@ public class RequestData {
     return Request.builder()
       .concurrency(contentStream.getConcurrency())
       .concurrencyId(contentStream.getConcurrencyIdInCohort())
-      .streamType(StreamType.Spot)
+      .streamType(contentStream.getPlayoutStream().getStreamType())
       .build();
   }
 
@@ -48,7 +49,7 @@ public class RequestData {
     return Request.builder()
       .concurrency(contentStream.getConcurrency())
       .concurrencyId(contentStream.getConcurrencyIdInStream())
-      .streamType(StreamType.Spot)
+      .streamType(contentStream.getPlayoutStream().getStreamType())
       .build();
   }
 }

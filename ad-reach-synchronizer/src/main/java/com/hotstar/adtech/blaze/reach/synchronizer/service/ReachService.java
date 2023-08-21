@@ -25,7 +25,7 @@ public class ReachService {
 
   private final DecisionReachDataRepository decisionReachDataRepository;
   private final ReachDataRepository originReachDataRepository;
-  private final ForkJoinPool customThreadPool = new ForkJoinPool(8);
+  private final ForkJoinPool customThreadPool = new ForkJoinPool(32);
 
   @Timed(MetricNames.CONTENT_REACH_SHARD_SYNC)
   public void updateMatchReachMatch(Match match, Map<Long, Boolean> adSetMaximiseReach) {

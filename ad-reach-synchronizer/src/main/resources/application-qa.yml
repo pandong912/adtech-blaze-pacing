@@ -1,3 +1,3 @@
 spring:
   profiles:
-    include: ad-model-client-qa, ad-redis-client-qa
+    include: ad-model-client-qa, ad-redis-client-qa, launch-darkly-nonprod

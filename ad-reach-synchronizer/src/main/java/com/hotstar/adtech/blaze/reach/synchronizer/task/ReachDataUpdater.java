@@ -1,5 +1,6 @@
 package com.hotstar.adtech.blaze.reach.synchronizer.task;
 
+import com.hotstar.adtech.blaze.reach.synchronizer.config.launchdarkly.BlazeDynamicConfig;
 import com.hotstar.adtech.blaze.reach.synchronizer.entity.AdModel;
 import com.hotstar.adtech.blaze.reach.synchronizer.entity.AdSet;
 import com.hotstar.adtech.blaze.reach.synchronizer.entity.Match;
@@ -18,12 +19,15 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class ReachDataUpdater {
 
-
   private final AdModelLoader adModelLoader;
   private final ReachService reachService;
+  private final BlazeDynamicConfig blazeDynamicConfig;
 
   @Scheduled(fixedDelayString = "${blaze.ad-reach-synchronizer.schedule.reach-sync-delay:60000}")
   public void update() {
+    if (!blazeDynamicConfig.getEnableMaximiseReach()) {
+      return;
+    }
     AdModel adModel = adModelLoader.get();
     for (Match match : adModel.getMatches()) {
       List<AdSet> adSets = adModel.getAdSetGroup().get(match.getContentId());

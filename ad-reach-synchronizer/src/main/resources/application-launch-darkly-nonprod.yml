@@ -1,0 +1,24 @@
+launch:
+  darkly:
+    vaultConfigPath:
+    enabled:
+      countries: IN
+      platforms:
+    user: ads-np
+    countryCode: in
+    filters:
+      region: ap-south-1
+    relay:
+      host: http://launch-darkly-relay-pp-internal.pp.hotstar-labs.com
+      sdkkey: ${LAUNCH_DARKLY_SDK_KEY}
+      port: 80
+      streamingDelay: 500
+      enabled: true
+      backoff:
+        retry: 3
+        interval: 3000
+    ddb:
+      ttl: 30000
+      enabled: false
+    scheduler:
+      delay: 900000

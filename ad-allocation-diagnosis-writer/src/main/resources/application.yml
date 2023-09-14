@@ -1,0 +1,41 @@
+spring:
+  profiles:
+    active: local
+  application:
+    name: "blaze-ad-allocation-diagnosis-writer"
+
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  metrics:
+    enable:
+      all: false
+      system: true
+      http: true
+      jvm:
+        memory: true
+        gc: true
+    distribution:
+      percentiles-histogram:
+        http: true
+  endpoint:
+    health:
+      show-details: always
+blaze:
+  clickhouse:
+    url: jdbc:clickhouse://localhost:8123
+    username:
+    password:
+    database: default
+    driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
+  data-exchanger:
+    endpoint: adtech-blaze-data-exchanger-service.internal.hotstar.com
+    retryer:
+      period: 100
+      maxPeriod: 1000
+      maxAttempts: 3
+

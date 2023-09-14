@@ -62,3 +62,20 @@ jobs:
       JAVA_VERSION: 8
       PRE_BUILD_SCRIPT_PATH: 'mvn clean package -pl ad-reach-synchronizer -am -Dmaven.test.skip=true'
       CUSTOM_UNIT_TEST_SCRIPT: 'mvn clean test -pl ad-reach-synchronizer -am'
+  build-ci-ad-allocation-diagnosis-writer:
+    uses: hotstar/hotstar-github-action-workflows/.github/workflows/hotstar-java-maven-ci-workflow.yml@main
+    with:
+      IMAGE_NAME: adtech-blaze-ad-allocation-diagnosis-writer
+      TRIGGER_PIPELINE: false
+      SERVICE_NAME: adtech-blaze-ad-allocation-diagnosis-writer
+      HARNESS_APP_ID: 6pljp6twRxWWqpbOhNLjUQ
+      HARNESS_PARAMETER_STRING: ''
+      WORKING_DIRECTORY: 'ad-allocation-diagnosis-writer'
+      DOCKER_FILEPATH: 'deploy/docker/Dockerfile'
+      DOCKER_ARGUMENTS_STRING: ''
+      TRUNK_BRANCH_NAME: master
+      HARNESS_WEBHOOK: 1bjWVdjKBpV3qV5Gk5Nmd8RNWZOorIAsUX0yPPBt
+      MAVEN_SETTINGS_PATHS: 'secret/non-prod/adtech/nexus/release secret/non-prod/adtech/nexus/snapshot secret/non-prod/adtech/nexus/launchdarkly'
+      JAVA_VERSION: 8
+      PRE_BUILD_SCRIPT_PATH: 'mvn clean package -pl ad-allocation-diagnosis-writer -am -Dmaven.test.skip=true'
+      CUSTOM_UNIT_TEST_SCRIPT: 'mvn clean test -pl ad-allocation-diagnosis-writer -am'

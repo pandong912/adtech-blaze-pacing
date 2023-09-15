@@ -45,9 +45,15 @@ public class AdContextController {
     return StandardResponse.success(response);
   }
 
-  @GetMapping("/flink/sample")
-  public StandardResponse<Double> getFlinkSample() {
-    Double flinkSample = globalConfigService.getFlinkSample();
+  @GetMapping("/flink/heartbeat/sample")
+  public StandardResponse<Double> getFlinkHeartbeatSample() {
+    Double flinkSample = globalConfigService.getFlinkHeartbeatSample();
+    return StandardResponse.success(flinkSample);
+  }
+
+  @GetMapping("/flink/tracker/sample")
+  public StandardResponse<Double> getFlinkTrackerSample() {
+    Double flinkSample = globalConfigService.getFlinkTrackerSample();
     return StandardResponse.success(flinkSample);
   }
 

@@ -12,8 +12,14 @@ import org.springframework.stereotype.Service;
 public class GlobalConfigService {
   private final GlobalConfigRepository globalConfigRepository;
 
-  public Double getFlinkSample() {
-    GlobalConfig globalConfig = globalConfigRepository.findByKey(GlobalConfigKey.FLINK_SAMPLE)
+  public Double getFlinkHeartbeatSample() {
+    GlobalConfig globalConfig = globalConfigRepository.findByKey(GlobalConfigKey.FLINK_HEARTBEAT_SAMPLE)
+      .orElseThrow(() -> new ServiceException("Flink sample not found"));
+    return Double.valueOf(globalConfig.getValue());
+  }
+
+  public Double getFlinkTrackerSample() {
+    GlobalConfig globalConfig = globalConfigRepository.findByKey(GlobalConfigKey.FLINK_TRACKER_SAMPLE)
       .orElseThrow(() -> new ServiceException("Flink sample not found"));
     return Double.valueOf(globalConfig.getValue());
   }

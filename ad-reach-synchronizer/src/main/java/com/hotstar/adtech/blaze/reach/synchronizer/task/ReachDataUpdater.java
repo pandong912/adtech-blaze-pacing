@@ -22,7 +22,7 @@ public class ReachDataUpdater {
   private final AdModelLoader adModelLoader;
   private final ReachService reachService;
 
-  @Scheduled(fixedDelayString = "${blaze.ad-reach-synchronizer.schedule.reach-sync-delay:40000}")
+  @Scheduled(fixedDelayString = "${blaze.ad-reach-synchronizer.schedule.reach-sync-delay:60000}")
   public void update() {
     AdModel adModel = adModelLoader.get();
     for (Match match : adModel.getMatches()) {

@@ -6,6 +6,7 @@ import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.BreakListResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.BreakTypeResponse;
 import com.hotstar.adtech.blaze.exchanger.service.BreakService;
+import com.hotstar.adtech.blaze.exchanger.service.GlobalConfigService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AdContextController {
   private final BreakService breakService;
+  private final GlobalConfigService globalConfigService;
 
   @GetMapping("/break-list/{contentId}")
   public StandardResponse<List<BreakListResponse>> getBreakList(@PathVariable("contentId") String contentId) {
@@ -41,6 +43,12 @@ public class AdContextController {
   public StandardResponse<List<BreakTypeResponse>> getAllBreakType() {
     List<BreakTypeResponse> response = breakService.getAllBreakType();
     return StandardResponse.success(response);
+  }
+
+  @GetMapping("/flink/sample")
+  public StandardResponse<Double> getFlinkSample() {
+    Double flinkSample = globalConfigService.getFlinkSample();
+    return StandardResponse.success(flinkSample);
   }
 
 }

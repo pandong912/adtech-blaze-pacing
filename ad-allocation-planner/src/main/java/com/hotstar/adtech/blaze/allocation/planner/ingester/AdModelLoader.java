@@ -42,6 +42,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -157,14 +158,27 @@ public class AdModelLoader {
       .filter(GoalMatchInfo::isEnabled)
       .filter(goalMatchInfo -> goalMatchInfo.getDeliveryMode() == DeliveryMode.SSAI
         || goalMatchInfo.getDeliveryMode() == DeliveryMode.SSAI_SPOT)
-      .filter(goalMatchInfo -> goalMatchInfo.getVideoAds() != null && !goalMatchInfo.getVideoAds().isEmpty())
       .map(this::buildAdSet)
+      .filter(Objects::nonNull)
       // make reach-enabled adSets at the top of the list, This is to reduce the size of the reach storage array.
       .sorted((a, b) -> b.getMaximizeReach() - a.getMaximizeReach())
       .collect(Collectors.groupingBy(AdSet::getContentId));
   }
 
   private AdSet buildAdSet(GoalMatchInfo adSet) {
+    List<Ad> spotAds = adSet.getVideoAds().stream()
+      .filter(VideoAd::isEnabled)
+      .filter(videoAd -> videoAd.getCreativeType() == CreativeType.Spot)
+      .map(this::buildAd)
+      .collect(Collectors.toList());
+    List<Ad> ssaiAds = adSet.getVideoAds().stream()
+      .filter(VideoAd::isEnabled)
+      .filter(videoAd -> videoAd.getCreativeType() == CreativeType.SSAI)
+      .map(this::buildAd)
+      .collect(Collectors.toList());
+    if (CollectionUtils.isEmpty(spotAds) && CollectionUtils.isEmpty(ssaiAds)) {
+      return null;
+    }
     return AdSet.builder()
       .contentId(adSet.getContentId())
       .campaignId(adSet.getCampaignId())
@@ -172,12 +186,8 @@ public class AdModelLoader {
       .impressionTarget(adSet.getImpressionTarget())
       .priority(adSet.getPriority())
       .campaignType(adSet.getCampaignType())
-      .spotAds(adSet.getVideoAds().stream().filter(VideoAd::isEnabled)
-        .filter(videoAd -> videoAd.getCreativeType() == CreativeType.Spot).map(this::buildAd)
-        .collect(Collectors.toList()))
-      .ssaiAds(adSet.getVideoAds().stream().filter(VideoAd::isEnabled)
-        .filter(videoAd -> videoAd.getCreativeType() == CreativeType.SSAI).map(this::buildAd)
-        .collect(Collectors.toList()))
+      .spotAds(spotAds)
+      .ssaiAds(ssaiAds)
       .audienceTargetingRule(buildAudienceTargetingRule(adSet.getAudienceTargetingRuleInfo()))
       .breakTargetingRule(buildBreakTargetingRule(adSet.getBreakTargetingRuleInfo()))
       .streamTargetingRule(buildStreamTargetingRule(adSet.getStreamTargetingRuleInfo()))

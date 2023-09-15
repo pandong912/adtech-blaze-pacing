@@ -1,6 +1,6 @@
 spring:
   profiles:
-    include: ad-model-repository-pp, ad-model-client-pp, allocation-plan-client-pp, launch-darkly-nonprod
+    include: ad-model-repository-pp, ad-model-client-pp, allocation-plan-client-pp, launch-darkly-nonprod, ad-redis-client-pp
 blaze:
   data-exchanger:
     endpoint: adtech-blaze-gateway-pp.pp.hotstar-labs.com/data-exchanger-service-eks-pp

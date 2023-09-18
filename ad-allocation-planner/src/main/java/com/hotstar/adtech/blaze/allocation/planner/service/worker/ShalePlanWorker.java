@@ -9,13 +9,13 @@ import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.Shal
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.ShaleResult;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.ShaleSupplyResult;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleSolver;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.ReachStorage;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.SpotQualificationExecutor;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.SsaiQualificationExecutor;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.BreakContext;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GraphContext;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.ShalePlanContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.BreakContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.GeneralPlanContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.ReachStorage;
+import com.hotstar.adtech.blaze.allocationdata.client.model.ShalePlanContext;
 import io.micrometer.core.annotation.Timed;
 import java.util.List;
 import java.util.stream.Collectors;

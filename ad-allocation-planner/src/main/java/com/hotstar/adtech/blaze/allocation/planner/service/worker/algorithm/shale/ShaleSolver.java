@@ -10,8 +10,8 @@ import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.Shal
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.biselector.AlphaBiSelector;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.biselector.BetaBiSelector;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.biselector.SigmaBiSelector;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.ReachStorage;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GraphContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.ReachStorage;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Metrics;
 import java.util.Collection;

@@ -1,9 +1,9 @@
 package com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.adset;
 
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AudienceTargetingRule;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AudienceTargetingRuleClause;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.Inspector;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AudienceTargetingRule;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AudienceTargetingRuleClause;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

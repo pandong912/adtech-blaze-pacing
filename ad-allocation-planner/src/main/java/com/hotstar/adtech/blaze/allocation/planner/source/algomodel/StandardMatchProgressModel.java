@@ -1,7 +1,7 @@
 package com.hotstar.adtech.blaze.allocation.planner.source.algomodel;
 
 import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.BreakContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.BreakContext;
 import java.util.List;
 import org.springframework.util.CollectionUtils;
 

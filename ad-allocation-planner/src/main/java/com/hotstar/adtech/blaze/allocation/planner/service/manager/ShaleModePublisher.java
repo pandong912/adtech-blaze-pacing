@@ -2,11 +2,11 @@ package com.hotstar.adtech.blaze.allocation.planner.service.manager;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.AlgorithmType;
 import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModel;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Match;
 import com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames;
 import com.hotstar.adtech.blaze.allocation.planner.service.manager.loader.ShalePlanContextLoader;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdModel;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Match;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.ShalePlanContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.ShalePlanContext;
 import io.micrometer.core.annotation.Timed;
 import java.time.Instant;
 import java.util.Map;

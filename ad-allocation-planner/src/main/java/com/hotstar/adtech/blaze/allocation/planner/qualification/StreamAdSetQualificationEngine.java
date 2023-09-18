@@ -1,10 +1,10 @@
 package com.hotstar.adtech.blaze.allocation.planner.qualification;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.Tenant;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.adset.StreamTargetingRuleInspector;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.QualificationResult;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
 import java.util.List;
 
 public class StreamAdSetQualificationEngine implements QualificationEngine {

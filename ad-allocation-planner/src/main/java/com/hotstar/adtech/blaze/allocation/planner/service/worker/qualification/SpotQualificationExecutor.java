@@ -3,14 +3,14 @@ package com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification
 import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.QUALIFICATION;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.PlanType;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.Language;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.QualificationEngine;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.StreamAdQualificationEngine;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.StreamAdSetQualificationEngine;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GraphContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.GeneralPlanContext;
 import io.micrometer.core.annotation.Timed;
 import java.util.List;
 import org.springframework.stereotype.Service;

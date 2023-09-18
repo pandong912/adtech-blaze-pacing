@@ -3,9 +3,9 @@ package com.hotstar.adtech.blaze.allocation.planner.service.worker;
 import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.WORKER_DATA_LOAD;
 
 import com.hotstar.adtech.blaze.allocation.planner.config.CacheConfig;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.ShalePlanContext;
-import com.hotstar.adtech.blaze.allocation.planner.source.s3.AllocationDataClient;
+import com.hotstar.adtech.blaze.allocationdata.client.AllocationDataClient;
+import com.hotstar.adtech.blaze.allocationdata.client.model.GeneralPlanContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.ShalePlanContext;
 import io.micrometer.core.annotation.Timed;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;

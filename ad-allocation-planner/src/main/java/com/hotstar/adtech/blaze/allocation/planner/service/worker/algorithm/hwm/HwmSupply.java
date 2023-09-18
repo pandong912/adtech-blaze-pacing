@@ -1,7 +1,7 @@
 package com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.hwm;
 
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.Supply;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Request;
+import com.hotstar.adtech.blaze.allocationdata.client.model.Request;
 
 public class HwmSupply extends Supply {
 

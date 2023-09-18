@@ -5,8 +5,8 @@ import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.MAT
 import com.hotstar.adtech.blaze.adserver.data.redis.service.ReachDataRepository;
 import com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.DegradationReachStorage;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.ReachStorage;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.RedisReachStorage;
+import com.hotstar.adtech.blaze.allocationdata.client.model.ReachStorage;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Metrics;
 import java.util.Arrays;

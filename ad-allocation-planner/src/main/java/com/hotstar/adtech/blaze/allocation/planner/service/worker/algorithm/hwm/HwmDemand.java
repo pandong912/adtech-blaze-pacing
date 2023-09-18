@@ -1,7 +1,7 @@
 package com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.hwm;
 
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.Demand;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Response;
+import com.hotstar.adtech.blaze.allocationdata.client.model.Response;
 import lombok.Getter;
 
 public class HwmDemand extends Demand {

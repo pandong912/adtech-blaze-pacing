@@ -1,0 +1,4 @@
+blaze:
+  allocation-data-client:
+    local:
+      base-dir: ./

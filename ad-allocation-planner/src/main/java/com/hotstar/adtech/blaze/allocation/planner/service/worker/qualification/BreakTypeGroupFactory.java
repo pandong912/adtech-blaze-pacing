@@ -1,9 +1,10 @@
 package com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.RuleType;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.BreakTargetingRule;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.BreakTargetingRule;
+import com.hotstar.adtech.blaze.allocationdata.client.model.BreakTypeGroup;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;

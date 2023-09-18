@@ -2,10 +2,10 @@ package com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.adse
 
 import com.hotstar.adtech.blaze.admodel.common.enums.RuleType;
 import com.hotstar.adtech.blaze.admodel.common.enums.Tenant;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.StreamTargetingRule;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.StreamTargetingRuleClause;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.Inspector;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.StreamTargetingRule;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.StreamTargetingRuleClause;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;

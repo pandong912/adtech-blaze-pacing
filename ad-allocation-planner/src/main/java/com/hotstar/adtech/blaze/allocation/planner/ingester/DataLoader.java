@@ -1,8 +1,8 @@
 package com.hotstar.adtech.blaze.allocation.planner.ingester;
 
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModel;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.AdModelVersion;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdModel;
 import com.hotstar.adtech.blaze.allocation.planner.source.algomodel.StandardMatchProgressModel;
 import java.util.List;
 import java.util.Objects;

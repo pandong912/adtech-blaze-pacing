@@ -6,11 +6,11 @@ import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.MAT
 import com.hotstar.adtech.blaze.admodel.common.enums.TaskStatus;
 import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResult;
 import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResultDetail;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModel;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Match;
 import com.hotstar.adtech.blaze.allocation.planner.config.launchdarkly.BlazeDynamicConfig;
 import com.hotstar.adtech.blaze.allocation.planner.ingester.DataLoader;
 import com.hotstar.adtech.blaze.allocation.planner.service.AllocationPlanTaskService;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdModel;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Match;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Metrics;
 import java.time.Instant;

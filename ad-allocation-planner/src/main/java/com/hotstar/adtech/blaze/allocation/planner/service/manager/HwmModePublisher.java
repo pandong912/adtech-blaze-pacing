@@ -2,10 +2,10 @@ package com.hotstar.adtech.blaze.allocation.planner.service.manager;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.AlgorithmType;
 import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModel;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Match;
 import com.hotstar.adtech.blaze.allocation.planner.service.manager.loader.GeneralPlanContextLoader;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdModel;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Match;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.GeneralPlanContext;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;

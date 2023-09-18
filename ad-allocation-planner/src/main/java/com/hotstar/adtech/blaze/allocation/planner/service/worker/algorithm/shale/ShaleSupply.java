@@ -2,7 +2,7 @@ package com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.sha
 
 import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.Supply;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Request;
+import com.hotstar.adtech.blaze.allocationdata.client.model.Request;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

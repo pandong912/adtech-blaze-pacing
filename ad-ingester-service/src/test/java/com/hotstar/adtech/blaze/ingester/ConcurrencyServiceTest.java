@@ -52,7 +52,7 @@ public class ConcurrencyServiceTest extends TestEnvConfig {
     Map<String, Long> contentAllStreamConcurrency = streamConcurrencyRepository.getContentAllStreamConcurrency("123");
     System.out.println("contentAllStreamConcurrency: " + contentAllStreamConcurrency);
     Assertions.assertNull(contentAllStreamConcurrency.get("in-hin--ssai"));
-    Assertions.assertEquals(3L, contentAllStreamConcurrency.get("P15"));
+    Assertions.assertEquals(5L, contentAllStreamConcurrency.get("P15"));
     Assertions.assertEquals(10L, contentAllStreamConcurrency.get("P7"));
 
     Map<String, Long> contentAllStreamCohortConcurrency =
@@ -93,7 +93,14 @@ public class ConcurrencyServiceTest extends TestEnvConfig {
         .ladder(Ladder.tv.toString())
         .language("tel")
         .tenant(Tenant.India.getName())
-        .build()
+        .build(),
+        SingleStream.builder()
+          .playoutId("P15")
+          .ads(StreamType.Spot.getAds())
+          .ladder(Ladder.web.toString())
+          .language("tel")
+          .tenant(Tenant.India.getName())
+          .build()
       ).stream()
       .collect(Collectors.toMap(SingleStream::getKey, SingleStream::getPlayoutId));
   }
@@ -104,6 +111,7 @@ public class ConcurrencyServiceTest extends TestEnvConfig {
     concurrencyValues.put("in-hin--ssai|SSAI::001", 1L);
     concurrencyValues.put("in-tel-phone-non_ssai", 1L);
     concurrencyValues.put("in-tel-tv-non_ssai", 2L);
+    concurrencyValues.put("in-tel-web-non_ssai", 2L);
     return ConcurrencyGroup.builder()
       .tsBucket(100L)
       .concurrencyValues(concurrencyValues)

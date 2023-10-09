@@ -12,6 +12,10 @@ spring:
       shutdown:
         await-termination: true
         await-termination-period: 180s
+    execution:
+      shutdown:
+        await-termination: true
+        await-termination-period: 90s
 management:
   server:
     port: 8081

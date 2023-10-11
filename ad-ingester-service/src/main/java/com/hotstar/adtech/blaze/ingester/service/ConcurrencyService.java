@@ -40,7 +40,6 @@ public class ConcurrencyService {
     updateCohortConcurrency(contentId, streamMappingConverter);
   }
 
-
   private void updateStreamConcurrency(String contentId, Map<String, String> converter) {
     try {
       ConcurrencyGroup concurrencyGroup = pulseService.getLiveContentStreamConcurrency(contentId);

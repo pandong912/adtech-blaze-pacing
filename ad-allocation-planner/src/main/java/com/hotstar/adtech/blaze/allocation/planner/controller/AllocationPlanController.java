@@ -52,8 +52,7 @@ public class AllocationPlanController {
   public StandardResponse<List<HwmAllocationPlan>> generateHwmPlan(@RequestBody AllocationRequest allocationRequest) {
     GeneralPlanContext generalPlanContext = buildGeneralPlanContext(allocationRequest, Collections.emptyList());
     setConcurrencyId(generalPlanContext);
-    List<BreakTypeGroup> breakTypeList =
-      breakTypeGroupFactory.getBreakTypeList(generalPlanContext.getAdSets(), generalPlanContext.getBreakDetails());
+    List<BreakTypeGroup> breakTypeList = generalPlanContext.getBreakTypeList();
     List<HwmAllocationPlan> hwmSolveResults = breakTypeList.stream()
       .flatMap(breakTypeGroup -> breakTypeGroup
         .getAllBreakDurations()
@@ -81,8 +80,7 @@ public class AllocationPlanController {
       .penalty(shaleAllocationRequest.getPenalty())
       .build();
 
-    List<BreakTypeGroup> breakTypeList =
-      breakTypeGroupFactory.getBreakTypeList(generalPlanContext.getAdSets(), generalPlanContext.getBreakDetails());
+    List<BreakTypeGroup> breakTypeList = generalPlanContext.getBreakTypeList();
     List<ShaleAllocationPlan> shaleSolveResults = breakTypeList.stream()
       .flatMap(breakTypeGroup -> breakTypeGroup
         .getAllBreakDurations()
@@ -138,6 +136,9 @@ public class AllocationPlanController {
 
     RequestData requestData = new RequestData(request.getConcurrencyData());
 
+    List<BreakTypeGroup> breakTypeList =
+      breakTypeGroupFactory.getBreakTypeList(adSets, request.getBreakDetails());
+
     return GeneralPlanContext.builder()
       .contentId(contentId)
       .concurrencyData(request.getConcurrencyData())
@@ -148,6 +149,7 @@ public class AllocationPlanController {
       .breakContext(breakContext)
       .breakDetails(request.getBreakDetails())
       .requestData(requestData)
+      .breakTypeList(breakTypeList)
       .build();
   }
 

@@ -3,6 +3,7 @@ package com.hotstar.adtech.blaze.allocation.planner.service.manager.loader;
 import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.PLAN_DATA_LOAD;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
+import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
@@ -11,6 +12,8 @@ import com.hotstar.adtech.blaze.allocation.planner.ingester.DataExchangerService
 import com.hotstar.adtech.blaze.allocation.planner.ingester.DataLoader;
 import com.hotstar.adtech.blaze.allocation.planner.service.manager.DataProcessService;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.DemandDiagnosis;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BreakTypeGroup;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BreakTypeGroupFactory;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.RequestData;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Response;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdModel;
@@ -38,6 +41,7 @@ public class GeneralPlanContextLoader {
   private final DataExchangerService dataExchangerService;
   private final DataLoader dataLoader;
   private final DataProcessService dataProcessService;
+  private final BreakTypeGroupFactory breakTypeGroupFactory;
 
   @Timed(value = PLAN_DATA_LOAD, extraTags = {"algorithm", "general"})
   public GeneralPlanContext getGeneralPlanContext(Match match, AdModel adModel) {
@@ -59,11 +63,13 @@ public class GeneralPlanContextLoader {
     List<DemandDiagnosis> demandDiagnosisList =
       dataProcessService.getDemandDiagnosisList(adSets, breakContext, adSetImpression);
 
-    log.info("total cohort size: {}", concurrencyData.getCohorts().size());
-    log.info("total stream size: {}", concurrencyData.getStreams().size());
-    log.info("break index: {}, total break number: {}", breakIndex, totalBreakNumber);
-    log.info("ssai adSet size: {}", adSets.stream().filter(adSet -> adSet.getSsaiAds().size() > 0).count());
-    log.info("spot adSet size: {}", adSets.stream().filter(adSet -> adSet.getSpotAds().size() > 0).count());
+    log.info("content:{}, total cohort size: {}", contentId, concurrencyData.getCohorts().size());
+    log.info("content:{},total stream size: {}", contentId, concurrencyData.getStreams().size());
+    log.info("content:{},break index: {}, total break number: {}", contentId, breakIndex, totalBreakNumber);
+    log.info("content:{},ssai adSet size: {}", contentId,
+      adSets.stream().filter(adSet -> !adSet.getSsaiAds().isEmpty()).count());
+    log.info("content:{},spot adSet size: {}", contentId,
+      adSets.stream().filter(adSet -> !adSet.getSpotAds().isEmpty()).count());
 
     List<Response> responses = demandDiagnosisList.stream()
       .map(dataProcessService::convertFromDemand)
@@ -71,6 +77,8 @@ public class GeneralPlanContextLoader {
     Map<String, Integer> attributeId2TargetingTagMap = adModel.getAttributeId2TargetingTags();
 
     RequestData requestData = new RequestData(concurrencyData);
+    List<BreakDetail> breakDetails = dataLoader.getBreakDetail();
+    List<BreakTypeGroup> breakTypeList = breakTypeGroupFactory.getBreakTypeList(adSets, breakDetails);
 
     return GeneralPlanContext.builder()
       .contentId(contentId)
@@ -81,7 +89,8 @@ public class GeneralPlanContextLoader {
       .requestData(requestData)
       .responses(responses)
       .breakContext(breakContext)
-      .breakDetails(dataLoader.getBreakDetail())
+      .breakDetails(breakDetails)
+      .breakTypeList(breakTypeList)
       .build();
   }
 

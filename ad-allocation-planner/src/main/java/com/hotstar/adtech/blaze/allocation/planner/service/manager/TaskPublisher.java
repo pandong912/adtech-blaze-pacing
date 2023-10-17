@@ -74,9 +74,7 @@ public class TaskPublisher {
       .allocationPlanResultDetails(new ArrayList<>())
       .taskStatus(TaskStatus.PUBLISHED)
       .build();
-
-    List<BreakTypeGroup> breakTypeList =
-      breakTypeGroupFactory.getBreakTypeList(generalPlanContext.getAdSets(), generalPlanContext.getBreakDetails());
+    List<BreakTypeGroup> breakTypeList = generalPlanContext.getBreakTypeList();
 
     BreakContext breakContext = generalPlanContext.getBreakContext();
     List<AllocationPlanResultDetail> ssaiAllocationPlanResultDetails = Arrays.stream(ssaiAlgorithms)

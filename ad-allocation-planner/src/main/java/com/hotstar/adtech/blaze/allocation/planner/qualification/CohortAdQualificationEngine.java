@@ -15,10 +15,10 @@ public class CohortAdQualificationEngine implements QualificationEngine {
   private final QualificationResult secondQualified;
   private final QualificationResult firstQualified;
 
-  public CohortAdQualificationEngine(Integer breakDuration, Integer languageId, int supplyId,
+  public CohortAdQualificationEngine(Integer durationLimit, Integer languageId, int supplyId,
                                      QualificationResult firstQualified,
                                      QualificationResult secondQualified) {
-    durationInspector = new DurationInspector(breakDuration);
+    durationInspector = new DurationInspector(durationLimit);
     languageInspector = new LanguageInspector(languageId);
     this.supplyId = supplyId;
     this.secondQualified = secondQualified;

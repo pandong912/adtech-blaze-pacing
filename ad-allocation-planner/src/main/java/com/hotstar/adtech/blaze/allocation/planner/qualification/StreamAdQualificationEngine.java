@@ -19,9 +19,9 @@ public class StreamAdQualificationEngine implements QualificationEngine {
   private final QualificationResult secondQualified;
   private final QualificationResult firstQualified;
 
-  public StreamAdQualificationEngine(Integer breakDuration, Integer breakTypeId, Language language, int supplyId,
+  public StreamAdQualificationEngine(Integer durationLimit, Integer breakTypeId, Language language, int supplyId,
                                      QualificationResult firstQualified, QualificationResult secondQualified) {
-    durationInspector = new DurationInspector(breakDuration);
+    durationInspector = new DurationInspector(durationLimit);
     breakTargetingRuleInspector = new BreakTargetingRuleInspector(breakTypeId);
     languageInspector = new LanguageInspector(language.getId());
     aspectRatioInspector = new AspectRatioInspector(language.getName());

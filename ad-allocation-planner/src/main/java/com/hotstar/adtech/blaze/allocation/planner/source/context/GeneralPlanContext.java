@@ -3,9 +3,11 @@ package com.hotstar.adtech.blaze.allocation.planner.source.context;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.DemandDiagnosis;
+import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BreakTypeGroup;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.RequestData;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Response;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.Builder;
@@ -21,10 +23,25 @@ public class GeneralPlanContext {
   List<DemandDiagnosis> demandDiagnosisList;
   List<Response> responses;
   BreakContext breakContext;
+  @Deprecated
   List<BreakDetail> breakDetails;
   RequestData requestData;
+  List<BreakTypeGroup> breakTypeList;
 
   public boolean isEmpty() {
     return adSets.isEmpty() || (concurrencyData.getCohorts().isEmpty() && concurrencyData.getStreams().isEmpty());
+  }
+
+  public Integer getDurationLimit(Integer breakTypeId, Integer duration) {
+    Integer step = breakTypeList.stream()
+      .filter(breakTypeGroup -> breakTypeGroup.getBreakTypeIds().contains(breakTypeId))
+      .findFirst()
+      .flatMap(breakTypeGroup -> new ArrayList<>(breakTypeGroup.getAllBreakDurations()).stream()
+        .sorted()
+        .filter(d -> d > duration)
+        .findFirst())
+      .map(d -> d - duration)
+      .orElse(duration);
+    return duration + step / 2;
   }
 }

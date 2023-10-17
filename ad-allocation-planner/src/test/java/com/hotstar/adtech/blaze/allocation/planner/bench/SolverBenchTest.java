@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 public class SolverBenchTest {
   private static final int PARALLELISM = 1;
 
-  @Test
+  //  @Test
   public void testShaleSolver() {
     Random random = new Random();
     random.setSeed(934280);

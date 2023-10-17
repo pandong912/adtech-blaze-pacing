@@ -41,24 +41,24 @@ jobs:
       DOCKER_ARGUMENTS_STRING: ''
       TRUNK_BRANCH_NAME: master
       HARNESS_WEBHOOK: luCSjvyaHAcKnIa4Vnrgd0rvxWjnSbindbo0pwEb
-      MAVEN_SETTINGS_PATHS: 'secret/non-prod/adtech/nexus/release secret/non-prod/adtech/nexus/snapshot secret/non-prod/seceng/nexus/iauth secret/non-prod/adtech/self-serve/nexus/release secret/non-prod/adtech/self-serve/nexus/snapshot'
+      MAVEN_SETTINGS_PATHS: 'secret/non-prod/adtech/nexus/release secret/non-prod/adtech/nexus/snapshot'
       JAVA_VERSION: 8
       PRE_BUILD_SCRIPT_PATH: 'mvn clean package -pl ad-ingester-service -am -Dmaven.test.skip=true'
       CUSTOM_UNIT_TEST_SCRIPT: 'mvn clean test -pl ad-ingester-service -am'
-  build-ci-ad-data-exchanger:
+  build-ci-reach-synchronizer:
     uses: hotstar/hotstar-github-action-workflows/.github/workflows/hotstar-java-maven-ci-workflow.yml@main
     with:
-      IMAGE_NAME: adtech-blaze-ad-data-exchanger
+      IMAGE_NAME: adtech-blaze-ad-reach-synchronizer
       TRIGGER_PIPELINE: false
-      SERVICE_NAME: adtech-blaze-ad-data-exchanger
+      SERVICE_NAME: adtech-blaze-ad-reach-synchronizer
       HARNESS_APP_ID: 6pljp6twRxWWqpbOhNLjUQ
       HARNESS_PARAMETER_STRING: ''
-      WORKING_DIRECTORY: 'ad-data-exchanger'
+      WORKING_DIRECTORY: 'ad-reach-synchronizer'
       DOCKER_FILEPATH: 'deploy/docker/Dockerfile'
       DOCKER_ARGUMENTS_STRING: ''
       TRUNK_BRANCH_NAME: master
       HARNESS_WEBHOOK: 1bjWVdjKBpV3qV5Gk5Nmd8RNWZOorIAsUX0yPPBt
-      MAVEN_SETTINGS_PATHS: 'secret/non-prod/adtech/nexus/release secret/non-prod/adtech/nexus/snapshot secret/non-prod/seceng/nexus/iauth secret/non-prod/adtech/self-serve/nexus/release secret/non-prod/adtech/self-serve/nexus/snapshot'
+      MAVEN_SETTINGS_PATHS: 'secret/non-prod/adtech/nexus/release secret/non-prod/adtech/nexus/snapshot secret/non-prod/adtech/nexus/launchdarkly'
       JAVA_VERSION: 8
-      PRE_BUILD_SCRIPT_PATH: 'mvn clean package -pl ad-data-exchanger -am -Dmaven.test.skip=true'
-      CUSTOM_UNIT_TEST_SCRIPT: 'mvn clean test -pl ad-data-exchanger -am'
+      PRE_BUILD_SCRIPT_PATH: 'mvn clean package -pl ad-reach-synchronizer -am -Dmaven.test.skip=true'
+      CUSTOM_UNIT_TEST_SCRIPT: 'mvn clean test -pl ad-reach-synchronizer -am'

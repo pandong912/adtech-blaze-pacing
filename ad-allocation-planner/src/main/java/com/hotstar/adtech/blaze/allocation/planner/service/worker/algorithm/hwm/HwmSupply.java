@@ -6,7 +6,7 @@ import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.
 public class HwmSupply extends Supply {
 
   public HwmSupply(Request request, int breakDuration) {
-    super(request.getConcurrencyId(), request.getConcurrency() * breakDuration, request.getConcurrency());
+    super(request.getConcurrencyId(), breakDuration, request.getConcurrency());
   }
 
 }

@@ -7,7 +7,6 @@ import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.RequestData;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Response;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import lombok.Builder;
@@ -37,7 +36,7 @@ public class GeneralPlanContext {
     Integer step = breakTypeList.stream()
       .filter(breakTypeGroup -> breakTypeGroup.getBreakTypeIds().contains(breakTypeId))
       .findFirst()
-      .flatMap(breakTypeGroup -> new ArrayList<>(breakTypeGroup.getAllBreakDurations()).stream()
+      .flatMap(breakTypeGroup -> breakTypeGroup.getAllBreakDurations().stream()
         .sorted()
         .filter(d -> d > duration)
         .findFirst())

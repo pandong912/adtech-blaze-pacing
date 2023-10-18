@@ -8,11 +8,14 @@ public class Supply {
   private long inventory;
   @Getter
   private final long concurrency;
+  @Getter
+  private final int breakDuration;
 
-  public Supply(Integer id, long inventory, long concurrency) {
+  public Supply(Integer id, int breakDuration, long concurrency) {
     this.id = id;
-    this.inventory = inventory;
+    this.inventory = breakDuration * concurrency;
     this.concurrency = concurrency;
+    this.breakDuration = breakDuration;
   }
 
   public void updateInventory(long needs) {
@@ -20,7 +23,7 @@ public class Supply {
   }
 
   public long getInventory(long timeNeeds) {
-    if (concurrency * timeNeeds <= inventory) {
+    if (concurrency * Math.min(breakDuration, timeNeeds) <= inventory) {
       return concurrency;
     } else {
       return 0L;

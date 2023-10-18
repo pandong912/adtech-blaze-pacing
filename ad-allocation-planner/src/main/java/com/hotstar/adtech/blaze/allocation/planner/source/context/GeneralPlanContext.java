@@ -32,7 +32,8 @@ public class GeneralPlanContext {
     return adSets.isEmpty() || (concurrencyData.getCohorts().isEmpty() && concurrencyData.getStreams().isEmpty());
   }
 
-  public Integer getDurationLimit(Integer breakTypeId, Integer duration) {
+  // solve https://hotstar.atlassian.net/browse/LIVE-27010
+  public Integer getRelaxedDuration(Integer breakTypeId, Integer duration) {
     Integer step = breakTypeList.stream()
       .filter(breakTypeGroup -> breakTypeGroup.getBreakTypeIds().contains(breakTypeId))
       .findFirst()

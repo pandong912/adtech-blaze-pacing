@@ -25,7 +25,7 @@ public class SpotQualificationExecutor {
 
     List<AdSet> adSets = generalPlanContext.getAdSets();
     List<ContentStream> streams = generalPlanContext.getConcurrencyData().getStreams();
-    Integer durationLimit = generalPlanContext.getDurationLimit(breakTypeIds.get(0), duration);
+    Integer relaxedDuration = generalPlanContext.getRelaxedDuration(breakTypeIds.get(0), duration);
 
     QualificationResult firstQualified = new BitSetQualificationResult(streams.size(), adSets.size());
 
@@ -33,7 +33,7 @@ public class SpotQualificationExecutor {
 
     QualificationResult secondQualified = new BitSetQualificationResult(streams.size(), adSets.size());
     generalPlanContext.getConcurrencyData().getStreams()
-      .forEach(request -> qualifyByBreak(generalPlanContext.getAdSets(), request, breakTypeIds.get(0), durationLimit,
+      .forEach(request -> qualifyByBreak(generalPlanContext.getAdSets(), request, breakTypeIds.get(0), relaxedDuration,
         firstQualified, secondQualified));
 
 
@@ -56,11 +56,11 @@ public class SpotQualificationExecutor {
     qualificationEngine.qualify(adSets);
   }
 
-  private void qualifyByBreak(List<AdSet> adSets, ContentStream request, Integer breakTypeId, Integer durationLimit,
+  private void qualifyByBreak(List<AdSet> adSets, ContentStream request, Integer breakTypeId, Integer relaxedDuration,
                               QualificationResult firstQualified, QualificationResult secondQualified) {
     Language language = request.getPlayoutStream().getLanguage();
     QualificationEngine qualificationEngine =
-      new StreamAdQualificationEngine(durationLimit, breakTypeId, language, request.getConcurrencyIdInStream(),
+      new StreamAdQualificationEngine(relaxedDuration, breakTypeId, language, request.getConcurrencyIdInStream(),
         firstQualified, secondQualified);
 
     qualificationEngine.qualify(adSets);

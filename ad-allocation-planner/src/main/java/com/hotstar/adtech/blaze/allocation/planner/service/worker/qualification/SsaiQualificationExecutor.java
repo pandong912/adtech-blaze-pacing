@@ -45,17 +45,17 @@ public class SsaiQualificationExecutor {
     streams
       .parallelStream()
       .forEach(contentStream -> qualifyByConcurrency(contentStream, adSets, firstQualified));
-    Integer durationLimit = generalPlanContext.getDurationLimit(breakTypeIds.get(0), duration);
+    Integer relaxedDuration = generalPlanContext.getRelaxedDuration(breakTypeIds.get(0), duration);
 
     QualificationResult secondQualified =
       new BitSetQualificationResult(requestData.getSsaiAndSpotRequests().size(), adSets.size());
     mixedStreamCohorts
       .parallelStream()
-      .forEach(request -> qualifyByBreak(request, adSets, durationLimit, firstQualified, secondQualified));
+      .forEach(request -> qualifyByBreak(request, adSets, relaxedDuration, firstQualified, secondQualified));
     streams
       .parallelStream()
       .forEach(
-        request -> qualifyByBreak(adSets, request, breakTypeIds.get(0), durationLimit, firstQualified,
+        request -> qualifyByBreak(adSets, request, breakTypeIds.get(0), relaxedDuration, firstQualified,
           secondQualified));
 
     return GraphContext.builder()
@@ -88,22 +88,22 @@ public class SsaiQualificationExecutor {
     qualificationEngine.qualify(adSets);
   }
 
-  private void qualifyByBreak(ContentCohort request, List<AdSet> adSets, Integer durationLimit,
+  private void qualifyByBreak(ContentCohort request, List<AdSet> adSets, Integer relaxedDuration,
                               QualificationResult firstQualified,
                               QualificationResult secondQualified) {
     Integer languageId = request.getPlayoutStream().getLanguage().getId();
     CohortAdQualificationEngine qualificationEngine =
-      new CohortAdQualificationEngine(durationLimit, languageId, request.getConcurrencyId(), firstQualified,
+      new CohortAdQualificationEngine(relaxedDuration, languageId, request.getConcurrencyId(), firstQualified,
         secondQualified);
 
     qualificationEngine.qualify(adSets);
   }
 
-  private void qualifyByBreak(List<AdSet> adSets, ContentStream request, Integer breakTypeId, Integer durationLimit,
+  private void qualifyByBreak(List<AdSet> adSets, ContentStream request, Integer breakTypeId, Integer relaxedDuration,
                               QualificationResult firstQualified, QualificationResult secondQualified) {
     Language language = request.getPlayoutStream().getLanguage();
     QualificationEngine qualificationEngine =
-      new StreamAdQualificationEngine(durationLimit, breakTypeId, language,
+      new StreamAdQualificationEngine(relaxedDuration, breakTypeId, language,
         request.getConcurrencyIdInCohort(),
         firstQualified, secondQualified);
 

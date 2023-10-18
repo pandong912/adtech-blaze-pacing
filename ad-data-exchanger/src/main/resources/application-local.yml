@@ -1,8 +1,0 @@
-server:
-  port: 8097
-management:
-  server:
-    port: 8197
-spring:
-  profiles:
-    include: ad-model-repository-local, ad-redis-client-local, allocation-plan-client-local, ad-model-client-local

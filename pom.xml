@@ -13,8 +13,6 @@
         <module>ad-allocation-planner-common</module>
         <module>ad-allocation-plan-client</module>
         <module>ad-allocation-planner</module>
-        <module>ad-data-exchanger-client</module>
-        <module>ad-data-exchanger</module>
         <module>ad-reach-synchronizer</module>
     </modules>
 

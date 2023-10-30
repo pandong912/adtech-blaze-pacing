@@ -14,12 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 public class ShaleSupply extends Supply {
   @Setter
   private double beta;
-  private final int breakDuration;
   private final StreamType streamType;
 
   public ShaleSupply(Request request, int breakDuration) {
-    super(request.getConcurrencyId(), request.getConcurrency() * breakDuration, request.getConcurrency());
-    this.breakDuration = breakDuration;
+    super(request.getConcurrencyId(), breakDuration, request.getConcurrency());
     this.streamType = request.getStreamType();
   }
 }

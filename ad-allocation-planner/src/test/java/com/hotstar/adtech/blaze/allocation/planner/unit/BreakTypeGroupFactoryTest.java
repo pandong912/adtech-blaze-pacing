@@ -8,6 +8,7 @@ import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BreakTypeGroupFactory;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.source.admodel.BreakTargetingRule;
+import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -46,6 +47,20 @@ public class BreakTypeGroupFactoryTest {
     Assertions.assertEquals(6, group.getAllBreakDurations().size());
     Assertions.assertTrue(Arrays.asList(30000, 50000, 20000, 40000, 60000, 70000)
       .containsAll(group.getAllBreakDurations()));
+
+    // test relaxDuration
+    GeneralPlanContext generalPlanContext = GeneralPlanContext.builder()
+      .breakTypeList(breakTypeGroups)
+      .build();
+    Integer relaxedDuration = generalPlanContext.getRelaxedDuration(3, 50000);
+    Assertions.assertEquals(55000, relaxedDuration);
+    Integer relaxedDuration2 = generalPlanContext.getRelaxedDuration(4, 50000);
+    Assertions.assertEquals(55000, relaxedDuration2);
+    Integer relaxedDuration3 = generalPlanContext.getRelaxedDuration(1, 20000);
+    Assertions.assertEquals(35000, relaxedDuration3);
+    Integer relaxedDuration4 = generalPlanContext.getRelaxedDuration(1, 50000);
+    Assertions.assertEquals(65000, relaxedDuration4);
+
 
   }
 

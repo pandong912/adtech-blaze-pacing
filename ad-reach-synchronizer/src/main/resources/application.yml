@@ -37,7 +37,7 @@ blaze:
       enable: true
       timeout-mills: 500
   data-exchanger:
-    endpoint: adtech-blaze-data-exchanger-service.internal.preprod.hotstar.com
+    endpoint: adtech-blaze-data-exchanger-service.internal.hotstar.com
     retryer:
       period: 100
       maxPeriod: 1000

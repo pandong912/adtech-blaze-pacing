@@ -5,11 +5,9 @@ import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.MAT
 import com.hotstar.adtech.blaze.admodel.common.enums.AlgorithmType;
 import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResult;
 import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResultDetail;
-import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.hwm.HwmAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.ShaleAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.service.AllocationPlanTaskService;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.BreakContext;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.ShalePlanContext;
 import com.hotstar.adtech.blaze.allocationplan.client.model.UploadResult;
@@ -68,7 +66,6 @@ public class AllocationPlanWorker {
   private UploadResult generateHwmPlan(AllocationPlanResultDetail subtask, AllocationPlanResult task) {
     GeneralPlanContext generalPlanContext =
       allocationDataLoader.loadGeneralData(task.getContentId(), task.getVersion());
-    printLog(generalPlanContext);
     HwmAllocationPlan hwmAllocationPlan =
       hwmPlanWorker.generatePlans(generalPlanContext, subtask.getPlanType(),
         parseBreakTypeIds(subtask.getBreakTypeIds()), subtask.getDuration());
@@ -79,7 +76,6 @@ public class AllocationPlanWorker {
   private UploadResult generateShalePlan(AllocationPlanResultDetail subtask, AllocationPlanResult task) {
     ShalePlanContext shalePlanContext =
       allocationDataLoader.loadShaleData(task.getContentId(), task.getVersion());
-    printLog(shalePlanContext.getGeneralPlanContext());
     ShaleAllocationPlan shaleAllocationPlan =
       shalePlanWorker.generatePlans(shalePlanContext, subtask.getPlanType(),
         parseBreakTypeIds(subtask.getBreakTypeIds()), subtask.getDuration());
@@ -90,14 +86,4 @@ public class AllocationPlanWorker {
     return Arrays.stream(breakTypeIds.split(",")).map(Integer::parseInt).collect(Collectors.toList());
   }
 
-
-  private void printLog(GeneralPlanContext generalPlanContext) {
-    ConcurrencyData concurrencyData = generalPlanContext.getConcurrencyData();
-    BreakContext breakContext = generalPlanContext.getBreakContext();
-    log.info("total cohort size: {}", concurrencyData.getCohorts().size());
-    log.info("total stream size: {}", concurrencyData.getStreams().size());
-    log.info("break index: {}, total break number: {}", breakContext.getNextBreakIndex(),
-      breakContext.getTotalBreakNumber());
-    log.info("adSet size: {}", generalPlanContext.getAdSets().size());
-  }
 }

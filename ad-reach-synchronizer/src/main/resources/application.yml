@@ -51,4 +51,4 @@ blaze:
       queue-capacity: 20000
     load.ad-model: 10000
     schedule:
-      reach-sync-delay: 60000
+      reach-sync-delay: 30000

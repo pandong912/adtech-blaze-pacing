@@ -75,8 +75,8 @@ public class SsaiQualificationExecutor {
                                     QualificationResult firstQualified) {
 
     CohortAdSetQualificationEngine qualificationEngine =
-      new CohortAdSetQualificationEngine(contentCohort.getSsaiTag(), attributeId2TargetingTagMap,
-        contentCohort.getConcurrencyId(), firstQualified);
+      new CohortAdSetQualificationEngine(contentCohort.getPlayoutStream(), contentCohort.getSsaiTag(),
+        attributeId2TargetingTagMap, contentCohort.getConcurrencyId(), firstQualified);
 
     qualificationEngine.qualify(adSets);
   }

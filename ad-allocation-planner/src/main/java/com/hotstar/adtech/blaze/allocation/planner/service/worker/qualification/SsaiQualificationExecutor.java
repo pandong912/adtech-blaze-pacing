@@ -4,6 +4,7 @@ import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.QUA
 
 import com.hotstar.adtech.blaze.admodel.common.enums.PlanType;
 import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
@@ -13,9 +14,9 @@ import com.hotstar.adtech.blaze.allocation.planner.qualification.CohortAdSetQual
 import com.hotstar.adtech.blaze.allocation.planner.qualification.QualificationEngine;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.StreamAdQualificationEngine;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.StreamAdSetQualificationEngine;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GraphContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.GeneralPlanContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.RequestData;
 import io.micrometer.core.annotation.Timed;
 import java.util.List;
 import java.util.Map;

@@ -2,17 +2,17 @@ package com.hotstar.adtech.blaze.allocation.planner.service.manager.loader;
 
 import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.PLAN_DATA_LOAD;
 
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModel;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Match;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.config.launchdarkly.BlazeDynamicConfig;
 import com.hotstar.adtech.blaze.allocation.planner.ingester.ReachService;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleConstant;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.DegradationReachStorage;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.ReachStorage;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdModel;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Match;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.ShalePlanContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.GeneralPlanContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.ReachStorage;
+import com.hotstar.adtech.blaze.allocationdata.client.model.ShalePlanContext;
 import io.micrometer.core.annotation.Timed;
 import java.util.Map;
 import java.util.stream.Collectors;

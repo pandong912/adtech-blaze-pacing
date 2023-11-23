@@ -3,6 +3,9 @@ package com.hotstar.adtech.blaze.allocation.planner.service.manager.loader;
 import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.PLAN_DATA_LOAD;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModel;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Match;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
@@ -11,17 +14,14 @@ import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
 import com.hotstar.adtech.blaze.allocation.planner.ingester.DataExchangerService;
 import com.hotstar.adtech.blaze.allocation.planner.ingester.DataLoader;
 import com.hotstar.adtech.blaze.allocation.planner.service.manager.DataProcessService;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.DemandDiagnosis;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BreakTypeGroup;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BreakTypeGroupFactory;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.RequestData;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Response;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdModel;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Match;
 import com.hotstar.adtech.blaze.allocation.planner.source.algomodel.StandardMatchProgressModel;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.BreakContext;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.BreakContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.BreakTypeGroup;
+import com.hotstar.adtech.blaze.allocationdata.client.model.DemandDiagnosis;
+import com.hotstar.adtech.blaze.allocationdata.client.model.GeneralPlanContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.RequestData;
+import com.hotstar.adtech.blaze.allocationdata.client.model.Response;
 import io.micrometer.core.annotation.Timed;
 import java.util.Collections;
 import java.util.List;
@@ -89,7 +89,6 @@ public class GeneralPlanContextLoader {
       .requestData(requestData)
       .responses(responses)
       .breakContext(breakContext)
-      .breakDetails(breakDetails)
       .breakTypeList(breakTypeList)
       .build();
   }

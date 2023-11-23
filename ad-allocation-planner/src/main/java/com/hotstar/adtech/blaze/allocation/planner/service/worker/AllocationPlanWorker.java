@@ -8,8 +8,8 @@ import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResultDet
 import com.hotstar.adtech.blaze.allocation.planner.common.response.hwm.HwmAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.ShaleAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.service.AllocationPlanTaskService;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.ShalePlanContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.GeneralPlanContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.ShalePlanContext;
 import com.hotstar.adtech.blaze.allocationplan.client.model.UploadResult;
 import io.micrometer.core.annotation.Timed;
 import java.time.Instant;

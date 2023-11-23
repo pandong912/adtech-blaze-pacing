@@ -1,12 +1,12 @@
 package com.hotstar.adtech.blaze.allocation.planner.qualification;
 
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.Language;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.ad.AspectRatioInspector;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.ad.DurationInspector;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.ad.LanguageInspector;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.adset.BreakTargetingRuleInspector;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.QualificationResult;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
 import java.util.List;
 
 public class StreamAdQualificationEngine implements QualificationEngine {

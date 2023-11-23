@@ -1,11 +1,11 @@
 package com.hotstar.adtech.blaze.allocation.planner.service.manager;
 
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.DemandDiagnosis;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Response;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Ad;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Ad;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.source.algomodel.StandardMatchProgressModel;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.BreakContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.BreakContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.DemandDiagnosis;
+import com.hotstar.adtech.blaze.allocationdata.client.model.Response;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;

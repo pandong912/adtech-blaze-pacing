@@ -1,6 +1,8 @@
 package com.hotstar.adtech.blaze.allocation.planner.controller;
 
 import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModel;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
 import com.hotstar.adtech.blaze.allocation.planner.common.request.AllocationRequest;
@@ -10,21 +12,19 @@ import com.hotstar.adtech.blaze.allocation.planner.common.response.hwm.HwmAlloca
 import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.ShaleAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.ingester.AdModelLoader;
 import com.hotstar.adtech.blaze.allocation.planner.service.manager.DataProcessService;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.DemandDiagnosis;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.HwmPlanWorker;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.ShalePlanWorker;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.ReachStorage;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.RedisReachStorage;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BreakTypeGroup;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BreakTypeGroupFactory;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.RequestData;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Response;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdModel;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.source.algomodel.StandardMatchProgressModel;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.BreakContext;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.ShalePlanContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.BreakContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.BreakTypeGroup;
+import com.hotstar.adtech.blaze.allocationdata.client.model.DemandDiagnosis;
+import com.hotstar.adtech.blaze.allocationdata.client.model.GeneralPlanContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.ReachStorage;
+import com.hotstar.adtech.blaze.allocationdata.client.model.RequestData;
+import com.hotstar.adtech.blaze.allocationdata.client.model.Response;
+import com.hotstar.adtech.blaze.allocationdata.client.model.ShalePlanContext;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -147,13 +147,13 @@ public class AllocationPlanController {
       .demandDiagnosisList(demandDiagnosisList)
       .responses(responses)
       .breakContext(breakContext)
-      .breakDetails(request.getBreakDetails())
       .requestData(requestData)
       .breakTypeList(breakTypeList)
       .build();
   }
 
-  private void setConcurrencyId(GeneralPlanContext generalPlanContext) {
+  private void setConcurrencyId(
+    GeneralPlanContext generalPlanContext) {
     List<ContentStream> streams = generalPlanContext.getConcurrencyData().getStreams();
     List<ContentCohort> cohorts = generalPlanContext.getConcurrencyData().getCohorts();
     IntStream.range(0, streams.size()).forEach(i -> streams.get(i).setConcurrencyId(i, cohorts.size()));

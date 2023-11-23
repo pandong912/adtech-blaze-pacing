@@ -1,10 +1,10 @@
 package com.hotstar.adtech.blaze.allocation.planner.qualification;
 
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Ad;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.ad.DurationInspector;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.ad.LanguageInspector;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.QualificationResult;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Ad;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.AdSet;
 import java.util.List;
 
 public class CohortAdQualificationEngine implements QualificationEngine {

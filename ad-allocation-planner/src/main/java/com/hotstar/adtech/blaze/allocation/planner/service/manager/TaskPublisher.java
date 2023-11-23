@@ -8,15 +8,14 @@ import com.hotstar.adtech.blaze.admodel.common.enums.TaskStatus;
 import com.hotstar.adtech.blaze.admodel.repository.AllocationPlanResultRepository;
 import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResult;
 import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResultDetail;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BreakTypeGroup;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BreakTypeGroupFactory;
-import com.hotstar.adtech.blaze.allocation.planner.source.admodel.Match;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.BreakContext;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.GeneralPlanContext;
-import com.hotstar.adtech.blaze.allocation.planner.source.context.ShalePlanContext;
-import com.hotstar.adtech.blaze.allocation.planner.source.s3.AllocationDataClient;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Match;
+import com.hotstar.adtech.blaze.allocationdata.client.AllocationDataClient;
+import com.hotstar.adtech.blaze.allocationdata.client.model.BreakContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.BreakTypeGroup;
+import com.hotstar.adtech.blaze.allocationdata.client.model.GeneralPlanContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.ShalePlanContext;
 import com.hotstar.adtech.blaze.allocationplan.client.AllocationPlanClient;
-import com.hotstar.adtech.blaze.allocationplan.client.common.PathUtils;
+import com.hotstar.adtech.blaze.allocationplan.client.util.PathUtils;
 import io.micrometer.core.annotation.Timed;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -32,7 +31,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TaskPublisher {
   private final AllocationPlanResultRepository allocationPlanResultRepository;
-  private final BreakTypeGroupFactory breakTypeGroupFactory;
   private final AllocationDataClient allocationDataClient;
   private final AllocationPlanClient allocationPlanClient;
 

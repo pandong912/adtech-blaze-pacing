@@ -1,6 +1,6 @@
 package com.hotstar.adtech.blaze.allocation.planner;
 
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.ReachStorage;
+import com.hotstar.adtech.blaze.allocationdata.client.model.ReachStorage;
 
 public class TestReachStorage implements ReachStorage {
   //  Map<Integer, Map<Integer, Double>> unReachData = new HashMap<>();

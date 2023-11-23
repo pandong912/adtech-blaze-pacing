@@ -4,11 +4,11 @@ import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shal
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleDemand;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleGraph;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleSupply;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.ReachStorage;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BitSetQualificationResult;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.QualificationResult;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Request;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.Response;
+import com.hotstar.adtech.blaze.allocationdata.client.model.ReachStorage;
+import com.hotstar.adtech.blaze.allocationdata.client.model.Request;
+import com.hotstar.adtech.blaze.allocationdata.client.model.Response;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;

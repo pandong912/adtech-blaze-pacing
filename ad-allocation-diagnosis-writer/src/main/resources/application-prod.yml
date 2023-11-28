@@ -1,0 +1,14 @@
+spring:
+  profiles:
+    include: ad-model-repository-prod,ad-model-client-prod, allocation-plan-client-prod, allocation-data-client-prod
+blaze:
+  clickhouse:
+    url: jdbc:clickhouse://10.11.47.167:8123/blaze
+    username:
+    password:
+    database: blaze
+    driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
+  data-exchanger:
+    endpoint: adtech-blaze-data-exchanger-service.internal.hotstar.com
+
+

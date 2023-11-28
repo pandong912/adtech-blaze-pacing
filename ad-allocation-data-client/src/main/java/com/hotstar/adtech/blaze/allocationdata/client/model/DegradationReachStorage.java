@@ -1,6 +1,5 @@
-package com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach;
+package com.hotstar.adtech.blaze.allocationdata.client.model;
 
-import com.hotstar.adtech.blaze.allocationdata.client.model.ReachStorage;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

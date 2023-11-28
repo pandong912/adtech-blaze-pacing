@@ -9,7 +9,7 @@ import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.config.launchdarkly.BlazeDynamicConfig;
 import com.hotstar.adtech.blaze.allocation.planner.ingester.ReachService;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleConstant;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.reach.DegradationReachStorage;
+import com.hotstar.adtech.blaze.allocationdata.client.model.DegradationReachStorage;
 import com.hotstar.adtech.blaze.allocationdata.client.model.GeneralPlanContext;
 import com.hotstar.adtech.blaze.allocationdata.client.model.ReachStorage;
 import com.hotstar.adtech.blaze.allocationdata.client.model.ShalePlanContext;

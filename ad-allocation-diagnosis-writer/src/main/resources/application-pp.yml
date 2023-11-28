@@ -1,0 +1,13 @@
+spring:
+  profiles:
+    include: ad-model-repository-pp,ad-model-client-pp, allocation-plan-client-pp, allocation-data-client-pp
+blaze:
+  clickhouse:
+    url: jdbc:clickhouse://10.54.29.73:8123/blaze
+    username:
+    password:
+    database: blaze
+    driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
+
+
+

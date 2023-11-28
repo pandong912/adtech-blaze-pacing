@@ -35,7 +35,7 @@ public class ReachService {
     } catch (Exception e) {
       Metrics.counter(MetricNames.REACH_UPDATE_EXCEPTION, MetricTags.EXCEPTION_CLASS, e.getClass().getName())
         .increment();
-      log.error("Fail to update content stream concurrency, content id: " + match.getContentId(), e);
+      log.error("Fail to update content reach data, content id: " + match.getContentId(), e);
     }
   }
 

@@ -1,12 +1,15 @@
 package com.hotstar.adtech.blaze.allocation.planner.unit;
 
 import com.google.common.collect.Sets;
+import com.hotstar.adtech.blaze.admodel.common.enums.RuleType;
 import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
 import com.hotstar.adtech.blaze.admodel.common.enums.Tenant;
 import com.hotstar.adtech.blaze.allocation.planner.QualificationTestData;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AudienceTargetingRule;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AudienceTargetingRuleClause;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.StreamTargetingRule;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.StreamTargetingRuleClause;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.Language;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.Platform;
@@ -14,6 +17,7 @@ import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.CohortAdSetQualificationEngine;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BitSetQualificationResult;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.QualificationResult;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import org.junit.jupiter.api.Assertions;
@@ -41,8 +45,8 @@ public class CohortQualificationEngineTest {
         .build();
     QualificationResult bitSet = new BitSetQualificationResult(10, 2);
     CohortAdSetQualificationEngine cohortQualificationEngine =
-      new CohortAdSetQualificationEngine(cohort.getSsaiTag(), QualificationTestData.getAttributeId2TargetingTagMap(),
-        cohort.getConcurrencyId(), bitSet);
+      new CohortAdSetQualificationEngine(cohort.getPlayoutStream(), cohort.getSsaiTag(),
+        QualificationTestData.getAttributeId2TargetingTagMap(), cohort.getConcurrencyId(), bitSet);
 
 
     AdSet adSet = AdSet.builder()
@@ -76,6 +80,102 @@ public class CohortQualificationEngineTest {
   }
 
   @Test
+  public void whenContainAllNeededTagsAndStreamQualifiedThenSuccess() {
+    ContentCohort cohort =
+      ContentCohort.builder()
+        .concurrencyId(0)
+        .ssaiTag("SSAI:M_MUM:M_NCR")
+        .playoutStream(PlayoutStream.builder()
+          .streamType(StreamType.SSAI_Spot)
+          .language(languageMapping.get("English"))
+          .platforms(Collections.singletonList(platformMapping.get("Android")))
+          .tenant(Tenant.India)
+          .build())
+        .build();
+    QualificationResult bitSet = new BitSetQualificationResult(10, 2);
+    CohortAdSetQualificationEngine cohortQualificationEngine =
+      new CohortAdSetQualificationEngine(cohort.getPlayoutStream(), cohort.getSsaiTag(),
+        QualificationTestData.getAttributeId2TargetingTagMap(), cohort.getConcurrencyId(), bitSet);
+
+
+    AdSet adSet = AdSet.builder()
+      .demandId(0)
+      .ssaiAds(QualificationTestData.getAds())
+      .audienceTargetingRule(AudienceTargetingRule.builder()
+        .includes(Collections.singletonList(AudienceTargetingRuleClause.builder()
+          .categoryId(2)
+          .targetingTags(Sets.newHashSet("M_MUM", "M_NCR", "M_BEN"))
+          .build()
+        ))
+        .excludes(Collections.emptyList())
+        .build())
+      .streamTargetingRule(StreamTargetingRule.builder()
+        .ruleType(RuleType.Include)
+        .tenant(Tenant.India)
+        .streamTargetingRuleClauses(Arrays.asList(
+          StreamTargetingRuleClause.builder()
+            .languageId(1)
+            .platformId(2)
+            .tenant(Tenant.India)
+            .build(),
+          StreamTargetingRuleClause.builder()
+            .languageId(1)
+            .platformId(1)
+            .tenant(Tenant.India)
+            .build()
+        )).build())
+      .build();
+    cohortQualificationEngine.qualify(Collections.singletonList(adSet));
+    Assertions.assertTrue(bitSet.get(0, 0));
+  }
+
+  @Test
+  public void whenContainAllNeededTagsAndStreamNotQualifiedThenFail() {
+    ContentCohort cohort =
+      ContentCohort.builder()
+        .concurrencyId(0)
+        .ssaiTag("SSAI:M_MUM:M_NCR")
+        .playoutStream(PlayoutStream.builder()
+          .streamType(StreamType.SSAI_Spot)
+          .language(languageMapping.get("English"))
+          .platforms(Collections.singletonList(platformMapping.get("Android")))
+          .tenant(Tenant.India)
+          .build())
+        .build();
+    QualificationResult bitSet = new BitSetQualificationResult(10, 2);
+    CohortAdSetQualificationEngine cohortQualificationEngine =
+      new CohortAdSetQualificationEngine(cohort.getPlayoutStream(), cohort.getSsaiTag(),
+        QualificationTestData.getAttributeId2TargetingTagMap(), cohort.getConcurrencyId(), bitSet);
+
+
+    AdSet adSet = AdSet.builder()
+      .demandId(0)
+      .ssaiAds(QualificationTestData.getAds())
+      .audienceTargetingRule(AudienceTargetingRule.builder()
+        .includes(Collections.singletonList(AudienceTargetingRuleClause.builder()
+          .categoryId(2)
+          .targetingTags(Sets.newHashSet("M_MUM", "M_NCR", "M_BEN"))
+          .build()
+        ))
+        .excludes(Collections.emptyList())
+        .build())
+      .streamTargetingRule(StreamTargetingRule.builder()
+        .ruleType(RuleType.Include)
+        .tenant(Tenant.India)
+        .streamTargetingRuleClauses(Collections.singletonList(
+          StreamTargetingRuleClause.builder()
+            .languageId(1)
+            .platformId(2)
+            .tenant(Tenant.India)
+            .build()
+        ))
+        .build())
+      .build();
+    cohortQualificationEngine.qualify(Collections.singletonList(adSet));
+    Assertions.assertFalse(bitSet.get(0, 0));
+  }
+
+  @Test
   public void whenContainOneNotNeededTagsThenFail() {
     ContentCohort cohort =
       ContentCohort.builder()
@@ -91,8 +191,8 @@ public class CohortQualificationEngineTest {
 
     QualificationResult bitSet = new BitSetQualificationResult(10, 2);
     CohortAdSetQualificationEngine cohortQualificationEngine =
-      new CohortAdSetQualificationEngine(cohort.getSsaiTag(), QualificationTestData.getAttributeId2TargetingTagMap(),
-        cohort.getConcurrencyId(), bitSet);
+      new CohortAdSetQualificationEngine(cohort.getPlayoutStream(), cohort.getSsaiTag(),
+        QualificationTestData.getAttributeId2TargetingTagMap(), cohort.getConcurrencyId(), bitSet);
 
 
     AdSet adSet = AdSet.builder()
@@ -127,8 +227,8 @@ public class CohortQualificationEngineTest {
 
     QualificationResult bitSet = new BitSetQualificationResult(10, 2);
     CohortAdSetQualificationEngine cohortQualificationEngine =
-      new CohortAdSetQualificationEngine(cohort.getSsaiTag(), QualificationTestData.getAttributeId2TargetingTagMap(),
-        cohort.getConcurrencyId(), bitSet);
+      new CohortAdSetQualificationEngine(cohort.getPlayoutStream(), cohort.getSsaiTag(),
+        QualificationTestData.getAttributeId2TargetingTagMap(), cohort.getConcurrencyId(), bitSet);
 
     AdSet adSet = AdSet.builder()
       .demandId(0)
@@ -177,8 +277,8 @@ public class CohortQualificationEngineTest {
 
     QualificationResult bitSet = new BitSetQualificationResult(10, 2);
     CohortAdSetQualificationEngine cohortQualificationEngine =
-      new CohortAdSetQualificationEngine(cohort.getSsaiTag(), QualificationTestData.getAttributeId2TargetingTagMap(),
-        cohort.getConcurrencyId(), bitSet);
+      new CohortAdSetQualificationEngine(cohort.getPlayoutStream(), cohort.getSsaiTag(),
+        QualificationTestData.getAttributeId2TargetingTagMap(), cohort.getConcurrencyId(), bitSet);
 
 
     AdSet adSet = AdSet.builder()

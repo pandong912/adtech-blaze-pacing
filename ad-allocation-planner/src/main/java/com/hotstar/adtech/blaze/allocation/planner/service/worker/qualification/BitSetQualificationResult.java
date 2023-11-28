@@ -14,7 +14,7 @@ public class BitSetQualificationResult implements QualificationResult {
     bitSet = new BitSet(supplySize * size);
   }
 
-  // make adSet size to be multiple of 64, so that we can avoid concurrent updating the bitSet
+  // make adSet size to be multiple of 64, so that we can concurrently and safely update bitSet
   private int getSize(int size) {
     int floor = size / 64;
     return (size % 64 == 0 ? floor : floor + 1) * 64;

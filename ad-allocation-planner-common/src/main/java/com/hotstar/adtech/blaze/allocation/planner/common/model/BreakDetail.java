@@ -10,4 +10,5 @@ public class BreakDetail {
   private final int breakTypeId;
   private final String breakType;
   private final List<Integer> breakDuration;
+  private final Long gameId;
 }

@@ -77,7 +77,7 @@ public class GeneralPlanContextLoader {
     Map<String, Integer> attributeId2TargetingTagMap = adModel.getAttributeId2TargetingTags();
 
     RequestData requestData = new RequestData(concurrencyData);
-    List<BreakDetail> breakDetails = dataLoader.getBreakDetail();
+    List<BreakDetail> breakDetails = adModel.getBreakDetails(contentId);
     List<BreakTypeGroup> breakTypeList = breakTypeGroupFactory.getBreakTypeList(adSets, breakDetails);
 
     return GeneralPlanContext.builder()

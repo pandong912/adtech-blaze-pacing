@@ -10,7 +10,6 @@ import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
 import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
 import com.hotstar.adtech.blaze.admodel.common.util.RespUtil;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.AdModelVersion;
-import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
@@ -19,12 +18,10 @@ import com.hotstar.adtech.blaze.exchanger.api.entity.BreakId;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdSetImpressionResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.BreakListResponse;
-import com.hotstar.adtech.blaze.exchanger.api.response.BreakTypeResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentCohortConcurrencyResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentStreamConcurrencyResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.MatchProgressModelResponse;
 import io.micrometer.core.annotation.Timed;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -39,7 +36,6 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class DataExchangerService {
   private static final String DEFAULT_SSAI_TAG = "SSAI::";
-  private static final String SPOT_BREAK = "Spot";
 
   private final DataExchangerClient dataExchangerClient;
 
@@ -73,18 +69,6 @@ public class DataExchangerService {
     return response.getData().getDeliveryProgresses();
   }
 
-  public List<BreakDetail> getBreakDefinition() {
-    StandardResponse<List<BreakTypeResponse>> response = dataExchangerClient.getAllBreakType();
-
-    if (response.getCode() != ResultCode.SUCCESS) {
-      throw new ServiceException("Failed to get break type from data exchanger");
-    }
-
-    return response.getData().stream()
-      .filter(breakTypeResponse -> SPOT_BREAK.equals(breakTypeResponse.getType()))
-      .map(this::buildBreakDetail)
-      .collect(Collectors.toList());
-  }
 
   public Map<String, List<BreakId>> getBreakList(String contentId) {
     StandardResponse<List<BreakListResponse>> response = dataExchangerClient.getBreakList(contentId);
@@ -184,20 +168,7 @@ public class DataExchangerService {
       .build();
   }
 
-  private BreakDetail buildBreakDetail(BreakTypeResponse breakTypeResponse) {
-    List<Integer> durationList = new ArrayList<>();
-    int duration = breakTypeResponse.getDurationLowerBound();
-    while (duration < breakTypeResponse.getDurationUpperBound()) {
-      durationList.add(duration);
-      duration += breakTypeResponse.getStep();
-    }
-    durationList.add(breakTypeResponse.getDurationUpperBound());
-    return BreakDetail.builder()
-      .breakTypeId(breakTypeResponse.getId())
-      .breakType(breakTypeResponse.getName())
-      .breakDuration(durationList)
-      .build();
-  }
+
 
   private String getSsaiTag(String ssaiTag) {
     return ssaiTag.length() < 6 ? DEFAULT_SSAI_TAG : ssaiTag;

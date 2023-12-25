@@ -11,6 +11,7 @@ import lombok.Value;
 public class Match {
   String contentId;
   Long seasonId;
+  Long gameId;
   Instant startTime;
   MatchState state;
 }

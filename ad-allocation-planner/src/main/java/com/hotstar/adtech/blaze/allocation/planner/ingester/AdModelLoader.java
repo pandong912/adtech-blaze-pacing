@@ -9,6 +9,7 @@ import com.hotstar.adtech.blaze.admodel.client.model.AttributeValueInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.AudienceTargetingRuleClauseInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.AudienceTargetingRuleInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.BreakTargetingRuleInfo;
+import com.hotstar.adtech.blaze.admodel.client.model.BreakTypeInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.GoalMatchInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.LanguageInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.MatchInfo;
@@ -31,9 +32,11 @@ import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Match;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.StreamTargetingRule;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.StreamTargetingRuleClause;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.AdModelVersion;
+import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.Language;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.Platform;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +53,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class AdModelLoader {
   private static final double DEMAND_PACING_COEFFICIENT = 0.5d;
+  private static final String SPOT_BREAK = "Spot";
   private final AdModelClient adModelClient;
 
   public AdModel loadAdModel(AdModelVersion adModelVersion) {
@@ -68,6 +72,11 @@ public class AdModelLoader {
 
     Map<String, List<AdSet>> adSetGroup = buildAdSetGroup(liveEntities.getGoalMatches());
 
+    Map<Long, List<BreakDetail>> breakTypes = metaEntities.getBreakTypes().stream()
+      .filter(breakTypeInfo -> SPOT_BREAK.equals(breakTypeInfo.getType()))
+      .map(this::buildBreakDetail)
+      .collect(Collectors.groupingBy(BreakDetail::getGameId));
+
     setAdSetInternalId(adSetGroup);
 
     Map<String, Integer> attributeId2TargetingTags = metaEntities.getAttributeValues().stream().collect(
@@ -80,6 +89,24 @@ public class AdModelLoader {
       .adSetGroup(adSetGroup)
       .adModelVersion(adModelVersion)
       .attributeId2TargetingTags(attributeId2TargetingTags)
+      .breakDetailGroup(breakTypes)
+      .build();
+  }
+
+
+  private BreakDetail buildBreakDetail(BreakTypeInfo breakTypeInfo) {
+    List<Integer> durationList = new ArrayList<>();
+    int duration = breakTypeInfo.getLowerBound();
+    while (duration < breakTypeInfo.getUpperBound()) {
+      durationList.add(duration);
+      duration += breakTypeInfo.getStep();
+    }
+    durationList.add(breakTypeInfo.getUpperBound());
+    return BreakDetail.builder()
+      .breakTypeId(breakTypeInfo.getId())
+      .breakType(breakTypeInfo.getName())
+      .breakDuration(durationList)
+      .gameId(breakTypeInfo.getGameId())
       .build();
   }
 
@@ -110,6 +137,7 @@ public class AdModelLoader {
       .seasonId(matchInfo.getSeasonId())
       .startTime(matchInfo.getStartTime())
       .state(matchInfo.getState())
+      .gameId(matchInfo.getGameId())
       .build();
   }
 

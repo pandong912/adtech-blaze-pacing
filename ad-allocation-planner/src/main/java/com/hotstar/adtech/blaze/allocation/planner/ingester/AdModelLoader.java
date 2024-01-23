@@ -29,6 +29,8 @@ import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AudienceTarget
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AudienceTargetingRuleClause;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.BreakTargetingRule;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Match;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.StreamNewTargetingRule;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.StreamNewTargetingRuleClause;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.StreamTargetingRule;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.StreamTargetingRuleClause;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.AdModelVersion;
@@ -219,6 +221,7 @@ public class AdModelLoader {
       .audienceTargetingRule(buildAudienceTargetingRule(adSet.getAudienceTargetingRuleInfo()))
       .breakTargetingRule(buildBreakTargetingRule(adSet.getBreakTargetingRuleInfo()))
       .streamTargetingRule(buildStreamTargetingRule(adSet.getStreamTargetingRuleInfo()))
+//      .streamNewTargetingRule(buildNewStreamTargetingRule(adSet.getStreamNewTargetingRule()));
       .demandPacingCoefficient(DEMAND_PACING_COEFFICIENT)
       .maximizeReach(adSet.isMaximiseReach() ? 1 : 0)
       .build();
@@ -277,6 +280,23 @@ public class AdModelLoader {
       .build();
   }
 
+//  private StreamNewTargetingRule buildStreamNewTargetingRule(StreamNewTargetingRuleInfo streamNewTargetingRuleInfo) {
+//    if (Objects.isNull(streamNewTargetingRuleInfo)) {
+//      return null;
+//    }
+//
+//    List<StreamNewTargetingRuleClause> streamNewTargetingRuleClauses =
+//      streamNewTargetingRuleInfo.getStreamNewTargetingRuleClauses().stream()
+//        .map(this::buildStreamNewTargetingRuleClause)
+//        .collect(Collectors.toList());
+//
+//    return StreamNewTargetingRule.builder()
+//      .tenant(streamNewTargetingRuleInfo.getTenant())
+//      .streamTargetingRuleClauses(streamNewTargetingRuleClauses)
+//      .ruleType(streamNewTargetingRuleInfo.getRuleType())
+//      .build();
+//  }
+
   private StreamTargetingRuleClause buildStreamTargetingRuleClause(
     StreamTargetingRuleClauseInfo streamTargetingRuleClauseInfo) {
     return StreamTargetingRuleClause.builder()
@@ -285,6 +305,17 @@ public class AdModelLoader {
       .platformId(streamTargetingRuleClauseInfo.getPlatformId())
       .build();
   }
+
+//  private StreamNewTargetingRuleClause buildStreamNewTargetingRuleClause(
+//    StreamNewTargetingRuleClauseInfo streamNewTargetingRuleClauseInfo) {
+//    return StreamNewTargetingRuleClause.builder()
+//      .tenant(streamNewTargetingRuleClauseInfo.getTenant())
+//      .languageId(streamNewTargetingRuleClauseInfo.getLanguageId())
+////      .platformId(streamNewTargetingRuleClauseInfo.getPlatformId()
+//      .ladder(streamNewTargetingRuleClauseInfo.getLadder())
+//      .streamType(streamNewTargetingRuleClauseInfo.getStreamType())
+//      .build();
+//  }
 
   private BreakTargetingRule buildBreakTargetingRule(BreakTargetingRuleInfo breakTargetingRuleInfo) {
     if (Objects.isNull(breakTargetingRuleInfo)) {

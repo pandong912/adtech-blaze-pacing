@@ -1,5 +1,6 @@
 package com.hotstar.adtech.blaze.allocation.planner.common.model;
 
+import com.hotstar.adtech.blaze.admodel.common.enums.Ladder;
 import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
 import com.hotstar.adtech.blaze.admodel.common.enums.Tenant;
 import java.util.List;
@@ -14,6 +15,7 @@ public class PlayoutStream {
   private static final String PLATFORM_SPLITTER = "+";
   Tenant tenant;
   Language language;
+  List<Ladder> ladders;
   List<Platform> platforms;
   String key;
   List<Integer> platformIds;
@@ -21,12 +23,13 @@ public class PlayoutStream {
   StreamType streamType;
 
   @Builder
-  public PlayoutStream(String playoutId, StreamType streamType, Tenant tenant, Language language,
+  public PlayoutStream(String playoutId, StreamType streamType, Tenant tenant, Language language, List<Ladder> ladders,
                        List<Platform> platforms) {
     this.playoutId = playoutId;
     this.streamType = streamType;
     this.tenant = tenant;
     this.language = language;
+    this.ladders = ladders;
     this.platforms = platforms;
     this.key = generateKey();
     this.platformIds = platforms.stream().map(Platform::getId).collect(Collectors.toList());

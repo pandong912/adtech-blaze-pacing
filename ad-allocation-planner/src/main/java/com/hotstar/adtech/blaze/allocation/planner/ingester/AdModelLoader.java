@@ -163,6 +163,7 @@ public class AdModelLoader {
       .streamType(streamMappingInfo.getStreamType())
       .tenant(streamMappingInfo.getTenant())
       .language(buildLanguage(streamMappingInfo.getLanguage()))
+      .ladders(streamMappingInfo.getLadders())
       .platforms(streamMappingInfo.getPlatforms().stream().map(this::buildPlatform).collect(
         Collectors.toList()))
       .build();

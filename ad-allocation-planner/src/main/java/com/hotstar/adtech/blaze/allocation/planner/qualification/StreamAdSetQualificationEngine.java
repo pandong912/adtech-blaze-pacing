@@ -31,8 +31,8 @@ public class StreamAdSetQualificationEngine implements QualificationEngine {
 
   public void qualify(List<AdSet> candidateAdSets) {
     for (AdSet candidateAdSet : candidateAdSets) {
-      if (streamTargetingRuleInspector.qualify(candidateAdSet) &&
-        streamNewTargetingRuleInspector.qualify(candidateAdSet)) {
+      if (streamTargetingRuleInspector.qualify(candidateAdSet)
+        && streamNewTargetingRuleInspector.qualify(candidateAdSet)) {
         firstQualified.set(supplyId, candidateAdSet.getDemandId());
       }
     }

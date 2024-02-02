@@ -15,6 +15,8 @@ import com.hotstar.adtech.blaze.admodel.client.model.LanguageInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.MatchInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.PlatformInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.StreamMappingInfo;
+import com.hotstar.adtech.blaze.admodel.client.model.StreamNewTargetingRuleClauseInfo;
+import com.hotstar.adtech.blaze.admodel.client.model.StreamNewTargetingRuleInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.StreamTargetingRuleClauseInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.StreamTargetingRuleInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.VideoAd;
@@ -29,6 +31,8 @@ import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AudienceTarget
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AudienceTargetingRuleClause;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.BreakTargetingRule;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Match;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.StreamNewTargetingRule;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.StreamNewTargetingRuleClause;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.StreamTargetingRule;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.StreamTargetingRuleClause;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.AdModelVersion;
@@ -159,6 +163,7 @@ public class AdModelLoader {
       .streamType(streamMappingInfo.getStreamType())
       .tenant(streamMappingInfo.getTenant())
       .language(buildLanguage(streamMappingInfo.getLanguage()))
+      .ladders(streamMappingInfo.getLadders())
       .platforms(streamMappingInfo.getPlatforms().stream().map(this::buildPlatform).collect(
         Collectors.toList()))
       .build();
@@ -219,6 +224,7 @@ public class AdModelLoader {
       .audienceTargetingRule(buildAudienceTargetingRule(adSet.getAudienceTargetingRuleInfo()))
       .breakTargetingRule(buildBreakTargetingRule(adSet.getBreakTargetingRuleInfo()))
       .streamTargetingRule(buildStreamTargetingRule(adSet.getStreamTargetingRuleInfo()))
+      .streamNewTargetingRule(buildStreamNewTargetingRule(adSet.getStreamNewTargetingRuleInfo()))
       .demandPacingCoefficient(DEMAND_PACING_COEFFICIENT)
       .maximizeReach(adSet.isMaximiseReach() ? 1 : 0)
       .build();
@@ -277,12 +283,39 @@ public class AdModelLoader {
       .build();
   }
 
+  private StreamNewTargetingRule buildStreamNewTargetingRule(StreamNewTargetingRuleInfo streamNewTargetingRuleInfo) {
+    if (Objects.isNull(streamNewTargetingRuleInfo)) {
+      return null;
+    }
+
+    List<StreamNewTargetingRuleClause> streamNewTargetingRuleClauses =
+      streamNewTargetingRuleInfo.getStreamNewTargetingRuleClauses().stream()
+        .map(this::buildStreamNewTargetingRuleClause)
+        .collect(Collectors.toList());
+
+    return StreamNewTargetingRule.builder()
+      .tenant(streamNewTargetingRuleInfo.getTenant())
+      .streamNewTargetingRuleClauses(streamNewTargetingRuleClauses)
+      .ruleType(streamNewTargetingRuleInfo.getRuleType())
+      .build();
+  }
+
   private StreamTargetingRuleClause buildStreamTargetingRuleClause(
     StreamTargetingRuleClauseInfo streamTargetingRuleClauseInfo) {
     return StreamTargetingRuleClause.builder()
       .tenant(streamTargetingRuleClauseInfo.getTenant())
       .languageId(streamTargetingRuleClauseInfo.getLanguageId())
       .platformId(streamTargetingRuleClauseInfo.getPlatformId())
+      .build();
+  }
+
+  private StreamNewTargetingRuleClause buildStreamNewTargetingRuleClause(
+    StreamNewTargetingRuleClauseInfo streamNewTargetingRuleClauseInfo) {
+    return StreamNewTargetingRuleClause.builder()
+      .tenant(streamNewTargetingRuleClauseInfo.getTenant())
+      .languageId(streamNewTargetingRuleClauseInfo.getLanguageId())
+      .ladder(streamNewTargetingRuleClauseInfo.getLadder())
+      .streamType(streamNewTargetingRuleClauseInfo.getStreamType())
       .build();
   }
 

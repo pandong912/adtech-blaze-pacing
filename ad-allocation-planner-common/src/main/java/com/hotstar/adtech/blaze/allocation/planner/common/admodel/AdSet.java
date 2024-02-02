@@ -22,6 +22,7 @@ public class AdSet {
 
   private final AudienceTargetingRule audienceTargetingRule;
   private final StreamTargetingRule streamTargetingRule;
+  private final StreamNewTargetingRule streamNewTargetingRule;
   private final BreakTargetingRule breakTargetingRule;
 
   private final List<Ad> ssaiAds;

@@ -14,6 +14,6 @@ public class UnReachData {
   Map<Long, Double> unReachRatio;
 
   public String getKey() {
-    return playoutStream.getKey() + SSAI_TAG_SPLITTER + ssaiTag;
+    return playoutStream.getPlayoutId() + SSAI_TAG_SPLITTER + ssaiTag;
   }
 }

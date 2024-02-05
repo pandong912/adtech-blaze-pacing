@@ -5,15 +5,11 @@ import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.MAT
 import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.MATCH_TOTAL_BREAK_FETCH;
 
 import com.hotstar.adtech.blaze.admodel.client.common.Names;
-import com.hotstar.adtech.blaze.admodel.common.domain.ResultCode;
-import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
-import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
-import com.hotstar.adtech.blaze.admodel.common.util.RespUtil;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.AdModelVersion;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
-import com.hotstar.adtech.blaze.exchanger.api.DataExchangerClient;
+import com.hotstar.adtech.blaze.exchanger.api.DataExchangerNewClient;
 import com.hotstar.adtech.blaze.exchanger.api.entity.BreakId;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdSetImpressionResponse;
@@ -37,12 +33,10 @@ import org.springframework.stereotype.Service;
 public class DataExchangerService {
   private static final String DEFAULT_SSAI_TAG = "SSAI::";
 
-  private final DataExchangerClient dataExchangerClient;
+  private final DataExchangerNewClient dataExchangerNewClient;
 
   public AdModelVersion getLatestAdModelVersion(AdModelVersion adModelVersion) {
-    return Optional.ofNullable(dataExchangerClient.getLatestAdModel(adModelVersion.getVersion()))
-      .filter(RespUtil::isSuccess)
-      .map(StandardResponse::getData)
+    return Optional.ofNullable(dataExchangerNewClient.getLatestAdModel(adModelVersion.getVersion()))
       .map(this::buildAdModelVersion)
       .orElse(adModelVersion);
   }
@@ -59,48 +53,31 @@ public class DataExchangerService {
   }
 
   public List<Double> getMatchBreakProgressModel() {
-    StandardResponse<MatchProgressModelResponse> response =
-      dataExchangerClient.getLatestMatchBreakProgressModel();
+    MatchProgressModelResponse response =
+      dataExchangerNewClient.getLatestMatchBreakProgressModel();
 
-    if (response.getCode() != ResultCode.SUCCESS) {
-      throw new ServiceException("Failed to get break progress from data exchanger");
-    }
 
-    return response.getData().getDeliveryProgresses();
+    return response.getDeliveryProgresses();
   }
 
 
   public Map<String, List<BreakId>> getBreakList(String contentId) {
-    StandardResponse<List<BreakListResponse>> response = dataExchangerClient.getBreakList(contentId);
+    List<BreakListResponse> response = dataExchangerNewClient.getBreakList(contentId);
 
-    if (response.getCode() != ResultCode.SUCCESS) {
-      throw new ServiceException("Failed to get break list from data exchanger");
-    }
-
-    return response.getData().stream()
+    return response.stream()
       .collect(Collectors.toMap(BreakListResponse::getPlayoutId, BreakListResponse::getBreakIds));
   }
 
   @Timed(MATCH_TOTAL_BREAK_FETCH)
   public Integer getTotalBreakNumber(String contentId) {
-    StandardResponse<Integer> response = dataExchangerClient.getTotalBreakNumber(contentId);
-
-    if (response.getCode() != ResultCode.SUCCESS) {
-      throw new ServiceException("Failed to get break number from data exchanger");
-    }
-
-    return response.getData();
+    return dataExchangerNewClient.getTotalBreakNumber(contentId);
   }
 
   @Timed(MATCH_IMPRESSION_FETCH)
   public Map<Long, Long> getAdSetImpression(String contentId) {
-    StandardResponse<List<AdSetImpressionResponse>> response = dataExchangerClient.getAllAdSetImpressions(contentId);
+    List<AdSetImpressionResponse> response = dataExchangerNewClient.getAllAdSetImpressions(contentId);
 
-    if (!Objects.equals(response.getCode(), ResultCode.SUCCESS)) {
-      throw new ServiceException(response.getMessage());
-    }
-
-    return response.getData().stream()
+    return response.stream()
       .collect(Collectors.toMap(AdSetImpressionResponse::getAdSetId,
         AdSetImpressionResponse::getImpression));
   }
@@ -108,14 +85,10 @@ public class DataExchangerService {
   @Timed(MATCH_CONCURRENCY_FETCH)
   public List<ContentCohort> getContentCohortConcurrency(String contentId,
                                                          Map<String, PlayoutStream> playoutStreamMap) {
-    StandardResponse<List<ContentCohortConcurrencyResponse>> response =
-      dataExchangerClient.getContentCohortWiseConcurrency(contentId);
+    List<ContentCohortConcurrencyResponse> response =
+      dataExchangerNewClient.getContentCohortWiseConcurrency(contentId);
 
-    if (!Objects.equals(response.getCode(), ResultCode.SUCCESS)) {
-      throw new ServiceException(response.getMessage());
-    }
-
-    return response.getData()
+    return response
       .stream()
       .map(contentCohortConcurrencyResponse -> getContentCohort(contentId, playoutStreamMap,
         contentCohortConcurrencyResponse))
@@ -140,14 +113,10 @@ public class DataExchangerService {
 
   public List<ContentStream> getContentStreamConcurrency(String contentId,
                                                          Map<String, PlayoutStream> playoutStreamMap) {
-    StandardResponse<List<ContentStreamConcurrencyResponse>> response =
-      dataExchangerClient.getContentStreamWiseConcurrency(contentId);
+    List<ContentStreamConcurrencyResponse> response =
+      dataExchangerNewClient.getContentStreamWiseConcurrency(contentId);
 
-    if (!Objects.equals(response.getCode(), ResultCode.SUCCESS)) {
-      throw new ServiceException(response.getMessage());
-    }
-
-    return response.getData().stream()
+    return response.stream()
       .map(contentStreamConcurrencyResponse -> getContentStream(contentId, playoutStreamMap,
         contentStreamConcurrencyResponse))
       .filter(Objects::nonNull)
@@ -167,7 +136,6 @@ public class DataExchangerService {
       .concurrency(resp.getConcurrencyValue())
       .build();
   }
-
 
 
   private String getSsaiTag(String ssaiTag) {

@@ -9,7 +9,7 @@ import com.hotstar.adtech.blaze.admodel.client.model.AdInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.GoalMatchInfo;
 import com.hotstar.adtech.blaze.admodel.common.enums.CampaignStatus;
 import com.hotstar.adtech.blaze.admodel.common.enums.DeliveryMode;
-import com.hotstar.adtech.blaze.exchanger.api.DataExchangerNewClient;
+import com.hotstar.adtech.blaze.exchanger.api.DataExchangerClient;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;
 import com.hotstar.adtech.blaze.reach.synchronizer.entity.Ad;
 import com.hotstar.adtech.blaze.reach.synchronizer.entity.AdModel;
@@ -39,7 +39,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class AdModelLoader {
   private final AdModelClient adModelClient;
-  private final DataExchangerNewClient dataExchangerNewClient;
+  private final DataExchangerClient dataExchangerClient;
   private final AtomicReference<AdModel> adModelAtomicReference = new AtomicReference<>();
   private final AtomicBoolean adModelReady = new AtomicBoolean(false);
 
@@ -65,41 +65,45 @@ public class AdModelLoader {
 
     try {
       AdModelResultUriResponse adModelResultUriResponse =
-        dataExchangerNewClient.getLatestAdModel(adModelVersion.getVersion());
-      String curAdModelMd5 = adModelResultUriResponse.getMd5(Names.Live_Ad_Model_PB);
-      String curLiveMatchMd5 = adModelResultUriResponse.getMd5(Names.Match_PB);
-      if (Objects.equals(curAdModelMd5, adModelVersion.getAdModelMd5())
-        && Objects.equals(curLiveMatchMd5, adModelVersion.getLiveMatchMd5())) {
-        LoadStatus.IGNORE.counter().increment();
-        return;
+        dataExchangerClient.getLatestAdModel(adModelVersion.getVersion());
+      if (adModelResultUriResponse != null) {
+        String curAdModelMd5 = adModelResultUriResponse.getMd5(Names.Live_Ad_Model_PB);
+        String curLiveMatchMd5 = adModelResultUriResponse.getMd5(Names.Match_PB);
+        if (Objects.equals(curAdModelMd5, adModelVersion.getAdModelMd5())
+          && Objects.equals(curLiveMatchMd5, adModelVersion.getLiveMatchMd5())) {
+          LoadStatus.IGNORE.counter().increment();
+          return;
+        }
+        AdModelUri adModelUri = buildAdModelUri(adModelResultUriResponse);
+
+        MatchEntities matchEntities = adModelClient.loadMatch(adModelUri);
+        List<Match> liveMatches = matchEntities.getMatches().stream().map(
+          matchInfo -> new Match(matchInfo.getSiMatchId(), matchInfo.getContentId())
+        ).collect(Collectors.toList());
+
+        LiveEntities liveEntities = adModelClient.loadLiveAdModel(adModelUri);
+        Map<String, Ad> adMap = liveEntities.getAds().stream().collect(
+          Collectors.toMap(AdInfo::getCreativeId, this::buildAd));
+
+        Map<String, List<AdSet>> adSetGroup = buildAdSets(liveEntities.getGoalMatches()).stream().collect(
+          Collectors.groupingBy(AdSet::getContentId));
+
+        AdModel adModel = AdModel.builder()
+          .matches(liveMatches)
+          .adMap(adMap)
+          .adSetGroup(adSetGroup)
+          .adModelVersion(AdModelVersion.builder().version(adModelUri.getVersion())
+            .adModelMd5(curAdModelMd5)
+            .liveMatchMd5(curLiveMatchMd5)
+            .build())
+          .build();
+        adModelAtomicReference.set(adModel);
+        adModelReady.set(true);
+
+        LoadStatus.SUCCESS.counter().increment();
+      } else {
+        LoadStatus.URL_NULL.counter().increment();
       }
-      AdModelUri adModelUri = buildAdModelUri(adModelResultUriResponse);
-
-      MatchEntities matchEntities = adModelClient.loadMatch(adModelUri);
-      List<Match> liveMatches = matchEntities.getMatches().stream().map(
-        matchInfo -> new Match(matchInfo.getSiMatchId(), matchInfo.getContentId())
-      ).collect(Collectors.toList());
-
-      LiveEntities liveEntities = adModelClient.loadLiveAdModel(adModelUri);
-      Map<String, Ad> adMap = liveEntities.getAds().stream().collect(
-        Collectors.toMap(AdInfo::getCreativeId, this::buildAd));
-
-      Map<String, List<AdSet>> adSetGroup = buildAdSets(liveEntities.getGoalMatches()).stream().collect(
-        Collectors.groupingBy(AdSet::getContentId));
-
-      AdModel adModel = AdModel.builder()
-        .matches(liveMatches)
-        .adMap(adMap)
-        .adSetGroup(adSetGroup)
-        .adModelVersion(AdModelVersion.builder().version(adModelUri.getVersion())
-          .adModelMd5(curAdModelMd5)
-          .liveMatchMd5(curLiveMatchMd5)
-          .build())
-        .build();
-      adModelAtomicReference.set(adModel);
-      adModelReady.set(true);
-
-      LoadStatus.SUCCESS.counter().increment();
     } catch (Exception ex) {
       LoadStatus.FAILED.counter().increment();
       log.error("Load Live Match Model failed", ex);

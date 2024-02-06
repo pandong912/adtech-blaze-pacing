@@ -5,11 +5,12 @@ import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.MAT
 import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.MATCH_TOTAL_BREAK_FETCH;
 
 import com.hotstar.adtech.blaze.admodel.client.common.Names;
+import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.AdModelVersion;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
-import com.hotstar.adtech.blaze.exchanger.api.DataExchangerNewClient;
+import com.hotstar.adtech.blaze.exchanger.api.DataExchangerClient;
 import com.hotstar.adtech.blaze.exchanger.api.entity.BreakId;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdSetImpressionResponse;
@@ -33,10 +34,10 @@ import org.springframework.stereotype.Service;
 public class DataExchangerService {
   private static final String DEFAULT_SSAI_TAG = "SSAI::";
 
-  private final DataExchangerNewClient dataExchangerNewClient;
+  private final DataExchangerClient dataExchangerClient;
 
   public AdModelVersion getLatestAdModelVersion(AdModelVersion adModelVersion) {
-    return Optional.ofNullable(dataExchangerNewClient.getLatestAdModel(adModelVersion.getVersion()))
+    return Optional.ofNullable(dataExchangerClient.getLatestAdModel(adModelVersion.getVersion()))
       .map(this::buildAdModelVersion)
       .orElse(adModelVersion);
   }
@@ -54,29 +55,40 @@ public class DataExchangerService {
 
   public List<Double> getMatchBreakProgressModel() {
     MatchProgressModelResponse response =
-      dataExchangerNewClient.getLatestMatchBreakProgressModel();
+      dataExchangerClient.getLatestMatchBreakProgressModel();
 
+    if (response == null) {
+      throw new ServiceException("Failed to get break progress from data exchanger");
+    }
 
     return response.getDeliveryProgresses();
   }
 
 
   public Map<String, List<BreakId>> getBreakList(String contentId) {
-    List<BreakListResponse> response = dataExchangerNewClient.getBreakList(contentId);
-
+    List<BreakListResponse> response = dataExchangerClient.getBreakList(contentId);
+    if (response == null) {
+      throw new ServiceException("Failed to get break list from data exchanger");
+    }
     return response.stream()
       .collect(Collectors.toMap(BreakListResponse::getPlayoutId, BreakListResponse::getBreakIds));
   }
 
   @Timed(MATCH_TOTAL_BREAK_FETCH)
   public Integer getTotalBreakNumber(String contentId) {
-    return dataExchangerNewClient.getTotalBreakNumber(contentId);
+    Integer response = dataExchangerClient.getTotalBreakNumber(contentId);
+    if (response == null) {
+      throw new ServiceException("Failed to get break number from data exchanger");
+    }
+    return response;
   }
 
   @Timed(MATCH_IMPRESSION_FETCH)
   public Map<Long, Long> getAdSetImpression(String contentId) {
-    List<AdSetImpressionResponse> response = dataExchangerNewClient.getAllAdSetImpressions(contentId);
-
+    List<AdSetImpressionResponse> response = dataExchangerClient.getAllAdSetImpressions(contentId);
+    if (response == null) {
+      throw new ServiceException("Failed to get adSet impression from data exchanger");
+    }
     return response.stream()
       .collect(Collectors.toMap(AdSetImpressionResponse::getAdSetId,
         AdSetImpressionResponse::getImpression));
@@ -86,8 +98,10 @@ public class DataExchangerService {
   public List<ContentCohort> getContentCohortConcurrency(String contentId,
                                                          Map<String, PlayoutStream> playoutStreamMap) {
     List<ContentCohortConcurrencyResponse> response =
-      dataExchangerNewClient.getContentCohortWiseConcurrency(contentId);
-
+      dataExchangerClient.getContentCohortWiseConcurrency(contentId);
+    if (response == null) {
+      throw new ServiceException("Failed to get content cohort from data exchanger");
+    }
     return response
       .stream()
       .map(contentCohortConcurrencyResponse -> getContentCohort(contentId, playoutStreamMap,
@@ -114,8 +128,10 @@ public class DataExchangerService {
   public List<ContentStream> getContentStreamConcurrency(String contentId,
                                                          Map<String, PlayoutStream> playoutStreamMap) {
     List<ContentStreamConcurrencyResponse> response =
-      dataExchangerNewClient.getContentStreamWiseConcurrency(contentId);
-
+      dataExchangerClient.getContentStreamWiseConcurrency(contentId);
+    if (response == null) {
+      throw new ServiceException("Failed to get content stream concurrency from data exchanger");
+    }
     return response.stream()
       .map(contentStreamConcurrencyResponse -> getContentStream(contentId, playoutStreamMap,
         contentStreamConcurrencyResponse))
@@ -136,7 +152,6 @@ public class DataExchangerService {
       .concurrency(resp.getConcurrencyValue())
       .build();
   }
-
 
   private String getSsaiTag(String ssaiTag) {
     return ssaiTag.length() < 6 ? DEFAULT_SSAI_TAG : ssaiTag;

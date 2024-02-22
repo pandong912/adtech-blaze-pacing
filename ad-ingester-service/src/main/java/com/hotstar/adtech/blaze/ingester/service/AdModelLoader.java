@@ -8,8 +8,6 @@ import com.hotstar.adtech.blaze.admodel.client.entity.MatchEntities;
 import com.hotstar.adtech.blaze.admodel.client.model.AdInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.MatchInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.StreamMappingInfo;
-import com.hotstar.adtech.blaze.admodel.common.domain.ApiErrorResponse;
-import com.hotstar.adtech.blaze.admodel.common.exception.ApiErrorException;
 import com.hotstar.adtech.blaze.exchanger.api.DataExchangerClient;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;
 import com.hotstar.adtech.blaze.ingester.entity.Ad;
@@ -108,10 +106,6 @@ public class AdModelLoader {
       LoadStatus.SUCCESS.counter().increment();
 
     } catch (Exception ex) {
-      if (ex instanceof ApiErrorException) {
-        ApiErrorResponse apiErrorResponse = ((ApiErrorException) ex).getApiErrorResponse();
-        log.error("code: " + apiErrorResponse.getCode() + "; message: " + apiErrorResponse.getMessage());
-      }
       LoadStatus.FAILED.counter().increment();
       log.error("Load Live Match Model failed", ex);
     }

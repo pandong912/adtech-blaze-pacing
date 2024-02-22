@@ -5,8 +5,6 @@ import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.MAT
 import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.MATCH_TOTAL_BREAK_FETCH;
 
 import com.hotstar.adtech.blaze.admodel.client.common.Names;
-import com.hotstar.adtech.blaze.admodel.common.domain.ApiErrorResponse;
-import com.hotstar.adtech.blaze.admodel.common.exception.ApiErrorException;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.AdModelVersion;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
@@ -60,7 +58,6 @@ public class DataExchangerService {
         dataExchangerClient.getLatestMatchBreakProgressModel();
       return response.getDeliveryProgresses();
     } catch (Exception ex) {
-      handleApiErrorException(ex);
       log.error("Fail to get matchBreakProgressModel", ex);
       throw ex;
     }
@@ -72,7 +69,6 @@ public class DataExchangerService {
       return response.stream()
         .collect(Collectors.toMap(BreakListResponse::getPlayoutId, BreakListResponse::getBreakIds));
     } catch (Exception ex) {
-      handleApiErrorException(ex);
       log.error("Failed to get break list from data exchanger", ex);
       throw ex;
     }
@@ -83,7 +79,6 @@ public class DataExchangerService {
     try {
       return dataExchangerClient.getTotalBreakNumber(contentId);
     } catch (Exception ex) {
-      handleApiErrorException(ex);
       log.error("Failed to get totalBreakNumber", ex);
       throw ex;
     }
@@ -97,7 +92,6 @@ public class DataExchangerService {
         .collect(Collectors.toMap(AdSetImpressionResponse::getAdSetId,
           AdSetImpressionResponse::getImpression));
     } catch (Exception ex) {
-      handleApiErrorException(ex);
       log.error("Failed to get AdSetImpression", ex);
       throw ex;
     }
@@ -116,7 +110,6 @@ public class DataExchangerService {
         .filter(Objects::nonNull)
         .collect(Collectors.toList());
     } catch (Exception ex) {
-      handleApiErrorException(ex);
       log.error("Failed to get ContentCohortConcurrency", ex);
       throw ex;
     }
@@ -148,7 +141,6 @@ public class DataExchangerService {
         .filter(Objects::nonNull)
         .collect(Collectors.toList());
     } catch (Exception ex) {
-      handleApiErrorException(ex);
       log.error("Failed to get ContentStreamConcurrency", ex);
       throw ex;
     }
@@ -170,13 +162,6 @@ public class DataExchangerService {
 
   private String getSsaiTag(String ssaiTag) {
     return ssaiTag.length() < 6 ? DEFAULT_SSAI_TAG : ssaiTag;
-  }
-
-  public void handleApiErrorException(Exception ex) {
-    if (ex instanceof ApiErrorException) {
-      ApiErrorResponse apiErrorResponse = ((ApiErrorException) ex).getApiErrorResponse();
-      log.error("code: " + apiErrorResponse.getCode() + "; message: " + apiErrorResponse.getMessage());
-    }
   }
 
 }

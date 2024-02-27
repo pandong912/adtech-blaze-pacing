@@ -16,12 +16,10 @@ import com.hotstar.adtech.blaze.exchanger.api.response.AdSetImpressionResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.BreakListResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentCohortConcurrencyResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.ContentStreamConcurrencyResponse;
-import com.hotstar.adtech.blaze.exchanger.api.response.MatchProgressModelResponse;
 import io.micrometer.core.annotation.Timed;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,9 +34,7 @@ public class DataExchangerService {
   private final DataExchangerClient dataExchangerClient;
 
   public AdModelVersion getLatestAdModelVersion(AdModelVersion adModelVersion) {
-    return Optional.ofNullable(dataExchangerClient.getLatestAdModel(adModelVersion.getVersion()))
-      .map(this::buildAdModelVersion)
-      .orElse(adModelVersion);
+    return buildAdModelVersion(dataExchangerClient.getLatestAdModel(adModelVersion.getVersion()));
   }
 
   private AdModelVersion buildAdModelVersion(AdModelResultUriResponse adModelResultUriResponse) {
@@ -53,66 +49,39 @@ public class DataExchangerService {
   }
 
   public List<Double> getMatchBreakProgressModel() {
-    try {
-      MatchProgressModelResponse response =
-        dataExchangerClient.getLatestMatchBreakProgressModel();
-      return response.getDeliveryProgresses();
-    } catch (Exception ex) {
-      log.error("Fail to get matchBreakProgressModel", ex);
-      throw ex;
-    }
+    return dataExchangerClient.getLatestMatchBreakProgressModel().getDeliveryProgresses();
   }
 
   public Map<String, List<BreakId>> getBreakList(String contentId) {
-    try {
-      List<BreakListResponse> response = dataExchangerClient.getBreakList(contentId);
-      return response.stream()
-        .collect(Collectors.toMap(BreakListResponse::getPlayoutId, BreakListResponse::getBreakIds));
-    } catch (Exception ex) {
-      log.error("Failed to get break list from data exchanger", ex);
-      throw ex;
-    }
+    return dataExchangerClient.getBreakList(contentId).stream()
+      .collect(Collectors.toMap(BreakListResponse::getPlayoutId, BreakListResponse::getBreakIds));
+
   }
 
   @Timed(MATCH_TOTAL_BREAK_FETCH)
   public Integer getTotalBreakNumber(String contentId) {
-    try {
-      return dataExchangerClient.getTotalBreakNumber(contentId);
-    } catch (Exception ex) {
-      log.error("Failed to get totalBreakNumber", ex);
-      throw ex;
-    }
+    return dataExchangerClient.getTotalBreakNumber(contentId);
   }
 
   @Timed(MATCH_IMPRESSION_FETCH)
   public Map<Long, Long> getAdSetImpression(String contentId) {
-    try {
-      List<AdSetImpressionResponse> response = dataExchangerClient.getAllAdSetImpressions(contentId);
-      return response.stream()
-        .collect(Collectors.toMap(AdSetImpressionResponse::getAdSetId,
-          AdSetImpressionResponse::getImpression));
-    } catch (Exception ex) {
-      log.error("Failed to get AdSetImpression", ex);
-      throw ex;
-    }
+    List<AdSetImpressionResponse> response = dataExchangerClient.getAllAdSetImpressions(contentId);
+    return response.stream()
+      .collect(Collectors.toMap(AdSetImpressionResponse::getAdSetId,
+        AdSetImpressionResponse::getImpression));
   }
 
   @Timed(MATCH_CONCURRENCY_FETCH)
   public List<ContentCohort> getContentCohortConcurrency(String contentId,
                                                          Map<String, PlayoutStream> playoutStreamMap) {
-    try {
-      List<ContentCohortConcurrencyResponse> response =
-        dataExchangerClient.getContentCohortWiseConcurrency(contentId);
-      return response
-        .stream()
-        .map(contentCohortConcurrencyResponse -> getContentCohort(contentId, playoutStreamMap,
-          contentCohortConcurrencyResponse))
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList());
-    } catch (Exception ex) {
-      log.error("Failed to get ContentCohortConcurrency", ex);
-      throw ex;
-    }
+    List<ContentCohortConcurrencyResponse> response =
+      dataExchangerClient.getContentCohortWiseConcurrency(contentId);
+    return response
+      .stream()
+      .map(contentCohortConcurrencyResponse -> getContentCohort(contentId, playoutStreamMap,
+        contentCohortConcurrencyResponse))
+      .filter(Objects::nonNull)
+      .collect(Collectors.toList());
   }
 
   private ContentCohort getContentCohort(String contentId, Map<String, PlayoutStream> playoutStreamMap,
@@ -132,18 +101,13 @@ public class DataExchangerService {
 
   public List<ContentStream> getContentStreamConcurrency(String contentId,
                                                          Map<String, PlayoutStream> playoutStreamMap) {
-    try {
-      List<ContentStreamConcurrencyResponse> response =
-        dataExchangerClient.getContentStreamWiseConcurrency(contentId);
-      return response.stream()
-        .map(contentStreamConcurrencyResponse -> getContentStream(contentId, playoutStreamMap,
-          contentStreamConcurrencyResponse))
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList());
-    } catch (Exception ex) {
-      log.error("Failed to get ContentStreamConcurrency", ex);
-      throw ex;
-    }
+    List<ContentStreamConcurrencyResponse> response =
+      dataExchangerClient.getContentStreamWiseConcurrency(contentId);
+    return response.stream()
+      .map(contentStreamConcurrencyResponse -> getContentStream(contentId, playoutStreamMap,
+        contentStreamConcurrencyResponse))
+      .filter(Objects::nonNull)
+      .collect(Collectors.toList());
   }
 
   private ContentStream getContentStream(String contentId, Map<String, PlayoutStream> playoutStreamMap,

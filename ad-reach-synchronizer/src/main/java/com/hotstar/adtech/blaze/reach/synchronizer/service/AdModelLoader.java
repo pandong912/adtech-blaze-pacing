@@ -66,7 +66,7 @@ public class AdModelLoader {
     try {
       AdModelResultUriResponse adModelResultUriResponse =
         dataExchangerClient.getLatestAdModel(adModelVersion.getVersion());
-      if (adModelResultUriResponse != null) {
+      if (adModelResultUriResponse.getVersion() > adModelVersion.getVersion()) {
         String curAdModelMd5 = adModelResultUriResponse.getMd5(Names.Live_Ad_Model_PB);
         String curLiveMatchMd5 = adModelResultUriResponse.getMd5(Names.Match_PB);
         if (Objects.equals(curAdModelMd5, adModelVersion.getAdModelMd5())

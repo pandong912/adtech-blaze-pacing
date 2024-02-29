@@ -8,8 +8,6 @@ import com.hotstar.adtech.blaze.admodel.client.entity.MatchEntities;
 import com.hotstar.adtech.blaze.admodel.client.model.AdInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.MatchInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.StreamMappingInfo;
-import com.hotstar.adtech.blaze.admodel.common.domain.ResultCode;
-import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
 import com.hotstar.adtech.blaze.exchanger.api.DataExchangerClient;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;
 import com.hotstar.adtech.blaze.ingester.entity.Ad;
@@ -63,12 +61,10 @@ public class AdModelLoader {
   @Timed(MetricNames.LOAD_AD_MODEL)
   public void loadAdModel() {
     AdModelVersion adModelVersion = get().getAdModelVersion();
-
     try {
-      StandardResponse<AdModelResultUriResponse> response =
+      AdModelResultUriResponse adModelResultUriResponse =
         dataExchangerClient.getLatestAdModel(adModelVersion.getVersion());
-      if (response.getCode() == ResultCode.SUCCESS) {
-        AdModelResultUriResponse adModelResultUriResponse = response.getData();
+      if (adModelResultUriResponse.getVersion() > adModelVersion.getVersion()) {
         String curAdModelMd5 = adModelResultUriResponse.getMd5(Names.Live_Ad_Model_PB);
         String curLiveMatchMd5 = adModelResultUriResponse.getMd5(Names.Match_PB);
         if (Objects.equals(curAdModelMd5, adModelVersion.getAdModelMd5())

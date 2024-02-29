@@ -12,7 +12,6 @@ import com.hotstar.adtech.blaze.allocation.diagnosis.entity.AdModelData;
 import com.hotstar.adtech.blaze.allocation.diagnosis.service.AdModelAdService;
 import com.hotstar.adtech.blaze.allocation.diagnosis.service.AdModelAdSetMatchService;
 import com.hotstar.adtech.blaze.allocation.diagnosis.service.AdModelMatchService;
-import com.hotstar.adtech.blaze.exchanger.api.DataExchangerClient;
 import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,7 +25,6 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class AdModelScheduler {
   private final AdModelClient adModelClient;
-  private final DataExchangerClient dataExchangerClient;
   private final AdModelAdSetMatchService adModelAdSetMatchService;
   private final AdModelAdService adModelAdService;
   private final AdModelMatchService adModelMatchService;

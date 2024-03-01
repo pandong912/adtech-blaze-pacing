@@ -28,8 +28,8 @@
 
     <properties>
         <blaze-module.version>1.7.5-SNAPSHOT</blaze-module.version>
-        <blaze-data-exchanger.version>1.9.2</blaze-data-exchanger.version>
-        <blaze-ad-model-module.version>1.12.3</blaze-ad-model-module.version>
+        <blaze-data-exchanger.version>1.9.3</blaze-data-exchanger.version>
+        <blaze-ad-model-module.version>1.12.3·</blaze-ad-model-module.version>
         <pulse.version>2.2.4</pulse.version>
         <shifu-common-stats-micrometer>0.1.1</shifu-common-stats-micrometer>
         <templatize.macro.version>2.0.5-RELEASE</templatize.macro.version>

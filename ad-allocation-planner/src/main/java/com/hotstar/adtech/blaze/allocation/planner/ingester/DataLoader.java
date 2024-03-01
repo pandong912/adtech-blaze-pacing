@@ -43,7 +43,7 @@ public class DataLoader {
   public void loadAdModel() {
     AdModelVersion adModelVersion = adModelReference.get().getAdModelVersion();
     AdModelVersion newVersion = dataExchangerService.getLatestAdModelVersion(adModelVersion);
-    if (Objects.equals(newVersion, adModelVersion)) {
+    if (newVersion.getVersion() <= adModelVersion.getVersion()) {
       return;
     }
     adModelReference.set(adModelLoader.loadAdModel(newVersion));

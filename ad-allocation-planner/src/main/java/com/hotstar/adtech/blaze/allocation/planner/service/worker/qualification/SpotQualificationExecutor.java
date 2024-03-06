@@ -18,11 +18,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class SpotQualificationExecutor {
 
-
   @Timed(value = QUALIFICATION, extraTags = {"type", "spot"})
   public GraphContext executeQualify(GeneralPlanContext generalPlanContext,
                                      List<Integer> breakTypeIds, Integer duration) {
-
     List<AdSet> adSets = generalPlanContext.getAdSets();
     List<ContentStream> streams = generalPlanContext.getConcurrencyData().getStreams();
     Integer relaxedDuration = generalPlanContext.getRelaxedDuration(breakTypeIds.get(0), duration);

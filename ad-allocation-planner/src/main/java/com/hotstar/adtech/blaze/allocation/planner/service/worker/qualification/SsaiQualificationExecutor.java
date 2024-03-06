@@ -73,7 +73,6 @@ public class SsaiQualificationExecutor {
   private void qualifyByConcurrency(ContentCohort contentCohort, List<AdSet> adSets,
                                     Map<String, Integer> attributeId2TargetingTagMap,
                                     QualificationResult firstQualified) {
-
     CohortAdSetQualificationEngine qualificationEngine =
       new CohortAdSetQualificationEngine(contentCohort.getPlayoutStream(), contentCohort.getSsaiTag(),
         attributeId2TargetingTagMap, contentCohort.getConcurrencyId(), firstQualified);

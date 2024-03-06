@@ -18,7 +18,6 @@ public class HwmSolver {
 
   @Timed(value = GRAPH_SOLVE, extraTags = {"algorithm", "hwm"})
   public List<HwmResult> solve(GraphContext context) {
-
     List<HwmSupply> supplies =
       context.getRequests().stream().map(request -> new HwmSupply(request, context.getBreakDuration()))
         .collect(Collectors.toList());
@@ -40,7 +39,6 @@ public class HwmSolver {
 
 
   private Collection<HwmResult> allocateOnOrder(List<HwmDemand> demands, HwmGraph hwmGraph) {
-
     Map<Long, HwmResult> allocations = demands.stream()
       .collect(Collectors.toMap(HwmDemand::getAdSetId, demand -> allocate(demand, hwmGraph)));
 
@@ -59,7 +57,7 @@ public class HwmSolver {
 
 
   private HwmResult allocate(HwmDemand demand, HwmGraph hwmGraph) {
-    long totalSupply = 0;
+    long totalSupply = 0L;
     for (HwmSupply supply : hwmGraph.getSupplies()) {
       if (hwmGraph.isQualified(demand, supply)) {
         totalSupply += supply.getInventory(demand.getAdDuration());

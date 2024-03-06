@@ -18,6 +18,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -34,6 +35,9 @@ public class AllocationPlanManager {
   private final DataLoader dataLoader;
   private final AllocationPlanTaskService allocationPlanTaskService;
   private final ShaleAndHwmModePublisher shaleAndHwmModePublisher;
+
+  @Value("${blaze.ad-allocation-planner.gap-time:30000}")
+  private long planGapTime;
 
   @Scheduled(fixedRateString = "${blaze.ad-allocation-planner.schedule.manager:3000}", initialDelayString = "1000")
   @Timed(value = MATCH_PLAN_UPDATE, histogram = true)
@@ -86,7 +90,7 @@ public class AllocationPlanManager {
     if (latestTask == null) {
       return true;
     }
-    if (latestTask.getVersion().plus(30, ChronoUnit.SECONDS).isAfter(Instant.now())) {
+    if (latestTask.getVersion().plus(planGapTime, ChronoUnit.SECONDS).isAfter(Instant.now())) {
       return false;
     }
     return latestTask.getTaskStatus() != TaskStatus.PUBLISHED;

@@ -38,6 +38,7 @@ management:
       show-details: always
 blaze:
   ad-allocation-planner:
+    gap-time: 300
     metrics-prefix: blaze
     executor:
       core-pool-size: 4

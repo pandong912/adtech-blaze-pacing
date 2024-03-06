@@ -4,6 +4,8 @@ spring:
 blaze:
   data-exchanger:
     endpoint: adtech-blaze-data-exchanger-apse1.hotstar-labs.com
+  ad-allocation-planner:
+    gap-time: 30
 
 
 

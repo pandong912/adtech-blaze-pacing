@@ -37,9 +37,6 @@ public class TaskPublisher {
   @Timed(value = MANAGER_PUBLISH)
   public void uploadAndPublish(Match match, GeneralPlanContext generalPlanContext, Instant version,
                                AlgorithmType spotAlgorithm, AlgorithmType... ssaiAlgorithms) {
-    if (generalPlanContext.isEmpty()) {
-      return;
-    }
     allocationDataClient.uploadHwmData(match.getContentId(), version.toString(), generalPlanContext);
     publish(match, generalPlanContext, version, spotAlgorithm, ssaiAlgorithms);
   }
@@ -49,9 +46,6 @@ public class TaskPublisher {
                                Instant version,
                                AlgorithmType spotAlgorithm, AlgorithmType... ssaiAlgorithms) {
     GeneralPlanContext generalPlanContext = shalePlanContext.getGeneralPlanContext();
-    if (generalPlanContext.isEmpty()) {
-      return;
-    }
     String path = PathUtils.joinToPath(match.getContentId(), version);
     allocationDataClient.uploadHwmData(match.getContentId(), version.toString(), generalPlanContext);
     allocationPlanClient.uploadSupplyIdMap(path, supplyIdMap);
@@ -62,9 +56,6 @@ public class TaskPublisher {
 
   private void publish(Match match, GeneralPlanContext generalPlanContext, Instant version,
                        AlgorithmType spotAlgorithm, AlgorithmType... ssaiAlgorithms) {
-    if (generalPlanContext.isEmpty()) {
-      return;
-    }
     AllocationPlanResult task = AllocationPlanResult.builder()
       .contentId(match.getContentId())
       .version(version)

@@ -28,16 +28,15 @@
 
     <properties>
         <blaze-module.version>1.7.5-SNAPSHOT</blaze-module.version>
-        <blaze-data-exchanger.version>1.9.3</blaze-data-exchanger.version>
+        <blaze-data-exchanger.version>1.9.4</blaze-data-exchanger.version>
         <blaze-ad-model-module.version>1.14.0</blaze-ad-model-module.version>
         <pulse.version>2.2.4</pulse.version>
-        <shifu-common-stats-micrometer>0.1.1</shifu-common-stats-micrometer>
         <templatize.macro.version>2.0.5-RELEASE</templatize.macro.version>
         <swagger.version>2.9.2</swagger.version>
         <spring.boot.version>2.3.12.RELEASE</spring.boot.version>
         <spring.cloud.version>Hoxton.SR8</spring.cloud.version>
         <guava.version>29.0-jre</guava.version>
-        <commons-collections4.version>4.1</commons-collections4.version>
+        <commons-collections4.version>4.4</commons-collections4.version>
         <commons-io.version>2.7</commons-io.version>
         <protostuff.version>1.6.0</protostuff.version>
         <plugin.checkstyle.version>3.0.0</plugin.checkstyle.version>

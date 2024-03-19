@@ -41,12 +41,12 @@ public class ShalePlanContextLoader {
       .collect(Collectors.toMap(ContentCohort::getPlayoutIdKey, ContentCohort::getConcurrencyId,
         this::processDuplicateStreamKey));
 
-    Map<Long, Integer> adSetIdToDemandId = generalPlanContext.getAdSets().stream()
+    Map<Long, Integer> adSetIdToReachIndex = generalPlanContext.getAdSets().stream()
       .filter(adSet -> adSet.getMaximizeReach() == 1)
-      .collect(Collectors.toMap(AdSet::getId, AdSet::getDemandId));
+      .collect(Collectors.toMap(AdSet::getId, AdSet::getReachIndex));
     ShalePlanContext shalePlanContext = ShalePlanContext.builder()
       .generalPlanContext(generalPlanContext)
-      .reachStorage(loadReach(match.getContentId(), supplyIdMap, adSetIdToDemandId))
+      .reachStorage(loadReach(match.getContentId(), supplyIdMap, adSetIdToReachIndex))
       .penalty(ShaleConstant.PENALTY)
       .build();
     return Pair.of(supplyIdMap, shalePlanContext);
@@ -58,9 +58,9 @@ public class ShalePlanContextLoader {
   }
 
   ReachStorage loadReach(String contentId, Map<String, Integer> concurrencyIdMap,
-                         Map<Long, Integer> adSetIdToDemandId) {
+                         Map<Long, Integer> adSetIdToReachIndex) {
     if (blazeDynamicConfig.getEnableMaximiseReach()) {
-      return reachService.getUnReachRatio(contentId, concurrencyIdMap, adSetIdToDemandId);
+      return reachService.getUnReachRatio(contentId, concurrencyIdMap, adSetIdToReachIndex);
     } else {
       return new DegradationReachStorage();
     }

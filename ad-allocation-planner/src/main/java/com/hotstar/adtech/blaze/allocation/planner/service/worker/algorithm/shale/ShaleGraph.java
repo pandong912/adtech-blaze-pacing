@@ -1,7 +1,7 @@
 package com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.QualificationResult;
+import com.hotstar.adtech.blaze.allocation.planner.qualification.QualificationResult;
 import com.hotstar.adtech.blaze.allocationdata.client.model.ReachStorage;
 import java.util.List;
 import lombok.Value;
@@ -61,7 +61,7 @@ public class ShaleGraph {
 
   public double getUnReachRatio(ShaleDemand demand, ShaleSupply supply) {
     if (demand.getReachEnabled() == 1 && supply.getStreamType() == StreamType.SSAI_Spot) {
-      return reachStorage.getUnReachRatioFromStorage(demand.getId(), supply.getId());
+      return reachStorage.getUnReachRatioFromStorage(demand.getReachIndex(), supply.getId());
     } else {
       return 0;
     }

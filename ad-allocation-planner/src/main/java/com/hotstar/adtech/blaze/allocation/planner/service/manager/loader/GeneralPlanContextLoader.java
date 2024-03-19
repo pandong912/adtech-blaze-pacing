@@ -13,8 +13,8 @@ import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
 import com.hotstar.adtech.blaze.allocation.planner.ingester.DataExchangerService;
 import com.hotstar.adtech.blaze.allocation.planner.ingester.DataLoader;
+import com.hotstar.adtech.blaze.allocation.planner.qualification.BreakTypeGroupFactory;
 import com.hotstar.adtech.blaze.allocation.planner.service.manager.DataProcessService;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BreakTypeGroupFactory;
 import com.hotstar.adtech.blaze.allocation.planner.source.algomodel.StandardMatchProgressModel;
 import com.hotstar.adtech.blaze.allocationdata.client.model.BreakContext;
 import com.hotstar.adtech.blaze.allocationdata.client.model.BreakTypeGroup;
@@ -90,6 +90,7 @@ public class GeneralPlanContextLoader {
       .responses(responses)
       .breakContext(breakContext)
       .breakTypeList(breakTypeList)
+      .targetingEvaluators(adModel.getTargetingEvaluatorsMap().get(contentId))
       .build();
   }
 
@@ -103,7 +104,8 @@ public class GeneralPlanContextLoader {
     String contentId = match.getContentId();
     Map<String, PlayoutStream> playoutStreamMap = adModel.getPlayoutStreamMap(match.getSeasonId());
 
-    List<ContentCohort> cohorts = getContentCohorts(contentId, playoutStreamMap);
+    //sorted by stream type, make SSAI_Spot first
+    List<ContentCohort> cohorts = getSortedContentCohorts(contentId, playoutStreamMap);
 
     List<ContentStream> streams = getContentStreams(contentId, playoutStreamMap, cohorts.size());
 
@@ -113,7 +115,7 @@ public class GeneralPlanContextLoader {
       .build();
   }
 
-  private List<ContentCohort> getContentCohorts(String contentId, Map<String, PlayoutStream> playoutStreamMap) {
+  private List<ContentCohort> getSortedContentCohorts(String contentId, Map<String, PlayoutStream> playoutStreamMap) {
     List<ContentCohort> cohorts = dataExchangerService.getContentCohortConcurrency(contentId, playoutStreamMap);
     List<ContentCohort> ssaiCohorts = cohorts.stream()
       .filter(cohort -> cohort.getPlayoutStream().getStreamType() == StreamType.SSAI_Spot)

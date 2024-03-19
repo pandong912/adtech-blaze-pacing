@@ -5,12 +5,12 @@ import com.hotstar.adtech.blaze.allocation.planner.common.model.ShaleAllocationD
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ShaleSupplyAllocationDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.ShaleAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames;
+import com.hotstar.adtech.blaze.allocation.planner.qualification.SpotQualificationExecutor;
+import com.hotstar.adtech.blaze.allocation.planner.qualification.SsaiQualificationExecutor;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.ShaleDemandResult;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.ShaleResult;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.ShaleSupplyResult;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleSolver;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.SpotQualificationExecutor;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.SsaiQualificationExecutor;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GraphContext;
 import com.hotstar.adtech.blaze.allocationdata.client.model.BreakContext;
 import com.hotstar.adtech.blaze.allocationdata.client.model.GeneralPlanContext;

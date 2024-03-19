@@ -1,5 +1,6 @@
 package com.hotstar.adtech.blaze.allocation.planner.common.admodel;
 
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.evaluator.TargetingEvaluatorsProtocol;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.AdModelVersion;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
@@ -25,6 +26,7 @@ public class AdModel {
   private Map<String, PlayoutStream> globalPlayoutStreamMap;
   private Map<String, List<AdSet>> adSetGroup;
   private Map<Long, List<BreakDetail>> breakDetailGroup;
+  private Map<String, TargetingEvaluatorsProtocol> targetingEvaluatorsMap;
 
   private AdModelVersion adModelVersion;
 

@@ -6,7 +6,7 @@ import com.hotstar.adtech.blaze.allocation.planner.QualificationTestData;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.BreakTargetingRule;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BreakTypeGroupFactory;
+import com.hotstar.adtech.blaze.allocation.planner.qualification.BreakTypeGroupFactory;
 import com.hotstar.adtech.blaze.allocationdata.client.model.BreakTypeGroup;
 import com.hotstar.adtech.blaze.allocationdata.client.model.GeneralPlanContext;
 import java.util.Arrays;

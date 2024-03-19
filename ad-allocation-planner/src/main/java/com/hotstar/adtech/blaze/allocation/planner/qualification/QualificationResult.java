@@ -1,4 +1,4 @@
-package com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification;
+package com.hotstar.adtech.blaze.allocation.planner.qualification;
 
 public interface QualificationResult {
   boolean get(int supplyIndex, int demandIndex);

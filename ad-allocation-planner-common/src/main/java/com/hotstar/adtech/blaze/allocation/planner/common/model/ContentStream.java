@@ -17,10 +17,6 @@ public class ContentStream {
   String contentId;
   long concurrency;
 
-  public String getKey() {
-    return playoutStream.getKey();
-  }
-
   public void setConcurrencyId(int i, int cohortSize) {
     this.concurrencyIdInStream = i;
     this.concurrencyIdInCohort = i + cohortSize;

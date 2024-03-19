@@ -11,10 +11,10 @@ import com.hotstar.adtech.blaze.allocation.planner.common.request.UnReachData;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.hwm.HwmAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.ShaleAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.ingester.AdModelLoader;
+import com.hotstar.adtech.blaze.allocation.planner.qualification.BreakTypeGroupFactory;
 import com.hotstar.adtech.blaze.allocation.planner.service.manager.DataProcessService;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.HwmPlanWorker;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.ShalePlanWorker;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BreakTypeGroupFactory;
 import com.hotstar.adtech.blaze.allocation.planner.source.algomodel.StandardMatchProgressModel;
 import com.hotstar.adtech.blaze.allocationdata.client.model.BreakContext;
 import com.hotstar.adtech.blaze.allocationdata.client.model.BreakTypeGroup;
@@ -72,7 +72,7 @@ public class AllocationPlanController {
     Map<String, Integer> concurrencyIdMap = generalPlanContext.getConcurrencyData().getCohorts().stream()
       .collect(Collectors.toMap(ContentCohort::getPlayoutIdKey, ContentCohort::getConcurrencyId));
     Map<Long, Integer> adSetIdMap =
-      generalPlanContext.getAdSets().stream().collect(Collectors.toMap(AdSet::getId, AdSet::getDemandId));
+      generalPlanContext.getAdSets().stream().collect(Collectors.toMap(AdSet::getId, AdSet::getReachIndex));
     ReachStorage reachStorage = buildReachStorage(concurrencyIdMap, adSetIdMap, shaleAllocationRequest);
     ShalePlanContext shalePlanContext = ShalePlanContext.builder()
       .generalPlanContext(generalPlanContext)
@@ -149,6 +149,7 @@ public class AllocationPlanController {
       .breakContext(breakContext)
       .requestData(requestData)
       .breakTypeList(breakTypeList)
+      .targetingEvaluators(adModel.getTargetingEvaluatorsMap().get(contentId))
       .build();
   }
 

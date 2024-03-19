@@ -27,6 +27,7 @@ public class DataProcessService {
       .demand(demandDiagnosis.getDemand())
       .adDuration(demandDiagnosis.getAdDuration())
       .maximizeReach(demandDiagnosis.getMaximizeReach())
+      .reachIndex(demandDiagnosis.getReachIndex())
       .build();
   }
 
@@ -59,6 +60,7 @@ public class DataProcessService {
         .average()
         .orElse(0))
       .maximizeReach(adSet.getMaximizeReach())
+      .reachIndex(adSet.getReachIndex())
       .build();
   }
 

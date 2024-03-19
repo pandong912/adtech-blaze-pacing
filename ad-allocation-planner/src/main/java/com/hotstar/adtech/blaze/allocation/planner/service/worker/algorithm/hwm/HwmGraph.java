@@ -1,6 +1,6 @@
 package com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.hwm;
 
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.QualificationResult;
+import com.hotstar.adtech.blaze.allocation.planner.qualification.QualificationResult;
 import java.util.List;
 import lombok.Value;
 

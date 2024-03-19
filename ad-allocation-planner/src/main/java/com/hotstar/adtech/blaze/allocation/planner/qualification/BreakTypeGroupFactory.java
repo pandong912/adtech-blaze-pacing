@@ -1,4 +1,4 @@
-package com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification;
+package com.hotstar.adtech.blaze.allocation.planner.qualification;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.RuleType;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;

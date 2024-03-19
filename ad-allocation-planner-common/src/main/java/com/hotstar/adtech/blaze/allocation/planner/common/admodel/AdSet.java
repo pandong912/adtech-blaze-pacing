@@ -31,6 +31,7 @@ public class AdSet {
   private int maximizeReach = 1;
 
   private int demandId;
+  private int reachIndex;
 
   public int getOrder() {
     return CampaignType.Promo == campaignType ? priority + MAX_PRIORITY : priority;

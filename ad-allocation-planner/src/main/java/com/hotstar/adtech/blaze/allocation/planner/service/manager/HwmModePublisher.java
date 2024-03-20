@@ -1,7 +1,9 @@
 package com.hotstar.adtech.blaze.allocation.planner.service.manager;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.AlgorithmType;
+import com.hotstar.adtech.blaze.admodel.common.exception.BusinessException;
 import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
+import com.hotstar.adtech.blaze.allocation.planner.ErrorCodes;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModel;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Match;
 import com.hotstar.adtech.blaze.allocation.planner.service.manager.loader.GeneralPlanContextLoader;
@@ -25,7 +27,7 @@ public class HwmModePublisher {
       GeneralPlanContext generalPlanContext = generalPlanContextLoader.getGeneralPlanContext(match, adModel);
       taskPublisher.uploadAndPublish(match, generalPlanContext, version, AlgorithmType.HWM, AlgorithmType.HWM);
     } catch (Exception e) {
-      throw new ServiceException("Failed to publish hwm mode task for match: " + match.getContentId(), e);
+      throw new BusinessException(ErrorCodes.HWM_MODE_PUBLISH_FAILED, e, match.getContentId());
     }
   }
 

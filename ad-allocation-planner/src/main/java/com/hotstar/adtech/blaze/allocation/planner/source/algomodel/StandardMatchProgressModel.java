@@ -1,6 +1,7 @@
 package com.hotstar.adtech.blaze.allocation.planner.source.algomodel;
 
-import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
+import com.hotstar.adtech.blaze.admodel.common.exception.BusinessException;
+import com.hotstar.adtech.blaze.allocation.planner.ErrorCodes;
 import com.hotstar.adtech.blaze.allocationdata.client.model.BreakContext;
 import java.util.List;
 import org.springframework.util.CollectionUtils;
@@ -14,12 +15,12 @@ public class StandardMatchProgressModel {
 
   public StandardMatchProgressModel(List<Double> matchBreakProgressRatios) {
     if (CollectionUtils.isEmpty(matchBreakProgressRatios)) {
-      throw new ServiceException("Match Break Progress Model Data is empty");
+      throw new BusinessException(ErrorCodes.MODEL_DATA_EMPTY);
     }
 
     final double totalProgressRatio = matchBreakProgressRatios.get(matchBreakProgressRatios.size() - 1);
     if (totalProgressRatio < 1.0d) {
-      throw new ServiceException("Match Break Progress Model Data is invalid");
+      throw new BusinessException(ErrorCodes.MODEL_DATA_INVALID);
     }
 
     totalBreakNumber = matchBreakProgressRatios.size();

@@ -2,7 +2,7 @@ package com.hotstar.adtech.blaze.allocationplan.client;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.AlgorithmType;
 import com.hotstar.adtech.blaze.admodel.common.enums.PlanType;
-import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
+import com.hotstar.adtech.blaze.admodel.common.exception.BusinessException;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.hwm.HwmAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.ShaleAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.SupplyInfo;
@@ -67,7 +67,7 @@ public class LocalAllocationPlanClient implements AllocationPlanClient {
       byte[] bytes = Files.readAllBytes(key);
       return ProtostuffUtils.deserialize(bytes, clazz);
     } catch (IOException e) {
-      throw new ServiceException("Failed to load allocation plan from:" + key, e);
+      throw new BusinessException(ErrorCodes.ALLOCATION_DATA_LOAD_FAILED, e, key);
     }
   }
 
@@ -139,7 +139,7 @@ public class LocalAllocationPlanClient implements AllocationPlanClient {
       Files.createDirectories(parentDir);
       Files.write(filePath, file);
     } catch (IOException e) {
-      throw new ServiceException("Failed to upload allocation plan to:" + filePath, e);
+      throw new BusinessException(ErrorCodes.ALLOCATION_DATA_UPLOAD_FAILED, e, filePath);
     }
     return fileName;
   }

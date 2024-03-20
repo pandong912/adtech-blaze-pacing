@@ -6,6 +6,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.hotstar.adtech.blaze.admodel.common.exception.BusinessException;
 import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
 import com.hotstar.adtech.blaze.allocationdata.client.model.GeneralPlanContext;
 import com.hotstar.adtech.blaze.allocationdata.client.model.ShalePlanContext;
@@ -48,7 +49,7 @@ public class S3AllocationDataClient implements AllocationDataClient {
       metadata.setContentLength(compressed.length);
       s3Client.putObject(this.bucketName, key, is, metadata);
     } catch (IOException e) {
-      throw new ServiceException("Failed to upload allocation data to:" + bucketName + "/" + key, e);
+      throw new BusinessException(ErrorCodes.ALLOCATION_DATA_UPLOAD_FAILED, e, bucketName + "/" + key);
     }
     return fileName;
   }
@@ -61,7 +62,7 @@ public class S3AllocationDataClient implements AllocationDataClient {
       byte[] decompress = GzipUtils.decompress(bytes);
       return ProtostuffUtils.deserialize(decompress, clazz);
     } catch (Exception e) {
-      throw new ServiceException("Failed to load allocation data from:" + bucketName + "/" + key, e);
+      throw new BusinessException(ErrorCodes.ALLOCATION_DATA_LOAD_FAILED, e, bucketName + "/" + key);
     }
   }
 

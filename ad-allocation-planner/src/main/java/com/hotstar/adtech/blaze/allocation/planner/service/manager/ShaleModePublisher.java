@@ -1,7 +1,8 @@
 package com.hotstar.adtech.blaze.allocation.planner.service.manager;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.AlgorithmType;
-import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
+import com.hotstar.adtech.blaze.admodel.common.exception.BusinessException;
+import com.hotstar.adtech.blaze.allocation.planner.ErrorCodes;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModel;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Match;
 import com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames;
@@ -35,7 +36,7 @@ public class ShaleModePublisher {
       taskPublisher.uploadAndPublish(match, planContext.getRight(), planContext.getLeft(), version, AlgorithmType.HWM,
         AlgorithmType.SHALE);
     } catch (Exception e) {
-      throw new ServiceException("Failed to publish shale mode task for match: " + match.getContentId(), e);
+      throw new BusinessException(ErrorCodes.SHALE_MODE_PUBLISH_FAILED, e, match.getContentId());
     }
   }
 }

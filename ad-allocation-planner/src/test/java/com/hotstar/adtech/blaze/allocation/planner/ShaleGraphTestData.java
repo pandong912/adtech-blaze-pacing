@@ -1,7 +1,7 @@
 package com.hotstar.adtech.blaze.allocation.planner;
 
-import com.hotstar.adtech.blaze.allocation.planner.qualification.BitSetQualificationResult;
-import com.hotstar.adtech.blaze.allocation.planner.qualification.QualificationResult;
+import com.hotstar.adtech.blaze.allocation.planner.qualification.result.BitSetQualificationResult;
+import com.hotstar.adtech.blaze.allocation.planner.qualification.result.QualificationResult;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleConstant;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleDemand;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleGraph;

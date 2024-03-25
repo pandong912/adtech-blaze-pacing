@@ -2,8 +2,8 @@ package com.hotstar.adtech.blaze.allocation.planner;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.PlanType;
 import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
-import com.hotstar.adtech.blaze.allocation.planner.qualification.ArrayQualificationResult;
-import com.hotstar.adtech.blaze.allocation.planner.qualification.QualificationResult;
+import com.hotstar.adtech.blaze.allocation.planner.qualification.result.ArrayQualificationResult;
+import com.hotstar.adtech.blaze.allocation.planner.qualification.result.QualificationResult;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GraphContext;
 import com.hotstar.adtech.blaze.allocationdata.client.model.Request;
 import com.hotstar.adtech.blaze.allocationdata.client.model.Response;

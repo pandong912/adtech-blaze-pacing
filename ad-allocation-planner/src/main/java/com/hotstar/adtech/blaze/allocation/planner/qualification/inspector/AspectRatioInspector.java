@@ -1,8 +1,7 @@
-package com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.ad;
+package com.hotstar.adtech.blaze.allocation.planner.qualification.inspector;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.StreamView;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Ad;
-import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.Inspector;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package com.hotstar.adtech.blaze.allocation.planner.source.context;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.PlanType;
-import com.hotstar.adtech.blaze.allocation.planner.qualification.QualificationResult;
+import com.hotstar.adtech.blaze.allocation.planner.qualification.result.QualificationResult;
 import com.hotstar.adtech.blaze.allocationdata.client.model.Request;
 import com.hotstar.adtech.blaze.allocationdata.client.model.Response;
 import java.util.List;

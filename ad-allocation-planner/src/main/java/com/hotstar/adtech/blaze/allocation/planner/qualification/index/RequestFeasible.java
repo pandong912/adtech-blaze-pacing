@@ -1,4 +1,4 @@
-package com.hotstar.adtech.blaze.allocation.planner.qualification;
+package com.hotstar.adtech.blaze.allocation.planner.qualification.index;
 
 import java.util.BitSet;
 import lombok.AllArgsConstructor;

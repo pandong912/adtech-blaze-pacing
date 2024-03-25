@@ -1,4 +1,4 @@
-package com.hotstar.adtech.blaze.allocation.planner.qualification;
+package com.hotstar.adtech.blaze.allocation.planner.qualification.result;
 
 import java.util.Arrays;
 import lombok.Getter;

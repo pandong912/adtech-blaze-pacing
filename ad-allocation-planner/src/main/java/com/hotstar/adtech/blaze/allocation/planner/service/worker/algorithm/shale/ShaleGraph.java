@@ -1,7 +1,7 @@
 package com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
-import com.hotstar.adtech.blaze.allocation.planner.qualification.QualificationResult;
+import com.hotstar.adtech.blaze.allocation.planner.qualification.result.QualificationResult;
 import com.hotstar.adtech.blaze.allocationdata.client.model.ReachStorage;
 import java.util.List;
 import lombok.Value;

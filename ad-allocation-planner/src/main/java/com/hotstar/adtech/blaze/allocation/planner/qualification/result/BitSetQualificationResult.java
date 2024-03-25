@@ -1,5 +1,6 @@
-package com.hotstar.adtech.blaze.allocation.planner.qualification;
+package com.hotstar.adtech.blaze.allocation.planner.qualification.result;
 
+import com.hotstar.adtech.blaze.allocation.planner.qualification.index.RequestFeasible;
 import java.util.BitSet;
 import java.util.List;
 import lombok.Getter;

@@ -21,13 +21,13 @@ public class RuleFeasible {
     return invertedIndex.get(tag);
   }
 
-  public static RuleFeasible of(RuleFeasibleProtocol targetingFeasible, int size) {
+  public static RuleFeasible of(RuleFeasibleProtocol targetingFeasible) {
     BitSet ingoreIncludeBitSet = targetingFeasible.getIgnoreIncludeBitSet();
     Map<String, RuleInvertedIndex> collect = targetingFeasible.getInvertedIndex().values()
       .stream()
       .map(RuleInvertedIndex::of)
       .collect(Collectors.toMap(RuleInvertedIndex::getTag, Function.identity()));
-    return new RuleFeasible(ingoreIncludeBitSet, collect, size);
+    return new RuleFeasible(ingoreIncludeBitSet, collect, targetingFeasible.getSize());
   }
 
 

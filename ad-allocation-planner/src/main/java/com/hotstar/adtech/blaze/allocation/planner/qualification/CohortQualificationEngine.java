@@ -33,6 +33,13 @@ public class CohortQualificationEngine {
     BitSet streamNew = evaluators.getStreamNew().targeting(buildStreamNewKey(playoutStream));
     qualified.and(streamNew);
 
+    BitSet language = evaluators.getLanguage().targeting(String.valueOf(playoutStream.getLanguage().getId()));
+    qualified.and(language);
+
+    BitSet duration =
+      evaluators.getDuration().targeting(String.valueOf(evaluators.getDurationSet().floor(relaxedDuration)));
+    qualified.and(duration);
+
     BitSet audience = evaluators.getAudience().entrySet().stream()
       .map(e -> categoryTargeting(categoryId2Tags, e))
       .reduce(BitSetUtil.allTrue(evaluators.getAdSetSize()), BitSetUtil::and);

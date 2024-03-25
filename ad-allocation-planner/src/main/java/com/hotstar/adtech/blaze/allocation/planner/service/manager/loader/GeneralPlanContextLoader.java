@@ -6,6 +6,7 @@ import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModel;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Match;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.evaluator.TargetingEvaluatorsProtocol;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
@@ -78,7 +79,9 @@ public class GeneralPlanContextLoader {
 
     RequestData requestData = new RequestData(concurrencyData);
     List<BreakDetail> breakDetails = adModel.getBreakDetails(contentId);
-    List<BreakTypeGroup> breakTypeList = breakTypeGroupFactory.getBreakTypeList(adSets, breakDetails);
+    TargetingEvaluatorsProtocol targetingEvaluators = adModel.getTargetingEvaluatorsMap().get(contentId);
+    List<BreakTypeGroup> breakTypeList =
+      breakTypeGroupFactory.getBreakTypeList(targetingEvaluators.getBreakTargeting(), breakDetails);
 
     return GeneralPlanContext.builder()
       .contentId(contentId)
@@ -90,7 +93,7 @@ public class GeneralPlanContextLoader {
       .responses(responses)
       .breakContext(breakContext)
       .breakTypeList(breakTypeList)
-      .targetingEvaluators(adModel.getTargetingEvaluatorsMap().get(contentId))
+      .targetingEvaluators(targetingEvaluators)
       .build();
   }
 

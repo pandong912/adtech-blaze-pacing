@@ -10,35 +10,20 @@ import com.hotstar.adtech.blaze.admodel.client.entity.SsaiSpotInvertedIndexEntit
 import com.hotstar.adtech.blaze.admodel.client.index.InvertedIndex;
 import com.hotstar.adtech.blaze.admodel.client.index.TargetingFeasible;
 import com.hotstar.adtech.blaze.admodel.client.model.AttributeValueInfo;
-import com.hotstar.adtech.blaze.admodel.client.model.AudienceTargetingRuleClauseInfo;
-import com.hotstar.adtech.blaze.admodel.client.model.AudienceTargetingRuleInfo;
-import com.hotstar.adtech.blaze.admodel.client.model.BreakTargetingRuleInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.BreakTypeInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.GoalMatchInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.LanguageInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.MatchInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.PlatformInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.StreamMappingInfo;
-import com.hotstar.adtech.blaze.admodel.client.model.StreamNewTargetingRuleClauseInfo;
-import com.hotstar.adtech.blaze.admodel.client.model.StreamNewTargetingRuleInfo;
-import com.hotstar.adtech.blaze.admodel.client.model.StreamTargetingRuleClauseInfo;
-import com.hotstar.adtech.blaze.admodel.client.model.StreamTargetingRuleInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.VideoAd;
 import com.hotstar.adtech.blaze.admodel.common.enums.CampaignStatus;
 import com.hotstar.adtech.blaze.admodel.common.enums.CreativeType;
 import com.hotstar.adtech.blaze.admodel.common.enums.DeliveryMode;
-import com.hotstar.adtech.blaze.admodel.common.enums.RuleType;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Ad;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModel;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
-import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AudienceTargetingRule;
-import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AudienceTargetingRuleClause;
-import com.hotstar.adtech.blaze.allocation.planner.common.admodel.BreakTargetingRule;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Match;
-import com.hotstar.adtech.blaze.allocation.planner.common.admodel.StreamNewTargetingRule;
-import com.hotstar.adtech.blaze.allocation.planner.common.admodel.StreamNewTargetingRuleClause;
-import com.hotstar.adtech.blaze.allocation.planner.common.admodel.StreamTargetingRule;
-import com.hotstar.adtech.blaze.allocation.planner.common.admodel.StreamTargetingRuleClause;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.evaluator.RuleFeasibleProtocol;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.evaluator.RuleInvertedIndexProtocol;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.evaluator.TargetingEvaluatorsProtocol;
@@ -132,6 +117,10 @@ public class AdModelLoader {
       .stream(buildRuleFeasibleProtocol(index.getStreamTargetingFeasible(), size))
       .streamNew(buildRuleFeasibleProtocol(index.getStreamNewTargetingFeasible(), size))
       .audience(audience)
+      .duration(buildRuleFeasibleProtocol(index.getDurationFeasible(), size))
+      .aspectRatio(buildRuleFeasibleProtocol(index.getAspectRatioFeasible(), size))
+      .language(buildRuleFeasibleProtocol(index.getLanguageFeasible(), size))
+      .durationSet(index.getDurationSet())
       .activeAdSet(activeAdSet.toLongArray())
       .adSetSize(size)
       .build();
@@ -279,10 +268,6 @@ public class AdModelLoader {
       .campaignType(adSet.getCampaignType())
       .spotAds(spotAds)
       .ssaiAds(ssaiAds)
-      .audienceTargetingRule(buildAudienceTargetingRule(adSet.getAudienceTargetingRuleInfo()))
-      .breakTargetingRule(buildBreakTargetingRule(adSet.getBreakTargetingRuleInfo()))
-      .streamTargetingRule(buildStreamTargetingRule(adSet.getStreamTargetingRuleInfo()))
-      .streamNewTargetingRule(buildStreamNewTargetingRule(adSet.getStreamNewTargetingRuleInfo()))
       .demandPacingCoefficient(DEMAND_PACING_COEFFICIENT)
       .maximizeReach(adSet.isMaximiseReach() ? 1 : 0)
       .demandId(adSet.getIndex())
@@ -299,94 +284,4 @@ public class AdModelLoader {
       .aspectRatio(ad.getAspectRatio())
       .build();
   }
-
-  private AudienceTargetingRule buildAudienceTargetingRule(AudienceTargetingRuleInfo audienceTargetingRuleInfo) {
-    if (Objects.isNull(audienceTargetingRuleInfo)) {
-      return AudienceTargetingRule.EMPTY;
-    }
-
-    Map<RuleType, List<AudienceTargetingRuleClause>> audienceTargetingRuleClauseMap =
-      audienceTargetingRuleInfo.getAudienceTargetingRuleClauses().stream()
-        .collect(Collectors.groupingBy(
-          AudienceTargetingRuleClauseInfo::getRuleType, Collectors.mapping(
-            this::buildAudienceTargetingRuleClause, Collectors.toList())));
-
-    return AudienceTargetingRule.builder()
-      .includes(audienceTargetingRuleClauseMap.getOrDefault(RuleType.Include, Collections.emptyList()))
-      .excludes(audienceTargetingRuleClauseMap.getOrDefault(RuleType.Exclude, Collections.emptyList()))
-      .build();
-  }
-
-  private AudienceTargetingRuleClause buildAudienceTargetingRuleClause(
-    AudienceTargetingRuleClauseInfo audienceTargetingRuleClauseInfo) {
-    return AudienceTargetingRuleClause.builder()
-      .categoryId(audienceTargetingRuleClauseInfo.getCategoryId())
-      .targetingTags(audienceTargetingRuleClauseInfo.getTargetingTags())
-      .build();
-  }
-
-  private StreamTargetingRule buildStreamTargetingRule(StreamTargetingRuleInfo streamTargetingRuleInfo) {
-    if (Objects.isNull(streamTargetingRuleInfo)) {
-      return null;
-    }
-
-    List<StreamTargetingRuleClause> streamTargetingRuleClauses =
-      streamTargetingRuleInfo.getStreamTargetingRuleClauses().stream()
-        .map(this::buildStreamTargetingRuleClause)
-        .collect(Collectors.toList());
-
-    return StreamTargetingRule.builder()
-      .tenant(streamTargetingRuleInfo.getTenant())
-      .streamTargetingRuleClauses(streamTargetingRuleClauses)
-      .ruleType(streamTargetingRuleInfo.getRuleType())
-      .build();
-  }
-
-  private StreamNewTargetingRule buildStreamNewTargetingRule(StreamNewTargetingRuleInfo streamNewTargetingRuleInfo) {
-    if (Objects.isNull(streamNewTargetingRuleInfo)) {
-      return null;
-    }
-
-    List<StreamNewTargetingRuleClause> streamNewTargetingRuleClauses =
-      streamNewTargetingRuleInfo.getStreamNewTargetingRuleClauses().stream()
-        .map(this::buildStreamNewTargetingRuleClause)
-        .collect(Collectors.toList());
-
-    return StreamNewTargetingRule.builder()
-      .tenant(streamNewTargetingRuleInfo.getTenant())
-      .streamNewTargetingRuleClauses(streamNewTargetingRuleClauses)
-      .ruleType(streamNewTargetingRuleInfo.getRuleType())
-      .build();
-  }
-
-  private StreamTargetingRuleClause buildStreamTargetingRuleClause(
-    StreamTargetingRuleClauseInfo streamTargetingRuleClauseInfo) {
-    return StreamTargetingRuleClause.builder()
-      .tenant(streamTargetingRuleClauseInfo.getTenant())
-      .languageId(streamTargetingRuleClauseInfo.getLanguageId())
-      .platformId(streamTargetingRuleClauseInfo.getPlatformId())
-      .build();
-  }
-
-  private StreamNewTargetingRuleClause buildStreamNewTargetingRuleClause(
-    StreamNewTargetingRuleClauseInfo streamNewTargetingRuleClauseInfo) {
-    return StreamNewTargetingRuleClause.builder()
-      .tenant(streamNewTargetingRuleClauseInfo.getTenant())
-      .languageId(streamNewTargetingRuleClauseInfo.getLanguageId())
-      .ladder(streamNewTargetingRuleClauseInfo.getLadder())
-      .streamType(streamNewTargetingRuleClauseInfo.getStreamType())
-      .build();
-  }
-
-  private BreakTargetingRule buildBreakTargetingRule(BreakTargetingRuleInfo breakTargetingRuleInfo) {
-    if (Objects.isNull(breakTargetingRuleInfo)) {
-      return null;
-    }
-
-    return BreakTargetingRule.builder()
-      .breakTypeIds(breakTargetingRuleInfo.getBreakTypeIds())
-      .ruleType(breakTargetingRuleInfo.getRuleType())
-      .build();
-  }
-
 }

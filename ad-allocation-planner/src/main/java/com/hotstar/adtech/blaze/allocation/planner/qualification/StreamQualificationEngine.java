@@ -1,6 +1,7 @@
 package com.hotstar.adtech.blaze.allocation.planner.qualification;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
+import com.hotstar.adtech.blaze.admodel.common.enums.StreamView;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Ad;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.Language;
@@ -10,7 +11,6 @@ import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.Aspec
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.DurationInspector;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.LanguageInspector;
 import java.util.BitSet;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -30,9 +30,19 @@ public class StreamQualificationEngine {
     BitSet streamNew = evaluators.getStreamNew().targeting(buildStreamNewKey(playoutStream));
     qualified.and(streamNew);
 
-    BitSet breakTargeting =
-      evaluators.getBreakTargeting().targeting(Collections.singleton(String.valueOf(breakTypeId)));
+    BitSet breakTargeting = evaluators.getBreakTargeting().targeting(String.valueOf(breakTypeId));
     qualified.and(breakTargeting);
+
+    BitSet aspectRatio = evaluators.getAspectRatio()
+      .targeting(StreamView.fromLanguageName(playoutStream.getLanguage().getName()).toString());
+    qualified.and(aspectRatio);
+
+    BitSet duration =
+      evaluators.getDuration().targeting(String.valueOf(evaluators.getDurationSet().floor(relaxedDuration)));
+    qualified.and(duration);
+
+    BitSet language = evaluators.getLanguage().targeting(String.valueOf(playoutStream.getLanguage().getId()));
+    qualified.and(language);
 
     Predicate<Ad> adPredicate = buildAdInspector(relaxedDuration, playoutStream.getLanguage());
     BitSet ad = adTargeting(qualified, adPredicate, candidateAdSets);

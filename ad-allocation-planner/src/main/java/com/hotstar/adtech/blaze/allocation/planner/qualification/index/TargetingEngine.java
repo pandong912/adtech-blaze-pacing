@@ -2,6 +2,7 @@ package com.hotstar.adtech.blaze.allocation.planner.qualification.index;
 
 import com.hotstar.adtech.blaze.admodel.common.util.BitSetUtil;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
@@ -12,6 +13,10 @@ public class TargetingEngine {
   public TargetingEngine(RuleFeasible feasible) {
     this.feasible = feasible;
     this.size = this.feasible.getSize();
+  }
+
+  public BitSet targeting(String tag) {
+    return targeting(Collections.singleton(tag));
   }
 
   public BitSet targeting(Set<String> tags) {

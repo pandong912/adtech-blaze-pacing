@@ -3,6 +3,7 @@ package com.hotstar.adtech.blaze.allocation.planner.controller;
 import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModel;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.evaluator.TargetingEvaluatorsProtocol;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
 import com.hotstar.adtech.blaze.allocation.planner.common.request.AllocationRequest;
@@ -135,9 +136,9 @@ public class AllocationPlanController {
       .collect(Collectors.toList());
 
     RequestData requestData = new RequestData(request.getConcurrencyData());
-
+    TargetingEvaluatorsProtocol targetingEvaluators = adModel.getTargetingEvaluatorsMap().get(contentId);
     List<BreakTypeGroup> breakTypeList =
-      breakTypeGroupFactory.getBreakTypeList(adSets, request.getBreakDetails());
+      breakTypeGroupFactory.getBreakTypeList(targetingEvaluators.getBreakTargeting(), request.getBreakDetails());
 
     return GeneralPlanContext.builder()
       .contentId(contentId)
@@ -149,7 +150,7 @@ public class AllocationPlanController {
       .breakContext(breakContext)
       .requestData(requestData)
       .breakTypeList(breakTypeList)
-      .targetingEvaluators(adModel.getTargetingEvaluatorsMap().get(contentId))
+      .targetingEvaluators(targetingEvaluators)
       .build();
   }
 

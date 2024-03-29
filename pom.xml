@@ -29,7 +29,7 @@
     <properties>
         <blaze-module.version>1.7.5-SNAPSHOT</blaze-module.version>
         <blaze-data-exchanger.version>1.9.4</blaze-data-exchanger.version>
-        <blaze-ad-model-module.version>1.14.0</blaze-ad-model-module.version>
+        <blaze-ad-model-module.version>1.16.0</blaze-ad-model-module.version>
         <pulse.version>2.2.4</pulse.version>
         <templatize.macro.version>2.0.5-RELEASE</templatize.macro.version>
         <swagger.version>2.9.2</swagger.version>

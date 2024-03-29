@@ -18,11 +18,6 @@ public class ContentCohort {
   PlayoutStream playoutStream;
   long concurrency;
 
-
-  public String getKey() {
-    return playoutStream.getKey() + "|" + ssaiTag;
-  }
-
   public String getPlayoutIdKey() {
     return playoutStream.getPlayoutId() + "|" + ssaiTag;
   }

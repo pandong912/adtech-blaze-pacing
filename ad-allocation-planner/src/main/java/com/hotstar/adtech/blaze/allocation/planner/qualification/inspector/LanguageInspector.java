@@ -1,7 +1,6 @@
-package com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.ad;
+package com.hotstar.adtech.blaze.allocation.planner.qualification.inspector;
 
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Ad;
-import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.Inspector;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

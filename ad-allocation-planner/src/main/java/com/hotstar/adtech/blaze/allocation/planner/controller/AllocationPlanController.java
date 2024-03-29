@@ -3,6 +3,7 @@ package com.hotstar.adtech.blaze.allocation.planner.controller;
 import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModel;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.evaluator.TargetingEvaluatorsProtocol;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
 import com.hotstar.adtech.blaze.allocation.planner.common.request.AllocationRequest;
@@ -11,10 +12,10 @@ import com.hotstar.adtech.blaze.allocation.planner.common.request.UnReachData;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.hwm.HwmAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.ShaleAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.ingester.AdModelLoader;
+import com.hotstar.adtech.blaze.allocation.planner.qualification.BreakTypeGroupFactory;
 import com.hotstar.adtech.blaze.allocation.planner.service.manager.DataProcessService;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.HwmPlanWorker;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.ShalePlanWorker;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BreakTypeGroupFactory;
 import com.hotstar.adtech.blaze.allocation.planner.source.algomodel.StandardMatchProgressModel;
 import com.hotstar.adtech.blaze.allocationdata.client.model.BreakContext;
 import com.hotstar.adtech.blaze.allocationdata.client.model.BreakTypeGroup;
@@ -72,7 +73,7 @@ public class AllocationPlanController {
     Map<String, Integer> concurrencyIdMap = generalPlanContext.getConcurrencyData().getCohorts().stream()
       .collect(Collectors.toMap(ContentCohort::getPlayoutIdKey, ContentCohort::getConcurrencyId));
     Map<Long, Integer> adSetIdMap =
-      generalPlanContext.getAdSets().stream().collect(Collectors.toMap(AdSet::getId, AdSet::getDemandId));
+      generalPlanContext.getAdSets().stream().collect(Collectors.toMap(AdSet::getId, AdSet::getReachIndex));
     ReachStorage reachStorage = buildReachStorage(concurrencyIdMap, adSetIdMap, shaleAllocationRequest);
     ShalePlanContext shalePlanContext = ShalePlanContext.builder()
       .generalPlanContext(generalPlanContext)
@@ -135,9 +136,9 @@ public class AllocationPlanController {
       .collect(Collectors.toList());
 
     RequestData requestData = new RequestData(request.getConcurrencyData());
-
+    TargetingEvaluatorsProtocol targetingEvaluators = adModel.getTargetingEvaluatorsMap().get(contentId);
     List<BreakTypeGroup> breakTypeList =
-      breakTypeGroupFactory.getBreakTypeList(adSets, request.getBreakDetails());
+      breakTypeGroupFactory.getBreakTypeList(targetingEvaluators.getBreakTargeting(), request.getBreakDetails());
 
     return GeneralPlanContext.builder()
       .contentId(contentId)
@@ -149,6 +150,7 @@ public class AllocationPlanController {
       .breakContext(breakContext)
       .requestData(requestData)
       .breakTypeList(breakTypeList)
+      .targetingEvaluators(targetingEvaluators)
       .build();
   }
 

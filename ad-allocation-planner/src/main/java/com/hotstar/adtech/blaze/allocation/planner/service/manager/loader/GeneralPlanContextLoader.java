@@ -6,6 +6,7 @@ import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModel;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Match;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.evaluator.TargetingEvaluatorsProtocol;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
@@ -13,8 +14,8 @@ import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
 import com.hotstar.adtech.blaze.allocation.planner.ingester.DataExchangerService;
 import com.hotstar.adtech.blaze.allocation.planner.ingester.DataLoader;
+import com.hotstar.adtech.blaze.allocation.planner.qualification.BreakTypeGroupFactory;
 import com.hotstar.adtech.blaze.allocation.planner.service.manager.DataProcessService;
-import com.hotstar.adtech.blaze.allocation.planner.service.worker.qualification.BreakTypeGroupFactory;
 import com.hotstar.adtech.blaze.allocation.planner.source.algomodel.StandardMatchProgressModel;
 import com.hotstar.adtech.blaze.allocationdata.client.model.BreakContext;
 import com.hotstar.adtech.blaze.allocationdata.client.model.BreakTypeGroup;
@@ -78,7 +79,9 @@ public class GeneralPlanContextLoader {
 
     RequestData requestData = new RequestData(concurrencyData);
     List<BreakDetail> breakDetails = adModel.getBreakDetails(contentId);
-    List<BreakTypeGroup> breakTypeList = breakTypeGroupFactory.getBreakTypeList(adSets, breakDetails);
+    TargetingEvaluatorsProtocol targetingEvaluators = adModel.getTargetingEvaluatorsMap().get(contentId);
+    List<BreakTypeGroup> breakTypeList =
+      breakTypeGroupFactory.getBreakTypeList(targetingEvaluators.getBreakTargeting(), breakDetails);
 
     return GeneralPlanContext.builder()
       .contentId(contentId)
@@ -90,6 +93,7 @@ public class GeneralPlanContextLoader {
       .responses(responses)
       .breakContext(breakContext)
       .breakTypeList(breakTypeList)
+      .targetingEvaluators(targetingEvaluators)
       .build();
   }
 
@@ -103,7 +107,8 @@ public class GeneralPlanContextLoader {
     String contentId = match.getContentId();
     Map<String, PlayoutStream> playoutStreamMap = adModel.getPlayoutStreamMap(match.getSeasonId());
 
-    List<ContentCohort> cohorts = getContentCohorts(contentId, playoutStreamMap);
+    //sorted by stream type, make SSAI_Spot first
+    List<ContentCohort> cohorts = getSortedContentCohorts(contentId, playoutStreamMap);
 
     List<ContentStream> streams = getContentStreams(contentId, playoutStreamMap, cohorts.size());
 
@@ -113,7 +118,7 @@ public class GeneralPlanContextLoader {
       .build();
   }
 
-  private List<ContentCohort> getContentCohorts(String contentId, Map<String, PlayoutStream> playoutStreamMap) {
+  private List<ContentCohort> getSortedContentCohorts(String contentId, Map<String, PlayoutStream> playoutStreamMap) {
     List<ContentCohort> cohorts = dataExchangerService.getContentCohortConcurrency(contentId, playoutStreamMap);
     List<ContentCohort> ssaiCohorts = cohorts.stream()
       .filter(cohort -> cohort.getPlayoutStream().getStreamType() == StreamType.SSAI_Spot)

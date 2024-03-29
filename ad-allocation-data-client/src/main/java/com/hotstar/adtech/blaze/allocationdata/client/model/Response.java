@@ -14,4 +14,5 @@ public class Response {
   double demand;
   int adDuration;
   int maximizeReach;
+  int reachIndex;
 }

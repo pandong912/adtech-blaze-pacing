@@ -19,4 +19,5 @@ public class DemandDiagnosis {
   private final double demandPacingCoefficient;
   private final int adDuration;
   private final int maximizeReach;
+  private final int reachIndex;
 }

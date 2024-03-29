@@ -27,13 +27,13 @@ public class ReachService {
 
   @Timed(MATCH_REACH_FETCH)
   public ReachStorage getUnReachRatio(String contentId, Map<String, Integer> concurrencyIdMap,
-                                      Map<Long, Integer> adSetIdToDemandId) {
-    if (adSetIdToDemandId.isEmpty()) {
+                                      Map<Long, Integer> adSetIdToReachIndex) {
+    if (adSetIdToReachIndex.isEmpty()) {
       return new DegradationReachStorage();
     }
 
     int supplySize = concurrencyIdMap.values().stream().mapToInt(Integer::intValue).max().orElse(0) + 1;
-    double[][] unReachStore = new double[adSetIdToDemandId.size()][supplySize];
+    double[][] unReachStore = new double[adSetIdToReachIndex.size()][supplySize];
 
     for (double[] row : unReachStore) {
       Arrays.fill(row, 1.0);
@@ -43,7 +43,7 @@ public class ReachService {
       .range(0, SHARD)
       .parallel()
       .mapToObj(shard -> getReachRatio(contentId, shard))
-      .forEach(reach -> fillReachArray(concurrencyIdMap, adSetIdToDemandId, reach, unReachStore));
+      .forEach(reach -> fillReachArray(concurrencyIdMap, adSetIdToReachIndex, reach, unReachStore));
 
     doStatistics(unReachStore, contentId);
     return new RedisReachStorage(unReachStore);

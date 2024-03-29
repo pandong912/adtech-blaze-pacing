@@ -1,6 +1,7 @@
 package com.hotstar.adtech.blaze.allocationdata.client.model;
 
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.evaluator.TargetingEvaluatorsProtocol;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ public class GeneralPlanContext {
   BreakContext breakContext;
   RequestData requestData;
   List<BreakTypeGroup> breakTypeList;
+  TargetingEvaluatorsProtocol targetingEvaluators;
 
   public boolean isEmpty() {
     return adSets.isEmpty() || (concurrencyData.getCohorts().isEmpty() && concurrencyData.getStreams().isEmpty());

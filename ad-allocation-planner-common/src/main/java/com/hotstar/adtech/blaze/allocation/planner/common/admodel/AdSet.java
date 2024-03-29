@@ -20,17 +20,13 @@ public class AdSet {
   private final long campaignId;
   private final CampaignType campaignType;
 
-  private final AudienceTargetingRule audienceTargetingRule;
-  private final StreamTargetingRule streamTargetingRule;
-  private final StreamNewTargetingRule streamNewTargetingRule;
-  private final BreakTargetingRule breakTargetingRule;
-
   private final List<Ad> ssaiAds;
   private final List<Ad> spotAds;
   @Builder.Default
   private int maximizeReach = 1;
 
   private int demandId;
+  private int reachIndex;
 
   public int getOrder() {
     return CampaignType.Promo == campaignType ? priority + MAX_PRIORITY : priority;

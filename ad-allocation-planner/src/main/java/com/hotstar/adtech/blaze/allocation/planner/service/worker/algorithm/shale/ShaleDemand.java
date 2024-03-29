@@ -17,6 +17,7 @@ public class ShaleDemand extends Demand {
   private double sigma;
   private double reachOffset;
   private final int reachEnabled;
+  private final int reachIndex;
 
   public ShaleDemand(Response response) {
     super(response.getDemandId(), response.getDemand(), response.getAdDuration());
@@ -24,5 +25,6 @@ public class ShaleDemand extends Demand {
     this.alpha = 0;
     this.order = response.getOrder();
     this.reachEnabled = response.getMaximizeReach();
+    this.reachIndex = response.getReachIndex();
   }
 }

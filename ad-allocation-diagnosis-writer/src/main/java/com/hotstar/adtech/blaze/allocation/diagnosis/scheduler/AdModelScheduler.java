@@ -2,6 +2,7 @@ package com.hotstar.adtech.blaze.allocation.diagnosis.scheduler;
 
 import com.hotstar.adtech.blaze.admodel.client.AdModelClient;
 import com.hotstar.adtech.blaze.admodel.client.AdModelUri;
+import com.hotstar.adtech.blaze.admodel.client.entity.AdEntities;
 import com.hotstar.adtech.blaze.admodel.client.entity.LiveEntities;
 import com.hotstar.adtech.blaze.admodel.client.entity.MatchEntities;
 import com.hotstar.adtech.blaze.admodel.repository.AdModelResultRepository;
@@ -65,8 +66,9 @@ public class AdModelScheduler {
   }
 
   private void writeToClickHouse(AdModelData adModelData) {
-    adModelAdSetMatchService.writeMatchAdSet(adModelData.getLiveEntities().getGoalMatches(), adModelData.getVersion());
-    adModelAdService.writeAd(adModelData.getLiveEntities().getAds(), adModelData.getVersion());
+
+    adModelAdSetMatchService.writeMatchAdSet(adModelData);
+    adModelAdService.writeAd(adModelData.getAdEntities().getAds(), adModelData.getVersion());
     adModelMatchService.writeMatch(adModelData.getMatchEntities().getMatches(), adModelData.getVersion());
   }
 
@@ -82,10 +84,12 @@ public class AdModelScheduler {
   private AdModelData loadData(AdModelUri adModelUri) {
     LiveEntities liveEntities = adModelClient.loadLiveAdModel(adModelUri);
     MatchEntities matchEntities = adModelClient.loadMatch(adModelUri);
+    AdEntities adEntities = adModelClient.loadAdEntity(adModelUri);
     return AdModelData.builder()
       .version(Instant.ofEpochMilli(adModelUri.getVersion()))
       .liveEntities(liveEntities)
       .matchEntities(matchEntities)
+      .adEntities(adEntities)
       .build();
   }
 

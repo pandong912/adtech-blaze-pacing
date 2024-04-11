@@ -3,7 +3,7 @@ package com.hotstar.adtech.blaze.ingester.service;
 import com.hotstar.adtech.blaze.admodel.client.AdModelClient;
 import com.hotstar.adtech.blaze.admodel.client.AdModelUri;
 import com.hotstar.adtech.blaze.admodel.client.common.Names;
-import com.hotstar.adtech.blaze.admodel.client.entity.LiveEntities;
+import com.hotstar.adtech.blaze.admodel.client.entity.AdEntities;
 import com.hotstar.adtech.blaze.admodel.client.entity.MatchEntities;
 import com.hotstar.adtech.blaze.admodel.client.model.AdInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.MatchInfo;
@@ -50,7 +50,7 @@ public class AdModelLoader {
         .adMap(Collections.emptyMap())
         .adModelVersion(AdModelVersion.builder().version(-1L)
           .liveMatchMd5("")
-          .adModelMd5("")
+          .adEntityMd5("")
           .build())
         .build());
 
@@ -65,9 +65,9 @@ public class AdModelLoader {
       AdModelResultUriResponse adModelResultUriResponse =
         dataExchangerClient.getLatestAdModel(adModelVersion.getVersion());
       if (adModelResultUriResponse.getVersion() > adModelVersion.getVersion()) {
-        String curAdModelMd5 = adModelResultUriResponse.getMd5(Names.Live_Ad_Model_PB);
-        String curLiveMatchMd5 = adModelResultUriResponse.getMd5(Names.Match_PB);
-        if (Objects.equals(curAdModelMd5, adModelVersion.getAdModelMd5())
+        String curAdEntityMd5 = adModelResultUriResponse.getMd5(Names.AD_ENTITY_PB);
+        String curLiveMatchMd5 = adModelResultUriResponse.getMd5(Names.MATCH_ENTITY_PB);
+        if (Objects.equals(curAdEntityMd5, adModelVersion.getAdEntityMd5())
           && Objects.equals(curLiveMatchMd5, adModelVersion.getLiveMatchMd5())) {
           LoadStatus.IGNORE.counter().increment();
           return;
@@ -85,8 +85,8 @@ public class AdModelLoader {
         Map<String, String> globalStreamMappingConverter =
           buildStreamMappingConverter(matchEntities.getGlobalStreamMappings());
 
-        LiveEntities liveEntities = adModelClient.loadLiveAdModel(adModelUri);
-        Map<String, Ad> adMap = liveEntities.getAds().stream().collect(
+        AdEntities adEntities = adModelClient.loadAdEntity(adModelUri);
+        Map<String, Ad> adMap = adEntities.getAds().stream().collect(
           Collectors.toMap(AdInfo::getCreativeId, this::buildAd));
 
         AdModel adModel = AdModel.builder()
@@ -95,7 +95,7 @@ public class AdModelLoader {
           .globalStreamMappingConverter(globalStreamMappingConverter)
           .adMap(adMap)
           .adModelVersion(AdModelVersion.builder().version(adModelUri.getVersion())
-            .adModelMd5(curAdModelMd5)
+            .adEntityMd5(curAdEntityMd5)
             .liveMatchMd5(curLiveMatchMd5)
             .build())
           .build();

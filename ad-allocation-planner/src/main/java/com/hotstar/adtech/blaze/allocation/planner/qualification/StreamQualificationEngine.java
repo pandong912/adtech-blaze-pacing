@@ -27,9 +27,6 @@ public class StreamQualificationEngine {
     BitSet stream = evaluators.getStream().targeting(buildStreamKey(playoutStream));
     qualified.and(stream);
 
-    BitSet streamNew = evaluators.getStreamNew().targeting(buildStreamNewKey(playoutStream));
-    qualified.and(streamNew);
-
     BitSet breakTargeting = evaluators.getBreakTargeting().targeting(String.valueOf(breakTypeId));
     qualified.and(breakTargeting);
 
@@ -50,19 +47,12 @@ public class StreamQualificationEngine {
     return qualified;
   }
 
-  private Set<String> buildStreamNewKey(PlayoutStream playoutStream) {
+  private Set<String> buildStreamKey(PlayoutStream playoutStream) {
     Language language = playoutStream.getLanguage();
     StreamType streamType = playoutStream.getStreamType();
     return playoutStream.getLadders()
       .stream()
-      .map(l -> playoutStream.getTenant() + "+" + language.getId() + "+" + l + "+" + streamType)
-      .collect(Collectors.toSet());
-  }
-
-  private Set<String> buildStreamKey(PlayoutStream playoutStream) {
-    return playoutStream.getPlatforms()
-      .stream()
-      .map(platform -> playoutStream.getTenant() + "+" + playoutStream.getLanguage().getId() + "+" + platform.getId())
+      .map(ladder -> playoutStream.getTenant() + "+" + language.getId() + "+" + ladder + "+" + streamType)
       .collect(Collectors.toSet());
   }
 

@@ -1,6 +1,6 @@
 package com.hotstar.adtech.blaze.allocationdata.client;
 
-import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
+import com.hotstar.adtech.blaze.admodel.common.exception.BusinessException;
 import com.hotstar.adtech.blaze.allocationdata.client.model.GeneralPlanContext;
 import com.hotstar.adtech.blaze.allocationdata.client.model.ShalePlanContext;
 import com.hotstar.adtech.blaze.allocationdata.client.util.GzipUtils;
@@ -32,7 +32,7 @@ public class LocalAllocationDataClient implements AllocationDataClient {
       byte[] decompress = GzipUtils.decompress(bytes);
       return ProtostuffUtils.deserialize(decompress, clazz);
     } catch (IOException e) {
-      throw new ServiceException("Failed to load allocation data from:" + key, e);
+      throw new BusinessException(ErrorCodes.ALLOCATION_DATA_LOAD_FAILED, e, key);
     }
   }
 
@@ -46,7 +46,7 @@ public class LocalAllocationDataClient implements AllocationDataClient {
       byte[] compress = GzipUtils.compress(file);
       Files.write(filePath, compress);
     } catch (IOException e) {
-      throw new ServiceException("Failed to upload allocation data to:" + filePath, e);
+      throw new BusinessException(ErrorCodes.ALLOCATION_DATA_UPLOAD_FAILED, e, filePath);
     }
     return fileName;
   }

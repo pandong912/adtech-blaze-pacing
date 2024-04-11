@@ -1,6 +1,7 @@
 package com.hotstar.adtech.blaze.allocationdata.client.util;
 
-import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
+import com.hotstar.adtech.blaze.admodel.common.exception.BusinessException;
+import com.hotstar.adtech.blaze.allocationdata.client.ErrorCodes;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.zip.GZIPInputStream;
@@ -16,7 +17,7 @@ public class GzipUtils {
       gzip.finish();
       return out.toByteArray();
     } catch (Exception e) {
-      throw new ServiceException("fail to compress data", e);
+      throw new BusinessException(ErrorCodes.COMPRESS_DATA_FAILED, e);
     }
   }
 
@@ -32,7 +33,7 @@ public class GzipUtils {
       }
       return out.toByteArray();
     } catch (Exception e) {
-      throw new ServiceException("fail to decompress data", e);
+      throw new BusinessException(ErrorCodes.DECOMPRESS_DATA_FAILED, e);
     }
   }
 }

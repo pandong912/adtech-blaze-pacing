@@ -1,6 +1,6 @@
 package com.hotstar.adtech.blaze.ingester.service;
 
-import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
+import com.hotstar.adtech.blaze.admodel.common.exception.BusinessException;
 import com.hotstar.adtech.blaze.ingester.entity.AdImpression;
 import com.hotstar.adtech.blaze.ingester.entity.ConcurrencyGroup;
 import com.hotstar.platform.pulse.api.PulseClient;
@@ -26,7 +26,7 @@ public class PulseService {
       pulseClient.getLiveContentAllCohortConcurrency(contentId, null);
 
     if (!response.succeed()) {
-      throw new ServiceException(response.getMessage());
+      throw new BusinessException(response.getMessage());
     }
 
     ContentDataConcurrencyBatchResponse batchConcurrency = response.getData();
@@ -43,7 +43,7 @@ public class PulseService {
       pulseClient.getLiveContentAllCohortConcurrencyV3(contentId, null);
 
     if (!response.succeed()) {
-      throw new ServiceException(response.getMessage());
+      throw new BusinessException(response.getMessage());
     }
 
     ContentDataConcurrencyBatchResponse batchConcurrency = response.getData();
@@ -60,7 +60,7 @@ public class PulseService {
       pulseClient.getLiveContentAllStreamConcurrencyV3(contentId, null);
 
     if (!response.succeed()) {
-      throw new ServiceException(response.getMessage());
+      throw new BusinessException(response.getMessage());
     }
 
     ContentDataConcurrencyBatchResponse batchConcurrency = response.getData();
@@ -75,7 +75,7 @@ public class PulseService {
     StandardResponse<AdImpressionBatchResponse> response = pulseClient.getMatchAllAdImpression(contentId);
 
     if (!response.succeed()) {
-      throw new ServiceException(response.getMessage());
+      throw new BusinessException(response.getMessage());
     }
 
     return response.getData().getAdImpressions().entrySet().stream().map(entry ->

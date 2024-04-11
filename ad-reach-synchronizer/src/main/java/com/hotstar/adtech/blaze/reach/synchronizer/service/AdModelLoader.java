@@ -5,13 +5,11 @@ import com.hotstar.adtech.blaze.admodel.client.AdModelUri;
 import com.hotstar.adtech.blaze.admodel.client.common.Names;
 import com.hotstar.adtech.blaze.admodel.client.entity.LiveEntities;
 import com.hotstar.adtech.blaze.admodel.client.entity.MatchEntities;
-import com.hotstar.adtech.blaze.admodel.client.model.AdInfo;
-import com.hotstar.adtech.blaze.admodel.client.model.GoalMatchInfo;
+import com.hotstar.adtech.blaze.admodel.client.model.ContentAdSetInfo;
 import com.hotstar.adtech.blaze.admodel.common.enums.CampaignStatus;
 import com.hotstar.adtech.blaze.admodel.common.enums.DeliveryMode;
 import com.hotstar.adtech.blaze.exchanger.api.DataExchangerClient;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;
-import com.hotstar.adtech.blaze.reach.synchronizer.entity.Ad;
 import com.hotstar.adtech.blaze.reach.synchronizer.entity.AdModel;
 import com.hotstar.adtech.blaze.reach.synchronizer.entity.AdModelVersion;
 import com.hotstar.adtech.blaze.reach.synchronizer.entity.AdSet;
@@ -25,7 +23,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
@@ -41,14 +38,12 @@ public class AdModelLoader {
   private final AdModelClient adModelClient;
   private final DataExchangerClient dataExchangerClient;
   private final AtomicReference<AdModel> adModelAtomicReference = new AtomicReference<>();
-  private final AtomicBoolean adModelReady = new AtomicBoolean(false);
 
   @PostConstruct
   public void init() {
     adModelAtomicReference.set(
       AdModel.builder()
         .matches(Collections.emptyList())
-        .adMap(Collections.emptyMap())
         .adModelVersion(AdModelVersion.builder().version(-1L)
           .liveMatchMd5("")
           .adModelMd5("")
@@ -67,8 +62,8 @@ public class AdModelLoader {
       AdModelResultUriResponse adModelResultUriResponse =
         dataExchangerClient.getLatestAdModel(adModelVersion.getVersion());
       if (adModelResultUriResponse.getVersion() > adModelVersion.getVersion()) {
-        String curAdModelMd5 = adModelResultUriResponse.getMd5(Names.Live_Ad_Model_PB);
-        String curLiveMatchMd5 = adModelResultUriResponse.getMd5(Names.Match_PB);
+        String curAdModelMd5 = adModelResultUriResponse.getMd5(Names.LIVE_ENTITY_PB);
+        String curLiveMatchMd5 = adModelResultUriResponse.getMd5(Names.MATCH_ENTITY_PB);
         if (Objects.equals(curAdModelMd5, adModelVersion.getAdModelMd5())
           && Objects.equals(curLiveMatchMd5, adModelVersion.getLiveMatchMd5())) {
           LoadStatus.IGNORE.counter().increment();
@@ -82,15 +77,13 @@ public class AdModelLoader {
         ).collect(Collectors.toList());
 
         LiveEntities liveEntities = adModelClient.loadLiveAdModel(adModelUri);
-        Map<String, Ad> adMap = liveEntities.getAds().stream().collect(
-          Collectors.toMap(AdInfo::getCreativeId, this::buildAd));
 
-        Map<String, List<AdSet>> adSetGroup = buildAdSets(liveEntities.getGoalMatches()).stream().collect(
-          Collectors.groupingBy(AdSet::getContentId));
-
+        Map<String, List<AdSet>> adSetGroup =
+          liveEntities.getInvertedIndexMap().entrySet()
+            .stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> buildAdSets(entry.getValue().getContentAdSets())));
         AdModel adModel = AdModel.builder()
           .matches(liveMatches)
-          .adMap(adMap)
           .adSetGroup(adSetGroup)
           .adModelVersion(AdModelVersion.builder().version(adModelUri.getVersion())
             .adModelMd5(curAdModelMd5)
@@ -98,7 +91,6 @@ public class AdModelLoader {
             .build())
           .build();
         adModelAtomicReference.set(adModel);
-        adModelReady.set(true);
 
         LoadStatus.SUCCESS.counter().increment();
       } else {
@@ -122,26 +114,17 @@ public class AdModelLoader {
       .build();
   }
 
-  private Ad buildAd(AdInfo adInfo) {
-    return Ad.builder()
-      .id(adInfo.getId())
-      .creativeId(adInfo.getCreativeId())
-      .adSetId(adInfo.getAdSetId())
-      .creativeType(adInfo.getCreativeType())
-      .build();
-  }
-
-  private List<AdSet> buildAdSets(List<GoalMatchInfo> adSets) {
+  private List<AdSet> buildAdSets(List<ContentAdSetInfo> adSets) {
     return adSets.stream()
       .filter(goalMatchInfo -> goalMatchInfo.getCampaignStatus() != CampaignStatus.PAUSED)
-      .filter(GoalMatchInfo::isEnabled)
+      .filter(ContentAdSetInfo::isEnabled)
       .filter(goalMatchInfo -> goalMatchInfo.getDeliveryMode() == DeliveryMode.SSAI
         || goalMatchInfo.getDeliveryMode() == DeliveryMode.SSAI_SPOT)
       .map(this::buildAdSet)
       .collect(Collectors.toList());
   }
 
-  private AdSet buildAdSet(GoalMatchInfo adSet) {
+  private AdSet buildAdSet(ContentAdSetInfo adSet) {
     return AdSet.builder()
       .contentId(adSet.getContentId())
       .campaignId(adSet.getCampaignId())

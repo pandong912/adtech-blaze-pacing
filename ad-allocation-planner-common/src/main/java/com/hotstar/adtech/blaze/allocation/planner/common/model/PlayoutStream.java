@@ -4,7 +4,6 @@ import com.hotstar.adtech.blaze.admodel.common.enums.Ladder;
 import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
 import com.hotstar.adtech.blaze.admodel.common.enums.Tenant;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Value;
 
@@ -16,32 +15,16 @@ public class PlayoutStream {
   Tenant tenant;
   Language language;
   List<Ladder> ladders;
-  List<Platform> platforms;
-  String key;
-  List<Integer> platformIds;
   String playoutId;
   StreamType streamType;
 
   @Builder
-  public PlayoutStream(String playoutId, StreamType streamType, Tenant tenant, Language language, List<Ladder> ladders,
-                       List<Platform> platforms) {
+  public PlayoutStream(String playoutId, StreamType streamType, Tenant tenant, Language language,
+                       List<Ladder> ladders) {
     this.playoutId = playoutId;
     this.streamType = streamType;
     this.tenant = tenant;
     this.language = language;
     this.ladders = ladders;
-    this.platforms = platforms;
-    this.key = generateKey();
-    this.platformIds = platforms.stream().map(Platform::getId).collect(Collectors.toList());
   }
-
-  private String generateKey() {
-    return (tenant == null ? "" : tenant.getName()) + SPLITTER + language.getName() + SPLITTER
-      + getPlatformString();
-  }
-
-  private String getPlatformString() {
-    return platforms.stream().map(Platform::getName).collect(Collectors.joining("+"));
-  }
-
 }

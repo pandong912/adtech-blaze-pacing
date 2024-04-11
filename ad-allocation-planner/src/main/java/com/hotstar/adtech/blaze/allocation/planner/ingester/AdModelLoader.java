@@ -2,19 +2,17 @@ package com.hotstar.adtech.blaze.allocation.planner.ingester;
 
 import com.hotstar.adtech.blaze.admodel.client.AdModelClient;
 import com.hotstar.adtech.blaze.admodel.client.AdModelUri;
-import com.hotstar.adtech.blaze.admodel.client.entity.ContentInvertedIndex;
 import com.hotstar.adtech.blaze.admodel.client.entity.LiveEntities;
 import com.hotstar.adtech.blaze.admodel.client.entity.MatchEntities;
 import com.hotstar.adtech.blaze.admodel.client.entity.MetaEntities;
-import com.hotstar.adtech.blaze.admodel.client.entity.SsaiSpotInvertedIndexEntity;
 import com.hotstar.adtech.blaze.admodel.client.index.InvertedIndex;
 import com.hotstar.adtech.blaze.admodel.client.index.TargetingFeasible;
+import com.hotstar.adtech.blaze.admodel.client.index.TargetingRule;
 import com.hotstar.adtech.blaze.admodel.client.model.AttributeValueInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.BreakTypeInfo;
-import com.hotstar.adtech.blaze.admodel.client.model.GoalMatchInfo;
+import com.hotstar.adtech.blaze.admodel.client.model.ContentAdSetInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.LanguageInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.MatchInfo;
-import com.hotstar.adtech.blaze.admodel.client.model.PlatformInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.StreamMappingInfo;
 import com.hotstar.adtech.blaze.admodel.client.model.VideoAd;
 import com.hotstar.adtech.blaze.admodel.common.enums.CampaignStatus;
@@ -30,7 +28,6 @@ import com.hotstar.adtech.blaze.allocation.planner.common.admodel.evaluator.Targ
 import com.hotstar.adtech.blaze.allocation.planner.common.model.AdModelVersion;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.Language;
-import com.hotstar.adtech.blaze.allocation.planner.common.model.Platform;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -68,7 +65,11 @@ public class AdModelLoader {
     Map<String, PlayoutStream> globalPlayoutStreamMap =
       buildPlayoutStreamMap(matchEntities.getGlobalStreamMappings());
 
-    Map<String, List<AdSet>> adSetGroup = buildAdSetGroup(liveEntities.getGoalMatches());
+    Map<String, InvertedIndex> invertedIndexMap = liveEntities.getInvertedIndexMap();
+    Map<String, List<AdSet>> adSetGroup = invertedIndexMap
+      .entrySet()
+      .stream()
+      .collect(Collectors.toMap(Map.Entry::getKey, e -> buildAdSetGroup(e.getValue())));
     assignReachIndex(adSetGroup);
 
     Map<Long, List<BreakDetail>> breakTypes = metaEntities.getBreakTypes().stream()
@@ -79,8 +80,8 @@ public class AdModelLoader {
     Map<String, Integer> attributeId2TargetingTags = metaEntities.getAttributeValues().stream().collect(
       Collectors.toMap(AttributeValueInfo::getSsaiTag, AttributeValueInfo::getAttributeId));
 
-    Map<String, ContentInvertedIndex> indexMap = liveEntities.getContentInvertedIndexMap();
-    Map<String, TargetingEvaluatorsProtocol> targetingEvaluatorsMap = buildTargetingEvaluators(indexMap, adSetGroup);
+    Map<String, TargetingEvaluatorsProtocol> targetingEvaluatorsMap =
+      buildTargetingEvaluators(invertedIndexMap, adSetGroup);
 
     return AdModel.builder()
       .matches(matchMap)
@@ -95,41 +96,41 @@ public class AdModelLoader {
   }
 
   public static Map<String, TargetingEvaluatorsProtocol> buildTargetingEvaluators(
-    Map<String, ContentInvertedIndex> contentIndexMap, Map<String, List<AdSet>> adSetGroup) {
+    Map<String, InvertedIndex> contentIndexMap, Map<String, List<AdSet>> adSetGroup) {
     return contentIndexMap.entrySet().stream()
       .collect(Collectors.toMap(Map.Entry::getKey,
         e -> buildTargetingEvaluatorsProtocol(e.getValue(),
           adSetGroup.getOrDefault(e.getKey(), Collections.emptyList()))));
   }
 
-  private static TargetingEvaluatorsProtocol buildTargetingEvaluatorsProtocol(ContentInvertedIndex contentIndex,
+  private static TargetingEvaluatorsProtocol buildTargetingEvaluatorsProtocol(InvertedIndex contentIndex,
                                                                               List<AdSet> adSet) {
-    SsaiSpotInvertedIndexEntity index = contentIndex.getSsaiSpotInvertedIndexEntity();
-    Map<Integer, RuleFeasibleProtocol> audience = index.getAudienceTargetingFeasible().entrySet()
+    int maxBitIndex = contentIndex.getCount();
+    Map<Integer, RuleFeasibleProtocol> audience = contentIndex.getAudienceTargetingFeasible().entrySet()
       .stream()
       .collect(
-        Collectors.toMap(Map.Entry::getKey, entry -> buildRuleFeasibleProtocol(entry.getValue(), index.getSize())));
-    int size = index.getSize();
-    BitSet activeAdSet = new BitSet(size);
+        Collectors.toMap(Map.Entry::getKey, entry -> buildRuleFeasibleProtocol(entry.getValue(), maxBitIndex)));
+    BitSet activeAdSet = new BitSet(maxBitIndex);
     adSet.stream().map(AdSet::getDemandId).forEach(activeAdSet::set);
     return TargetingEvaluatorsProtocol.builder()
-      .breakTargeting(buildRuleFeasibleProtocol(index.getBreakTargetingFeasible(), size))
-      .stream(buildRuleFeasibleProtocol(index.getStreamTargetingFeasible(), size))
-      .streamNew(buildRuleFeasibleProtocol(index.getStreamNewTargetingFeasible(), size))
+      .breakTargeting(buildRuleFeasibleProtocol(contentIndex.getBreakTargetingFeasible(), maxBitIndex))
+      .stream(buildRuleFeasibleProtocol(contentIndex.getStreamTargetingFeasible(), maxBitIndex))
+      .streamNew(buildRuleFeasibleProtocol(contentIndex.getStreamNewTargetingFeasible(), maxBitIndex))
       .audience(audience)
-      .duration(buildRuleFeasibleProtocol(index.getDurationFeasible(), size))
-      .aspectRatio(buildRuleFeasibleProtocol(index.getAspectRatioFeasible(), size))
-      .language(buildRuleFeasibleProtocol(index.getLanguageFeasible(), size))
-      .durationSet(index.getDurationSet())
+      .duration(buildRuleFeasibleProtocol(contentIndex.getDurationFeasible(), maxBitIndex))
+      .aspectRatio(buildRuleFeasibleProtocol(contentIndex.getAspectRatioFeasible(), maxBitIndex))
+      .language(buildRuleFeasibleProtocol(contentIndex.getLanguageFeasible(), maxBitIndex))
+      .durationSet(contentIndex.getDurationSet())
       .activeAdSet(activeAdSet.toLongArray())
-      .adSetSize(size)
+      .maxBitIndex(maxBitIndex)
       .build();
   }
 
   private static RuleFeasibleProtocol buildRuleFeasibleProtocol(TargetingFeasible targetingFeasible, int size) {
-    Map<String, RuleInvertedIndexProtocol> ruleInvertedIndexProtocol = targetingFeasible.getInvertedIndex().entrySet()
-      .stream()
-      .collect(Collectors.toMap(Map.Entry::getKey, entry -> buildIndex(entry.getValue())));
+    Map<String, RuleInvertedIndexProtocol> ruleInvertedIndexProtocol =
+      targetingFeasible.getTargetingRuleMap().entrySet()
+        .stream()
+        .collect(Collectors.toMap(Map.Entry::getKey, entry -> buildIndex(entry.getValue())));
     return RuleFeasibleProtocol.builder()
       .invertedIndex(ruleInvertedIndexProtocol)
       .size(size)
@@ -137,11 +138,11 @@ public class AdModelLoader {
       .build();
   }
 
-  private static RuleInvertedIndexProtocol buildIndex(InvertedIndex entry) {
+  private static RuleInvertedIndexProtocol buildIndex(TargetingRule targetingRule) {
     return RuleInvertedIndexProtocol.builder()
-      .include(entry.getInclude())
-      .exclude(entry.getExclude())
-      .tag(entry.getTag())
+      .include(targetingRule.getInclude())
+      .exclude(targetingRule.getExclude())
+      .tag(targetingRule.getTag())
       .build();
   }
 
@@ -213,8 +214,6 @@ public class AdModelLoader {
       .tenant(streamMappingInfo.getTenant())
       .language(buildLanguage(streamMappingInfo.getLanguage()))
       .ladders(streamMappingInfo.getLadders())
-      .platforms(streamMappingInfo.getPlatforms().stream().map(this::buildPlatform).collect(
-        Collectors.toList()))
       .build();
   }
 
@@ -226,26 +225,19 @@ public class AdModelLoader {
       .build();
   }
 
-  private Platform buildPlatform(PlatformInfo platformInfo) {
-    return Platform.builder()
-      .id(platformInfo.getId())
-      .name(platformInfo.getName())
-      .tag(platformInfo.getTag())
-      .build();
-  }
-
-  private Map<String, List<AdSet>> buildAdSetGroup(List<GoalMatchInfo> adSets) {
-    return adSets.stream()
+  private List<AdSet> buildAdSetGroup(InvertedIndex invertedIndex) {
+    Map<Long, Integer> adSetIndexMap = invertedIndex.getAdSetIndexMap();
+    return invertedIndex.getContentAdSets().stream()
       .filter(goalMatchInfo -> goalMatchInfo.getCampaignStatus() != CampaignStatus.PAUSED)
-      .filter(GoalMatchInfo::isEnabled)
+      .filter(ContentAdSetInfo::isEnabled)
       .filter(goalMatchInfo -> goalMatchInfo.getDeliveryMode() == DeliveryMode.SSAI
         || goalMatchInfo.getDeliveryMode() == DeliveryMode.SSAI_SPOT)
-      .map(this::buildAdSet)
+      .map(goalMatchInfo -> buildAdSet(goalMatchInfo, adSetIndexMap.get(goalMatchInfo.getAdSetId())))
       .filter(Objects::nonNull)
-      .collect(Collectors.groupingBy(AdSet::getContentId));
+      .collect(Collectors.toList());
   }
 
-  private AdSet buildAdSet(GoalMatchInfo adSet) {
+  private AdSet buildAdSet(ContentAdSetInfo adSet, Integer bitIndex) {
     List<Ad> spotAds = adSet.getVideoAds().stream()
       .filter(VideoAd::isEnabled)
       .filter(videoAd -> videoAd.getCreativeType() == CreativeType.Spot)
@@ -270,7 +262,7 @@ public class AdModelLoader {
       .ssaiAds(ssaiAds)
       .demandPacingCoefficient(DEMAND_PACING_COEFFICIENT)
       .maximizeReach(adSet.isMaximiseReach() ? 1 : 0)
-      .demandId(adSet.getIndex())
+      .demandId(bitIndex)
       .build();
   }
 

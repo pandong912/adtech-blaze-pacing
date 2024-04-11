@@ -42,9 +42,9 @@ public class DataExchangerService {
       .version(adModelResultUriResponse.getVersion())
       .id(adModelResultUriResponse.getId())
       .path(adModelResultUriResponse.getPath())
-      .adModelMd5(adModelResultUriResponse.getMd5(Names.Live_Ad_Model_PB))
-      .metadataMd5(adModelResultUriResponse.getMd5(Names.Meta_PB))
-      .liveMatchMd5(adModelResultUriResponse.getMd5(Names.Match_PB))
+      .adModelMd5(adModelResultUriResponse.getMd5(Names.LIVE_ENTITY_PB))
+      .metadataMd5(adModelResultUriResponse.getMd5(Names.META_ENTITY_PB))
+      .liveMatchMd5(adModelResultUriResponse.getMd5(Names.MATCH_ENTITY_PB))
       .build();
   }
 

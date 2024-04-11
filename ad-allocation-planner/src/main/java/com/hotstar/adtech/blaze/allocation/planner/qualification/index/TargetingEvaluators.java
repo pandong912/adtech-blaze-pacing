@@ -49,7 +49,7 @@ public class TargetingEvaluators {
       .durationSet(protocol.getDurationSet())
       .aspectRatio(aspectRatio)
       .activeAdSetBitSet(protocol.getActiveAdSetBitSet())
-      .adSetSize(protocol.getAdSetSize())
+      .adSetSize(protocol.getMaxBitIndex())
       .build();
   }
 }

@@ -7,6 +7,6 @@ import lombok.Getter;
 @Getter
 public class AdModelVersion {
   private final Long version;
-  private final String adModelMd5;
+  private final String adEntityMd5;
   private final String liveMatchMd5;
 }

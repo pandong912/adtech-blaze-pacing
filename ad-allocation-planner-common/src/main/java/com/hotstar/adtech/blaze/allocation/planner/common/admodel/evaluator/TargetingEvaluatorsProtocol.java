@@ -19,7 +19,7 @@ public class TargetingEvaluatorsProtocol {
   private final RuleFeasibleProtocol aspectRatio;
   private final TreeSet<Integer> durationSet;
   private final long[] activeAdSet;
-  private final int adSetSize;
+  private final int maxBitIndex;
 
   public BitSet getActiveAdSetBitSet() {
     return BitSet.valueOf(activeAdSet);

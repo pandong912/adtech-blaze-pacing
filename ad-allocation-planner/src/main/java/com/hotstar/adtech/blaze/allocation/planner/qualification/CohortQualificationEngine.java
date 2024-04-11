@@ -30,9 +30,6 @@ public class CohortQualificationEngine {
     BitSet stream = evaluators.getStream().targeting(buildStreamKey(playoutStream));
     qualified.and(stream);
 
-    BitSet streamNew = evaluators.getStreamNew().targeting(buildStreamNewKey(playoutStream));
-    qualified.and(streamNew);
-
     BitSet language = evaluators.getLanguage().targeting(String.valueOf(playoutStream.getLanguage().getId()));
     qualified.and(language);
 
@@ -58,19 +55,12 @@ public class CohortQualificationEngine {
     return categoryTargetingEngine.targeting(tags);
   }
 
-  private Set<String> buildStreamNewKey(PlayoutStream playoutStream) {
+  private Set<String> buildStreamKey(PlayoutStream playoutStream) {
     Language language = playoutStream.getLanguage();
     StreamType streamType = playoutStream.getStreamType();
     return playoutStream.getLadders()
       .stream()
-      .map(l -> playoutStream.getTenant() + "+" + language.getId() + "+" + l + "+" + streamType)
-      .collect(Collectors.toSet());
-  }
-
-  private Set<String> buildStreamKey(PlayoutStream playoutStream) {
-    return playoutStream.getPlatforms()
-      .stream()
-      .map(platform -> playoutStream.getTenant() + "+" + playoutStream.getLanguage().getId() + "+" + platform.getId())
+      .map(ladder -> playoutStream.getTenant() + "+" + language.getId() + "+" + ladder + "+" + streamType)
       .collect(Collectors.toSet());
   }
 

@@ -7,10 +7,10 @@ feign:
       default:
         loggerLevel: full
 server:
-  port: 9092
+  port: 9094
 management:
   server:
-    port: 9093
+    port: 9095
 blaze:
   ad-reach-synchronizer:
     reach-sync-lag: 0

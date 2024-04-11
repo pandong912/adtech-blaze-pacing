@@ -15,7 +15,6 @@ public class TargetingEvaluators {
   private final Map<Integer, TargetingEngine> audience;
   private final TargetingEngine stream;
   private final TargetingEngine breakTargeting;
-  private final TargetingEngine streamNew;
   private final TargetingEngine language;
   private final TargetingEngine duration;
   private final TargetingEngine aspectRatio;
@@ -27,8 +26,6 @@ public class TargetingEvaluators {
     Map<Integer, TargetingEngine> audience = protocol.getAudience().entrySet().stream()
       .collect(Collectors.toMap(Map.Entry::getKey,
         entry -> new TargetingEngine(RuleFeasible.of(entry.getValue()))));
-    TargetingEngine streamNew =
-      new TargetingEngine(RuleFeasible.of(protocol.getStreamNew()));
     TargetingEngine stream =
       new TargetingEngine(RuleFeasible.of(protocol.getStream()));
     TargetingEngine breakTargeting =
@@ -41,7 +38,6 @@ public class TargetingEvaluators {
       new TargetingEngine(RuleFeasible.of(protocol.getAspectRatio()));
     return TargetingEvaluators.builder()
       .audience(audience)
-      .streamNew(streamNew)
       .stream(stream)
       .breakTargeting(breakTargeting)
       .language(language)

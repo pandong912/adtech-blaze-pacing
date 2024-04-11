@@ -13,7 +13,6 @@ public class TargetingEvaluatorsProtocol {
   private final Map<Integer, RuleFeasibleProtocol> audience;
   private final RuleFeasibleProtocol stream;
   private final RuleFeasibleProtocol breakTargeting;
-  private final RuleFeasibleProtocol streamNew;
   private final RuleFeasibleProtocol language;
   private final RuleFeasibleProtocol duration;
   private final RuleFeasibleProtocol aspectRatio;

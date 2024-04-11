@@ -9,7 +9,6 @@ import lombok.Value;
 @Value
 public class AdModel {
   List<Match> matches;
-  Map<String, Ad> adMap;
   Map<String, List<AdSet>> adSetGroup;
   AdModelVersion adModelVersion;
 }

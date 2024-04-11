@@ -2,12 +2,12 @@ package com.hotstar.adtech.blaze.allocation.diagnosis.service;
 
 import static com.hotstar.adtech.blaze.allocation.diagnosis.metric.MetricNames.ALLOCATION_CONCURRENCY;
 
+import com.hotstar.adtech.blaze.admodel.common.enums.Ladder;
 import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResult;
 import com.hotstar.adtech.blaze.allocation.diagnosis.model.AllocationCohortConcurrency;
 import com.hotstar.adtech.blaze.allocation.diagnosis.sink.AllocationConcurrencySink;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
-import com.hotstar.adtech.blaze.allocation.planner.common.model.Platform;
 import com.hotstar.adtech.blaze.allocationdata.client.AllocationDataClient;
 import com.hotstar.adtech.blaze.allocationdata.client.model.GeneralPlanContext;
 import io.micrometer.core.annotation.Timed;
@@ -54,7 +54,7 @@ public class AllocationConcurrencyService {
       .cohortId(cohort.getConcurrencyId())
       .language(cohort.getPlayoutStream().getLanguage().getName())
       .platforms(
-        cohort.getPlayoutStream().getPlatforms().stream().map(Platform::getName).collect(Collectors.joining("+")))
+        cohort.getPlayoutStream().getLadders().stream().map(Ladder::toString).collect(Collectors.joining("+")))
       .tenant(cohort.getPlayoutStream().getTenant().getName())
       .ssaiTag(cohort.getSsaiTag())
       .streamType(cohort.getPlayoutStream().getStreamType().name())
@@ -72,7 +72,7 @@ public class AllocationConcurrencyService {
       .cohortId(stream.getConcurrencyIdInCohort())
       .language(stream.getPlayoutStream().getLanguage().getName())
       .platforms(
-        stream.getPlayoutStream().getPlatforms().stream().map(Platform::getName).collect(Collectors.joining("+")))
+        stream.getPlayoutStream().getLadders().stream().map(Ladder::toString).collect(Collectors.joining("+")))
       .tenant(stream.getPlayoutStream().getTenant().getName())
       .ssaiTag("")
       .streamType(stream.getPlayoutStream().getStreamType().name())

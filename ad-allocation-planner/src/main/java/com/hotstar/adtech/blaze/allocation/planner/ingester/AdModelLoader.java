@@ -115,7 +115,6 @@ public class AdModelLoader {
     return TargetingEvaluatorsProtocol.builder()
       .breakTargeting(buildRuleFeasibleProtocol(contentIndex.getBreakTargetingFeasible(), maxBitIndex))
       .stream(buildRuleFeasibleProtocol(contentIndex.getStreamTargetingFeasible(), maxBitIndex))
-      .streamNew(buildRuleFeasibleProtocol(contentIndex.getStreamNewTargetingFeasible(), maxBitIndex))
       .audience(audience)
       .duration(buildRuleFeasibleProtocol(contentIndex.getDurationFeasible(), maxBitIndex))
       .aspectRatio(buildRuleFeasibleProtocol(contentIndex.getAspectRatioFeasible(), maxBitIndex))

@@ -1,6 +1,0 @@
-blaze:
-  allocation-data-client:
-    aws:
-      s3:
-        region: ap-south-1
-        bucket-name: adtech-blaze-ad-model-develop

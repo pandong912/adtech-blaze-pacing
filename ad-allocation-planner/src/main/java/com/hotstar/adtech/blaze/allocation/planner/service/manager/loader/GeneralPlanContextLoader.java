@@ -79,7 +79,8 @@ public class GeneralPlanContextLoader {
 
     RequestData requestData = new RequestData(concurrencyData);
     List<BreakDetail> breakDetails = adModel.getBreakDetails(contentId);
-    TargetingEvaluatorsProtocol targetingEvaluators = adModel.getTargetingEvaluatorsMap().get(contentId);
+    TargetingEvaluatorsProtocol targetingEvaluators =
+      adModel.getTargetingEvaluatorsMap().getOrDefault(contentId, TargetingEvaluatorsProtocol.EMPTY);
     List<BreakTypeGroup> breakTypeList =
       breakTypeGroupFactory.getBreakTypeList(targetingEvaluators.getBreakTargeting(), breakDetails);
 

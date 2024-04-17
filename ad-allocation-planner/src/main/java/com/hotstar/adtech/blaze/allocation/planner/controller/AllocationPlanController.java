@@ -136,7 +136,8 @@ public class AllocationPlanController {
       .collect(Collectors.toList());
 
     RequestData requestData = new RequestData(request.getConcurrencyData());
-    TargetingEvaluatorsProtocol targetingEvaluators = adModel.getTargetingEvaluatorsMap().get(contentId);
+    TargetingEvaluatorsProtocol targetingEvaluators = adModel.getTargetingEvaluatorsMap().getOrDefault(contentId,
+      TargetingEvaluatorsProtocol.EMPTY);
     List<BreakTypeGroup> breakTypeList =
       breakTypeGroupFactory.getBreakTypeList(targetingEvaluators.getBreakTargeting(), request.getBreakDetails());
 

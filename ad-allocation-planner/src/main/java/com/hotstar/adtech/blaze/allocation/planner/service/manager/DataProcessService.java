@@ -2,7 +2,8 @@ package com.hotstar.adtech.blaze.allocation.planner.service.manager;
 
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Ad;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
-import com.hotstar.adtech.blaze.allocation.planner.source.algomodel.StandardMatchProgressModel;
+import com.hotstar.adtech.blaze.allocation.planner.common.algomodel.StandardMatchProgressModel;
+import com.hotstar.adtech.blaze.allocation.planner.common.utils.DemandUtils;
 import com.hotstar.adtech.blaze.allocationdata.client.model.BreakContext;
 import com.hotstar.adtech.blaze.allocationdata.client.model.DemandDiagnosis;
 import com.hotstar.adtech.blaze.allocationdata.client.model.Response;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class DataProcessService {
   public BreakContext getBreakContext(int totalBreakNumber, int breakIndex, StandardMatchProgressModel model) {
-    return model.getEstimatedBreakIndex(breakIndex + 1, totalBreakNumber);
+    return getEstimatedBreakIndex(model, breakIndex + 1, totalBreakNumber);
   }
 
   public Response convertFromDemand(DemandDiagnosis demandDiagnosis) {
@@ -67,18 +68,25 @@ public class DataProcessService {
   private double calculateDemand(AdSet adSet, long delivered, BreakContext breakContext) {
     double demandPacingCoefficient = adSet.getDemandPacingCoefficient();
     long target = adSet.getImpressionTarget();
-
-    return getDemandByRatio(target, delivered, breakContext.getExpectedRatio()) * demandPacingCoefficient
-      + getDemandByProgress(target, delivered, breakContext.getExpectedProgress()) * (1 - demandPacingCoefficient);
+    double expectedRatio = breakContext.getExpectedRatio();
+    double expectedProgress = breakContext.getExpectedProgress();
+    return DemandUtils.calculateDemand(demandPacingCoefficient, target, delivered, expectedRatio, expectedProgress);
   }
 
-  private double getDemandByRatio(long target, long delivered, double expectedRatio) {
-    long remaining = target - delivered;
-    return Math.max(expectedRatio * remaining, 0d);
-  }
+  private BreakContext getEstimatedBreakIndex(StandardMatchProgressModel model, int nextBreak, int totalBreaks) {
+    int totalBreakNumber = model.getTotalBreakNumber();
+    // current break index position projected onto the model, start from 1
+    int currentBreakIndex =
+      Math.min(Double.valueOf(Math.ceil((double) nextBreak * totalBreakNumber / totalBreaks)).intValue(),
+        totalBreakNumber);
 
-  private double getDemandByProgress(long target, long delivered, double expectedProgress) {
-    double actualRatio = (double) delivered / target;
-    return Math.max((expectedProgress - actualRatio) * target, 0d);
+    int position = currentBreakIndex - 1;
+    return BreakContext.builder()
+      .nextBreakIndex(nextBreak)
+      .totalBreakNumber(totalBreaks)
+      .estimatedModelBreakIndex(currentBreakIndex)
+      .expectedRatio(model.getExpectedRatio(position))
+      .expectedProgress(model.getExpectedProgress(position))
+      .build();
   }
 }

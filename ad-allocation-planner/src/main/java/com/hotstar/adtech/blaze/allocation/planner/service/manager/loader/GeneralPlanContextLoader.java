@@ -7,6 +7,7 @@ import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModel;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Match;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.evaluator.TargetingEvaluatorsProtocol;
+import com.hotstar.adtech.blaze.allocation.planner.common.algomodel.StandardMatchProgressModel;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
@@ -16,7 +17,6 @@ import com.hotstar.adtech.blaze.allocation.planner.ingester.DataExchangerService
 import com.hotstar.adtech.blaze.allocation.planner.ingester.DataLoader;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.BreakTypeGroupFactory;
 import com.hotstar.adtech.blaze.allocation.planner.service.manager.DataProcessService;
-import com.hotstar.adtech.blaze.allocation.planner.source.algomodel.StandardMatchProgressModel;
 import com.hotstar.adtech.blaze.allocationdata.client.model.BreakContext;
 import com.hotstar.adtech.blaze.allocationdata.client.model.BreakTypeGroup;
 import com.hotstar.adtech.blaze.allocationdata.client.model.DemandDiagnosis;

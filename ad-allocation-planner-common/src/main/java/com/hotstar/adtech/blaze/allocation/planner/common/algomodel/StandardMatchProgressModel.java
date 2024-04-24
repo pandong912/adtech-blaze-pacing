@@ -1,13 +1,12 @@
-package com.hotstar.adtech.blaze.allocation.planner.source.algomodel;
+package com.hotstar.adtech.blaze.allocation.planner.common.algomodel;
 
-import com.hotstar.adtech.blaze.admodel.common.exception.BusinessException;
-import com.hotstar.adtech.blaze.allocation.planner.ErrorCodes;
-import com.hotstar.adtech.blaze.allocationdata.client.model.BreakContext;
 import java.util.List;
+import lombok.Getter;
 import org.springframework.util.CollectionUtils;
 
 public class StandardMatchProgressModel {
 
+  @Getter
   private final int totalBreakNumber;
   private final Double[] incrementalProgressRatio;
   private final Double[] cumulativeProgressRatio;
@@ -15,12 +14,12 @@ public class StandardMatchProgressModel {
 
   public StandardMatchProgressModel(List<Double> matchBreakProgressRatios) {
     if (CollectionUtils.isEmpty(matchBreakProgressRatios)) {
-      throw new BusinessException(ErrorCodes.MODEL_DATA_EMPTY);
+      throw new IllegalArgumentException("Match Break Progress Model Data is invalid");
     }
 
     final double totalProgressRatio = matchBreakProgressRatios.get(matchBreakProgressRatios.size() - 1);
     if (totalProgressRatio < 1.0d) {
-      throw new BusinessException(ErrorCodes.MODEL_DATA_INVALID);
+      throw new IllegalArgumentException("Match Break Progress Model Data is invalid");
     }
 
     totalBreakNumber = matchBreakProgressRatios.size();
@@ -36,22 +35,6 @@ public class StandardMatchProgressModel {
       leftCumulativeProgressRatio[i] = totalProgressRatio - prevBreakProgressRatio;
       prevBreakProgressRatio = currentBreakProgressRatio;
     }
-  }
-
-  public BreakContext getEstimatedBreakIndex(int nextBreak, int totalBreaks) {
-    // current break index position projected onto the model, start from 1
-    int currentBreakIndex =
-      Math.min(Double.valueOf(Math.ceil((double) nextBreak * totalBreakNumber / totalBreaks)).intValue(),
-        totalBreakNumber);
-
-    int position = currentBreakIndex - 1;
-    return BreakContext.builder()
-      .nextBreakIndex(nextBreak)
-      .totalBreakNumber(totalBreaks)
-      .estimatedModelBreakIndex(currentBreakIndex)
-      .expectedRatio(getExpectedRatio(position))
-      .expectedProgress(getExpectedProgress(position))
-      .build();
   }
 
   public double getExpectedRatio(int position) {

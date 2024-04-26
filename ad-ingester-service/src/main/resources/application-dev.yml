@@ -1,6 +1,6 @@
 spring:
   profiles:
-    include: ad-model-client-dev, ad-redis-client-dev
+    include: ad-redis-client-dev
 pulse:
   counter-service:
     endpoint: http://pulse-counter.internal.hotstar.com

@@ -30,7 +30,7 @@ public class ReachDataUpdater {
     }
     AdModel adModel = adModelLoader.get();
     for (Match match : adModel.getMatches()) {
-      List<AdSet> adSets = adModel.getAdSetGroup().get(match.getContentId());
+      List<AdSet> adSets = adModel.getContentIdToAdSets().get(match.getContentId());
       if (adSets == null || adSets.isEmpty()) {
         log.info("no adSet found for match: {}", match);
         continue;

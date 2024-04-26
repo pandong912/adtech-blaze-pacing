@@ -1,6 +1,6 @@
 spring:
   profiles:
-    include: ad-model-client-local, ad-redis-client-local, launch-darkly-dev
+    include: ad-redis-client-local, launch-darkly-dev
 feign:
   client:
     config:

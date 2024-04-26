@@ -1,29 +1,20 @@
 package com.hotstar.adtech.blaze.ingester.service;
 
-import com.hotstar.adtech.blaze.admodel.client.AdModelClient;
-import com.hotstar.adtech.blaze.admodel.client.AdModelUri;
 import com.hotstar.adtech.blaze.admodel.client.common.Names;
-import com.hotstar.adtech.blaze.admodel.client.entity.AdEntities;
-import com.hotstar.adtech.blaze.admodel.client.entity.MatchEntities;
-import com.hotstar.adtech.blaze.admodel.client.model.AdInfo;
-import com.hotstar.adtech.blaze.admodel.client.model.MatchInfo;
-import com.hotstar.adtech.blaze.admodel.client.model.StreamMappingInfo;
 import com.hotstar.adtech.blaze.exchanger.api.DataExchangerClient;
-import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;
+import com.hotstar.adtech.blaze.exchanger.api.response.admodel.AdModelForIngesterResponse;
+import com.hotstar.adtech.blaze.exchanger.api.response.admodel.MatchResponse;
 import com.hotstar.adtech.blaze.ingester.entity.Ad;
 import com.hotstar.adtech.blaze.ingester.entity.AdModel;
 import com.hotstar.adtech.blaze.ingester.entity.AdModelVersion;
 import com.hotstar.adtech.blaze.ingester.entity.Match;
-import com.hotstar.adtech.blaze.ingester.entity.SingleStream;
 import com.hotstar.adtech.blaze.ingester.metric.MetricNames;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -37,127 +28,73 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 public class AdModelLoader {
-  private final AdModelClient adModelClient;
   private final DataExchangerClient dataExchangerClient;
   private final AtomicReference<AdModel> adModelAtomicReference = new AtomicReference<>();
   private final AtomicBoolean adModelReady = new AtomicBoolean(false);
 
   @PostConstruct
   public void init() {
-    adModelAtomicReference.set(
-      AdModel.builder()
-        .matches(Collections.emptyList())
-        .adMap(Collections.emptyMap())
-        .adModelVersion(AdModelVersion.builder().version(-1L)
-          .liveMatchMd5("")
-          .adEntityMd5("")
-          .build())
-        .build());
-
     loadAdModel();
   }
 
   @Scheduled(fixedDelayString = "${blaze.ad-ingester-service.load.ad-model:10000}")
   @Timed(MetricNames.LOAD_AD_MODEL)
   public void loadAdModel() {
-    AdModelVersion adModelVersion = get().getAdModelVersion();
     try {
-      AdModelResultUriResponse adModelResultUriResponse =
-        dataExchangerClient.getLatestAdModel(adModelVersion.getVersion());
-      if (adModelResultUriResponse.getVersion() > adModelVersion.getVersion()) {
-        String curAdEntityMd5 = adModelResultUriResponse.getMd5(Names.AD_ENTITY_PB);
-        String curLiveMatchMd5 = adModelResultUriResponse.getMd5(Names.MATCH_ENTITY_PB);
-        if (Objects.equals(curAdEntityMd5, adModelVersion.getAdEntityMd5())
-          && Objects.equals(curLiveMatchMd5, adModelVersion.getLiveMatchMd5())) {
-          LoadStatus.IGNORE.counter().increment();
-          return;
-        }
-        AdModelUri adModelUri = buildAdModelUri(adModelResultUriResponse);
+      AdModelForIngesterResponse adModelForIngesterResponse = dataExchangerClient.getLatestAdModelForIngester();
+      AdModel adModel = AdModel.builder()
+        .matches(buildMatches(adModelForIngesterResponse))
+        .streamMappingConverterGroup(adModelForIngesterResponse.getStreamMappingConverterGroup())
+        .globalStreamMappingConverter(adModelForIngesterResponse.getGlobalStreamMappingConverter())
+        .adMap(buildAdMap(adModelForIngesterResponse))
+        .adModelVersion(AdModelVersion.builder()
+          .version(adModelForIngesterResponse.getAdModelVersion().getVersionTimestamp())
+          .adEntityMd5(adModelForIngesterResponse.getAdModelVersion().getFilenameToMd5().get(Names.AD_ENTITY_PB))
+          .liveMatchMd5(adModelForIngesterResponse.getAdModelVersion().getFilenameToMd5().get(Names.LIVE_ENTITY_PB))
+          .build())
+        .build();
+      adModelAtomicReference.set(adModel);
+      adModelReady.set(true);
 
-        MatchEntities matchEntities = adModelClient.loadMatch(adModelUri);
-
-        List<Match> liveMatches = matchEntities.getMatches().stream()
-          .map(this::buildMatch)
-          .collect(Collectors.toList());
-        Map<Long, Map<String, String>> streamMappingConverterGroup = matchEntities.getStreamMappings().stream()
-          .collect(Collectors.groupingBy(StreamMappingInfo::getSeasonId,
-            Collectors.collectingAndThen(Collectors.toList(), this::buildStreamMappingConverter)));
-        Map<String, String> globalStreamMappingConverter =
-          buildStreamMappingConverter(matchEntities.getGlobalStreamMappings());
-
-        AdEntities adEntities = adModelClient.loadAdEntity(adModelUri);
-        Map<String, Ad> adMap = adEntities.getAds().stream().collect(
-          Collectors.toMap(AdInfo::getCreativeId, this::buildAd));
-
-        AdModel adModel = AdModel.builder()
-          .matches(liveMatches)
-          .streamMappingConverterGroup(streamMappingConverterGroup)
-          .globalStreamMappingConverter(globalStreamMappingConverter)
-          .adMap(adMap)
-          .adModelVersion(AdModelVersion.builder().version(adModelUri.getVersion())
-            .adEntityMd5(curAdEntityMd5)
-            .liveMatchMd5(curLiveMatchMd5)
-            .build())
-          .build();
-        adModelAtomicReference.set(adModel);
-        adModelReady.set(true);
-
-        LoadStatus.SUCCESS.counter().increment();
-      } else {
-        LoadStatus.URL_NULL.counter().increment();
-      }
+      LoadStatus.SUCCESS.counter().increment();
     } catch (Exception ex) {
       LoadStatus.FAILED.counter().increment();
       log.error("Load Live Match Model failed", ex);
     }
   }
 
+  private List<Match> buildMatches(AdModelForIngesterResponse adModelForIngesterResponse) {
+    return adModelForIngesterResponse
+      .getMatches()
+      .stream()
+      .map(this::buildMatch)
+      .collect(Collectors.toList());
+  }
+
+  private static Map<String, Ad> buildAdMap(AdModelForIngesterResponse adModelForIngesterResponse) {
+    return adModelForIngesterResponse
+      .getCreativeIdToAd()
+      .entrySet()
+      .stream()
+      .collect(Collectors.toMap(Map.Entry::getKey, entry -> Ad.builder()
+        .creativeType(entry.getValue().getCreativeType())
+        .creativeId(entry.getValue().getCreativeId())
+        .adSetId(entry.getValue().getAdSetId())
+        .creativeType(entry.getValue().getCreativeType())
+        .id(entry.getValue().getId())
+        .build()));
+  }
+
+  private Match buildMatch(MatchResponse matchResponse) {
+    return Match.builder()
+      .tournamentId(matchResponse.getTournamentId())
+      .contentId(matchResponse.getContentId())
+      .seasonId(matchResponse.getSeasonId())
+      .build();
+  }
+
   public AdModel get() {
     return adModelAtomicReference.get();
-  }
-
-  private AdModelUri buildAdModelUri(AdModelResultUriResponse adModelResultUriResponse) {
-    return AdModelUri.builder()
-      .id(adModelResultUriResponse.getId())
-      .path(adModelResultUriResponse.getPath())
-      .version(adModelResultUriResponse.getVersion())
-      .build();
-  }
-
-  private Match buildMatch(MatchInfo matchInfo) {
-    return Match.builder()
-      .contentId(matchInfo.getContentId())
-      .tournamentId(matchInfo.getTournamentId())
-      .seasonId(matchInfo.getSeasonId())
-      .build();
-  }
-
-  private Map<String, String> buildStreamMappingConverter(List<StreamMappingInfo> streamMappings) {
-    return streamMappings.stream()
-      .flatMap(streamMappingInfo -> buildStream(streamMappingInfo).stream())
-      .collect(Collectors.toMap(SingleStream::getKey, SingleStream::getPlayoutId));
-  }
-
-  private List<SingleStream> buildStream(StreamMappingInfo streamMappingInfo) {
-    return streamMappingInfo.getLadders().stream()
-      .map(ladder ->
-        SingleStream.builder()
-          .tenant(streamMappingInfo.getTenant().getName())
-          .language(streamMappingInfo.getLanguage().getAbbreviation())
-          .ladder(ladder.name())
-          .ads(streamMappingInfo.getStreamType().getAds())
-          .playoutId(streamMappingInfo.getPlayoutId())
-          .build()
-      ).collect(Collectors.toList());
-  }
-
-  private Ad buildAd(AdInfo adInfo) {
-    return Ad.builder()
-      .id(adInfo.getId())
-      .creativeId(adInfo.getCreativeId())
-      .adSetId(adInfo.getAdSetId())
-      .creativeType(adInfo.getCreativeType())
-      .build();
   }
 
   private enum LoadStatus {

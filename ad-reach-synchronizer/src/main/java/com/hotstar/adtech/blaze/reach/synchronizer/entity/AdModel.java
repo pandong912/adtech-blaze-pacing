@@ -9,6 +9,6 @@ import lombok.Value;
 @Value
 public class AdModel {
   List<Match> matches;
-  Map<String, List<AdSet>> adSetGroup;
-  AdModelVersion adModelVersion;
+  Map<String, List<AdSet>> contentIdToAdSets;
+  long versionTimestamp;
 }

@@ -1,6 +1,6 @@
 spring:
   profiles:
-    include: ad-model-client-prod, ad-redis-client-prod
+    include: ad-redis-client-prod
 blaze:
   ad-ingester-service:
     swagger:

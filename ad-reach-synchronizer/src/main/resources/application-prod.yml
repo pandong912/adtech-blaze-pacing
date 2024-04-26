@@ -1,6 +1,6 @@
 spring:
   profiles:
-    include: ad-model-client-prod, ad-redis-client-prod-eks, launch-darkly-prod
+    include: ad-redis-client-prod-eks, launch-darkly-prod
 blaze:
   data-exchanger:
     endpoint: adtech-blaze-data-exchanger-service.internal.sgp.hotstar.com

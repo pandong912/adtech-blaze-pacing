@@ -1,6 +1,6 @@
 spring:
   profiles:
-    include: ad-model-client-local, ad-redis-client-local
+    include: ad-redis-client-local
 pulse:
   counter-service:
     readTimeout: 30000

@@ -1,28 +1,19 @@
 package com.hotstar.adtech.blaze.reach.synchronizer.service;
 
-import com.hotstar.adtech.blaze.admodel.client.AdModelClient;
-import com.hotstar.adtech.blaze.admodel.client.AdModelUri;
-import com.hotstar.adtech.blaze.admodel.client.common.Names;
-import com.hotstar.adtech.blaze.admodel.client.entity.LiveEntities;
-import com.hotstar.adtech.blaze.admodel.client.entity.MatchEntities;
-import com.hotstar.adtech.blaze.admodel.client.model.ContentAdSetInfo;
-import com.hotstar.adtech.blaze.admodel.common.enums.CampaignStatus;
-import com.hotstar.adtech.blaze.admodel.common.enums.DeliveryMode;
 import com.hotstar.adtech.blaze.exchanger.api.DataExchangerClient;
-import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;
+import com.hotstar.adtech.blaze.exchanger.api.response.admodel.AdModelForSynchronizerResponse;
+import com.hotstar.adtech.blaze.exchanger.api.response.admodel.AdSetResponse;
+import com.hotstar.adtech.blaze.exchanger.api.response.admodel.MatchResponse;
 import com.hotstar.adtech.blaze.reach.synchronizer.entity.AdModel;
-import com.hotstar.adtech.blaze.reach.synchronizer.entity.AdModelVersion;
 import com.hotstar.adtech.blaze.reach.synchronizer.entity.AdSet;
 import com.hotstar.adtech.blaze.reach.synchronizer.entity.Match;
 import com.hotstar.adtech.blaze.reach.synchronizer.metric.MetricNames;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
@@ -35,102 +26,72 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 public class AdModelLoader {
-  private final AdModelClient adModelClient;
   private final DataExchangerClient dataExchangerClient;
   private final AtomicReference<AdModel> adModelAtomicReference = new AtomicReference<>();
 
   @PostConstruct
   public void init() {
-    adModelAtomicReference.set(
-      AdModel.builder()
-        .matches(Collections.emptyList())
-        .adModelVersion(AdModelVersion.builder().version(-1L)
-          .liveMatchMd5("")
-          .adModelMd5("")
-          .build())
-        .build());
-
     loadAdModel();
   }
 
   @Scheduled(fixedDelayString = "${blaze.ad-reach-synchronizer.load.ad-model:10000}")
   @Timed(MetricNames.LOAD_AD_MODEL)
   public void loadAdModel() {
-    AdModelVersion adModelVersion = get().getAdModelVersion();
-
     try {
-      AdModelResultUriResponse adModelResultUriResponse =
-        dataExchangerClient.getLatestAdModel(adModelVersion.getVersion());
-      if (adModelResultUriResponse.getVersion() > adModelVersion.getVersion()) {
-        String curAdModelMd5 = adModelResultUriResponse.getMd5(Names.LIVE_ENTITY_PB);
-        String curLiveMatchMd5 = adModelResultUriResponse.getMd5(Names.MATCH_ENTITY_PB);
-        if (Objects.equals(curAdModelMd5, adModelVersion.getAdModelMd5())
-          && Objects.equals(curLiveMatchMd5, adModelVersion.getLiveMatchMd5())) {
-          LoadStatus.IGNORE.counter().increment();
-          return;
-        }
-        AdModelUri adModelUri = buildAdModelUri(adModelResultUriResponse);
+      AdModelForSynchronizerResponse adModelForSyncResponse = dataExchangerClient.getLatestAdModelForSynchronizer();
 
-        MatchEntities matchEntities = adModelClient.loadMatch(adModelUri);
-        List<Match> liveMatches = matchEntities.getMatches().stream().map(
-          matchInfo -> new Match(matchInfo.getSiMatchId(), matchInfo.getContentId())
-        ).collect(Collectors.toList());
+      AdModel adModel = AdModel.builder()
+        .matches(buildMatches(adModelForSyncResponse))
+        .contentIdToAdSets(adModelForSyncResponse
+          .getContentIdToAdSets()
+          .entrySet()
+          .stream()
+          .collect(Collectors.toMap(Map.Entry::getKey, AdModelLoader::buildAdSets)))
+        .versionTimestamp(adModelForSyncResponse.getAdModelVersion().getVersionTimestamp())
+        .build();
 
-        LiveEntities liveEntities = adModelClient.loadLiveAdModel(adModelUri);
-
-        Map<String, List<AdSet>> adSetGroup =
-          liveEntities.getInvertedIndexMap().entrySet()
-            .stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, entry -> buildAdSets(entry.getValue().getContentAdSets())));
-        AdModel adModel = AdModel.builder()
-          .matches(liveMatches)
-          .adSetGroup(adSetGroup)
-          .adModelVersion(AdModelVersion.builder().version(adModelUri.getVersion())
-            .adModelMd5(curAdModelMd5)
-            .liveMatchMd5(curLiveMatchMd5)
-            .build())
-          .build();
-        adModelAtomicReference.set(adModel);
-
-        LoadStatus.SUCCESS.counter().increment();
-      } else {
-        LoadStatus.URL_NULL.counter().increment();
-      }
+      adModelAtomicReference.set(adModel);
+      LoadStatus.SUCCESS.counter().increment();
     } catch (Exception ex) {
       LoadStatus.FAILED.counter().increment();
       log.error("Load Live Match Model failed", ex);
     }
   }
 
-  public AdModel get() {
-    return adModelAtomicReference.get();
-  }
-
-  private AdModelUri buildAdModelUri(AdModelResultUriResponse adModelResultUriResponse) {
-    return AdModelUri.builder()
-      .id(adModelResultUriResponse.getId())
-      .path(adModelResultUriResponse.getPath())
-      .version(adModelResultUriResponse.getVersion())
-      .build();
-  }
-
-  private List<AdSet> buildAdSets(List<ContentAdSetInfo> adSets) {
-    return adSets.stream()
-      .filter(goalMatchInfo -> goalMatchInfo.getCampaignStatus() != CampaignStatus.PAUSED)
-      .filter(ContentAdSetInfo::isEnabled)
-      .filter(goalMatchInfo -> goalMatchInfo.getDeliveryMode() == DeliveryMode.SSAI
-        || goalMatchInfo.getDeliveryMode() == DeliveryMode.SSAI_SPOT)
-      .map(this::buildAdSet)
+  private static List<AdSet> buildAdSets(Map.Entry<String, List<AdSetResponse>> entry) {
+    return entry
+      .getValue()
+      .stream()
+      .map(AdModelLoader::buildAdSet)
       .collect(Collectors.toList());
   }
 
-  private AdSet buildAdSet(ContentAdSetInfo adSet) {
+  private static AdSet buildAdSet(AdSetResponse adSetResponse) {
     return AdSet.builder()
-      .contentId(adSet.getContentId())
-      .campaignId(adSet.getCampaignId())
-      .id(adSet.getAdSetId())
-      .maximiseReach(adSet.isMaximiseReach())
+      .contentId(adSetResponse.getContentId())
+      .maximiseReach(adSetResponse.getMaximiseReach())
+      .id(adSetResponse.getAdSetId())
+      .campaignId(adSetResponse.getCampaignId())
       .build();
+  }
+
+  private static List<Match> buildMatches(AdModelForSynchronizerResponse adModelForSyncResponse) {
+    return adModelForSyncResponse
+      .getMatches()
+      .stream()
+      .map(AdModelLoader::buildMatch)
+      .collect(Collectors.toList());
+  }
+
+  private static Match buildMatch(MatchResponse matchResponse) {
+    return Match.builder()
+      .siMatchId(matchResponse.getSiMatchId())
+      .contentId(matchResponse.getContentId())
+      .build();
+  }
+
+  public AdModel get() {
+    return adModelAtomicReference.get();
   }
 
 

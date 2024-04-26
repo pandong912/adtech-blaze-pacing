@@ -1,6 +1,6 @@
 spring:
   profiles:
-    include: ad-model-client-load, ad-redis-client-load
+    include: ad-redis-client-load
 pulse:
   counter-service:
     endpoint: http://pulse-counter.internal.preprod.hotstar.com

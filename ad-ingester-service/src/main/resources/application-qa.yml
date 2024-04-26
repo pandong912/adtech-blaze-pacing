@@ -1,6 +1,6 @@
 spring:
   profiles:
-    include: ad-model-client-qa, ad-redis-client-qa
+    include: ad-redis-client-qa
 blaze:
   ad-ingester-service:
     schedule:

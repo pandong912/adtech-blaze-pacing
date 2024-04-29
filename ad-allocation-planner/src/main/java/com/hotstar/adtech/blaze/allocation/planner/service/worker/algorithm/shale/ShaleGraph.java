@@ -51,7 +51,9 @@ public class ShaleGraph {
 
   public double getTd(ShaleDemand demand, ShaleSupply supply) {
     double reachRatio = getUnReachRatio(demand, supply);
-    return demand.getTheta() + Math.max(0, reachRatio - demand.getReachOffset());
+    double reachFactor = reachRatio - demand.getReachOffset();
+    double theta = demand.getTheta();
+    return Math.min(1, theta + Math.max(0, Math.sqrt(theta) * reachFactor));
   }
 
   public double getRd(ShaleDemand demand, ShaleSupply supply) {

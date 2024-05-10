@@ -5,7 +5,7 @@ blaze:
   ad-ingester-service:
     schedule:
       concurrency-sync-delay: 5000
-      impression-sync-delay: 5000
+
 pulse:
   counter-service:
     endpoint: http://pulse-counter.internal.hotstar.com

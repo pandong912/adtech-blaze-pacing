@@ -23,7 +23,6 @@ public class DebugController {
       .matches(adModel.getMatches())
       .streamMappingConverterGroup(adModel.getStreamMappingConverterGroup())
       .globalStreamMappingConverter(adModel.getGlobalStreamMappingConverter())
-      .adMap(adModel.getAdMap())
       .adModelVersion(adModel.getAdModelVersion())
       .build();
 

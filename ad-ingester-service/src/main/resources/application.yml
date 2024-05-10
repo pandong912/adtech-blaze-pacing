@@ -62,7 +62,7 @@ blaze:
     load.ad-model: 10000
     schedule:
       concurrency-sync-delay: 20000
-      impression-sync-delay: 10000
+
 pulse:
   counter-service:
     endpoint: ${PULSE_COUNTER_SERVICE_ENDPOINT}

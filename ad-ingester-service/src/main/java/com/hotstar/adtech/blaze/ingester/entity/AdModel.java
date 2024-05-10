@@ -13,7 +13,6 @@ public class AdModel {
   private final List<Match> matches;
   private final Map<Long, Map<String, String>> streamMappingConverterGroup;
   private final Map<String, String> globalStreamMappingConverter;
-  private final Map<String, Ad> adMap;
   private final AdModelVersion adModelVersion;
 
   public Map<String, String> getStreamMappingConverter(Long seasonId) {

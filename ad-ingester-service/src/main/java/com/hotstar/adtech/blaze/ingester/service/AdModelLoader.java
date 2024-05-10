@@ -4,7 +4,6 @@ import com.hotstar.adtech.blaze.admodel.client.common.Names;
 import com.hotstar.adtech.blaze.exchanger.api.DataExchangerClient;
 import com.hotstar.adtech.blaze.exchanger.api.response.admodel.AdModelForIngesterResponse;
 import com.hotstar.adtech.blaze.exchanger.api.response.admodel.MatchResponse;
-import com.hotstar.adtech.blaze.ingester.entity.Ad;
 import com.hotstar.adtech.blaze.ingester.entity.AdModel;
 import com.hotstar.adtech.blaze.ingester.entity.AdModelVersion;
 import com.hotstar.adtech.blaze.ingester.entity.Match;
@@ -14,7 +13,6 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -46,7 +44,6 @@ public class AdModelLoader {
         .matches(buildMatches(adModelForIngesterResponse))
         .streamMappingConverterGroup(adModelForIngesterResponse.getStreamMappingConverterGroup())
         .globalStreamMappingConverter(adModelForIngesterResponse.getGlobalStreamMappingConverter())
-        .adMap(buildAdMap(adModelForIngesterResponse))
         .adModelVersion(AdModelVersion.builder()
           .version(adModelForIngesterResponse.getAdModelVersion().getVersionTimestamp())
           .adEntityMd5(adModelForIngesterResponse.getAdModelVersion().getFilenameToMd5().get(Names.AD_ENTITY_PB))
@@ -69,20 +66,6 @@ public class AdModelLoader {
       .stream()
       .map(this::buildMatch)
       .collect(Collectors.toList());
-  }
-
-  private static Map<String, Ad> buildAdMap(AdModelForIngesterResponse adModelForIngesterResponse) {
-    return adModelForIngesterResponse
-      .getCreativeIdToAd()
-      .entrySet()
-      .stream()
-      .collect(Collectors.toMap(Map.Entry::getKey, entry -> Ad.builder()
-        .creativeType(entry.getValue().getCreativeType())
-        .creativeId(entry.getValue().getCreativeId())
-        .adSetId(entry.getValue().getAdSetId())
-        .creativeType(entry.getValue().getCreativeType())
-        .id(entry.getValue().getId())
-        .build()));
   }
 
   private Match buildMatch(MatchResponse matchResponse) {

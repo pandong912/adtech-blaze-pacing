@@ -51,14 +51,14 @@ public class AllocationPlanWorker {
     try {
       if (task.getVersion().plus(4, ChronoUnit.MINUTES).isBefore(Instant.now())) {
         allocationPlanTaskService.subTaskExpired(subtask);
-        log.error("subtask expired: {}", subtask.getId());
+        log.error("subtask expired: {}, parent task detail: {}", subtask, task);
         return;
       }
       UploadResult uploadResult = subtask.getAlgorithmType() == AlgorithmType.SHALE
         ? generateShalePlan(subtask, task) : generateHwmPlan(subtask, task);
       allocationPlanTaskService.subTaskSuccess(subtask, uploadResult);
     } catch (Exception e) {
-      log.error("fail to build plan for content: " + task.getContentId(), e);
+      log.error("subtask failed: {}, parent task detail: {}", subtask, task, e);
       allocationPlanTaskService.subTaskFail(subtask);
     }
   }

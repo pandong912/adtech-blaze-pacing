@@ -1,6 +1,7 @@
 package com.hotstar.adtech.blaze.allocation.planner.common.admodel;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.CampaignType;
+import com.hotstar.adtech.blaze.admodel.common.enums.PacingMode;
 import java.util.List;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +17,7 @@ public class AdSet {
   private final String contentId;
   private final long impressionTarget;
   private final double demandPacingCoefficient;
+  private final PacingMode pacingMode;
 
   private final long campaignId;
   private final CampaignType campaignType;

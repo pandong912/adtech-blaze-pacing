@@ -1,4 +1,7 @@
 spring:
   profiles:
     include: ad-model-repository-prod, ad-model-client-prod, allocation-plan-client-prod, launch-darkly-prod, ad-redis-client-prod-eks, allocation-data-client-prod
+blaze:
+  ad-allocation-planner:
+    gap-time: 30
 

@@ -1,5 +1,6 @@
 package com.hotstar.adtech.blaze.allocation.planner.service.manager;
 
+import com.hotstar.adtech.blaze.admodel.common.enums.PacingMode;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Ad;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.common.algomodel.StandardMatchProgressModel;
@@ -66,8 +67,11 @@ public class DataProcessService {
   }
 
   private double calculateDemand(AdSet adSet, long delivered, BreakContext breakContext) {
-    double demandPacingCoefficient = adSet.getDemandPacingCoefficient();
     long target = adSet.getImpressionTarget();
+    if (adSet.getPacingMode() == PacingMode.ASAP) {
+      return Math.max(0, target - delivered);
+    }
+    double demandPacingCoefficient = adSet.getDemandPacingCoefficient();
     double expectedRatio = breakContext.getExpectedRatio();
     double expectedProgress = breakContext.getExpectedProgress();
     return DemandUtils.calculateDemand(demandPacingCoefficient, target, delivered, expectedRatio, expectedProgress);

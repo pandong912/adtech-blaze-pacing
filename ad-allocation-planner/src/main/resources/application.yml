@@ -50,7 +50,7 @@ blaze:
       load.break-progress-model: 300000
       load.break-definition: 300000
       manager: 3000
-      worker: 1000
+      worker: 500
   data-exchanger:
     endpoint: adtech-blaze-data-exchanger-service.internal.hotstar.com
     retryer:

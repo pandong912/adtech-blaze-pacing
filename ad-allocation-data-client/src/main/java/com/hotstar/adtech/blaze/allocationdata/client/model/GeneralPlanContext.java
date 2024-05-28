@@ -23,7 +23,7 @@ public class GeneralPlanContext {
   TargetingEvaluatorsProtocol targetingEvaluators;
 
   public boolean isEmpty() {
-    return adSets.isEmpty() || (concurrencyData.getCohorts().isEmpty() && concurrencyData.getStreams().isEmpty());
+    return adSets.isEmpty();
   }
 
   // solve https://hotstar.atlassian.net/browse/LIVE-27010

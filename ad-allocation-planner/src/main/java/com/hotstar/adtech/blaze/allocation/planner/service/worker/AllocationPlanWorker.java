@@ -36,7 +36,7 @@ public class AllocationPlanWorker {
   private final HwmPlanWorker hwmPlanWorker;
   private final AllocationPlanResultService resultService;
 
-  @Scheduled(fixedRateString = "${blaze.ad-allocation-planner.schedule.worker:1000}", initialDelayString = "1000")
+  @Scheduled(fixedRateString = "${blaze.ad-allocation-planner.schedule.worker:500}", initialDelayString = "1000")
   @Timed(value = MATCH_WORKER_GENERATE_PLAN, histogram = true)
   public void generatePlan() {
     try {

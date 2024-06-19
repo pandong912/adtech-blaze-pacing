@@ -255,6 +255,7 @@ public class AdModelLoader {
       .campaignId(adSet.getCampaignId())
       .id(adSet.getAdSetId())
       .impressionTarget(adSet.getImpressionTarget())
+      .pacingMode(adSet.getPacingMode())
       .priority(adSet.getPriority())
       .campaignType(adSet.getCampaignType())
       .spotAds(spotAds)

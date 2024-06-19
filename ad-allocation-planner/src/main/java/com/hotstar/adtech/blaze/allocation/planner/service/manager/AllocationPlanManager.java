@@ -81,7 +81,7 @@ public class AllocationPlanManager {
         allocationPlanTaskService.taskSuccess(latestTask);
       } else {
         allocationPlanTaskService.taskFailed(latestTask);
-        log.error("task is failed, task:{}, subTask size: {}", latestTask.getVersion(), details.size());
+        log.error("task is failed, task:{}, subTask size: {}", latestTask, details.size());
       }
     }
   }

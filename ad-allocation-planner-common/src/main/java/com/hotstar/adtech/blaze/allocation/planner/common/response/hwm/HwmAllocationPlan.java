@@ -16,4 +16,8 @@ public class HwmAllocationPlan {
   private List<Integer> breakTypeIds;
   private int duration;
   private List<HwmAllocationDetail> hwmAllocationDetails;
+
+  public String getTags() {
+    return "hwm" + "|" + planType + "|" + "breakType_" + breakTypeIds + "|" + "duration_" + duration;
+  }
 }

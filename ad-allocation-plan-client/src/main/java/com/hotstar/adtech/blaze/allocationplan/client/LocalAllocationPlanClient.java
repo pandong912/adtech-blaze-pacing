@@ -10,11 +10,14 @@ import com.hotstar.adtech.blaze.allocationplan.client.model.LoadRequest;
 import com.hotstar.adtech.blaze.allocationplan.client.model.UploadResult;
 import com.hotstar.adtech.blaze.allocationplan.client.util.ProtostuffUtils;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -32,42 +35,71 @@ public class LocalAllocationPlanClient implements AllocationPlanClient {
 
 
   @Override
-  public List<ShaleAllocationPlan> loadShaleAllocationPlans(List<LoadRequest> loadRequests) {
-    return loadRequests.parallelStream()
-      .map(loadRequest -> loadFromLocal(ShaleAllocationPlan.class, loadRequest.getPath(), loadRequest.getFileName()))
-      .collect(Collectors.toList());
+  public Map<Long, ShaleAllocationPlan> loadShaleAllocationPlans(PlanType planType, List<LoadRequest> loadRequests) {
+    return loadShaleFromLocal().stream()
+      .collect(Collectors.toMap(plan -> (long) plan.getTags().hashCode(), Function.identity()));
   }
 
   @Override
-  public List<HwmAllocationPlan> loadHwmAllocationPlans(List<LoadRequest> loadRequests) {
-    return loadRequests.parallelStream()
-      .map(loadRequest -> loadFromLocal(HwmAllocationPlan.class, loadRequest.getPath(), loadRequest.getFileName()))
-      .collect(Collectors.toList());
+  public Map<Long, HwmAllocationPlan> loadHwmAllocationPlans(PlanType planType, List<LoadRequest> loadRequests) {
+    return loadHwmFromLocal(planType).stream()
+      .collect(Collectors.toMap(plan -> (long) plan.getTags().hashCode(), Function.identity()));
   }
 
   @Override
   public ShaleAllocationPlan loadShaleAllocationPlan(LoadRequest loadRequest) {
-    return loadFromLocal(ShaleAllocationPlan.class, loadRequest.getPath(), loadRequest.getFileName());
+    return loadShaleFromLocal().get(0);
   }
 
   @Override
   public HwmAllocationPlan loadHwmAllocationPlan(LoadRequest loadRequest) {
-    return loadFromLocal(HwmAllocationPlan.class, loadRequest.getPath(), loadRequest.getFileName());
+    return loadHwmFromLocal(loadRequest.getPlanType()).get(0);
   }
 
   @Override
   public SupplyInfo loadSupplyIdMap(String path) {
-    return loadFromLocal(SupplyInfo.class, path, SUPPLY_ID_MAP_FILE_NAME);
+    return loadSupplyInfo();
+  }
+
+  public SupplyInfo loadSupplyInfo() {
+    Path key = Paths.get(baseDir, SUPPLY_ID_MAP_FILE_NAME);
+    try {
+      byte[] bytes = Files.readAllBytes(key);
+      return ProtostuffUtils.deserialize(bytes, SupplyInfo.class);
+    } catch (IOException e) {
+      throw new BusinessException(ErrorCodes.ALLOCATION_DATA_LOAD_FAILED, e, key);
+    }
   }
 
 
-  public <T> T loadFromLocal(Class<T> clazz, String path, String fileName) {
-    Path key = Paths.get(baseDir, path, fileName);
-    try {
-      byte[] bytes = Files.readAllBytes(key);
-      return ProtostuffUtils.deserialize(bytes, clazz);
+  public List<ShaleAllocationPlan> loadShaleFromLocal() {
+    Path dir = Paths.get(baseDir);
+    List<ShaleAllocationPlan> shaleAllocationPlans = new ArrayList<>();
+    try (DirectoryStream<Path> pathStream = Files.newDirectoryStream(dir, "shale*")) {
+      for (Path entry : pathStream) {
+        byte[] bytes = Files.readAllBytes(entry);
+        ShaleAllocationPlan deserialize = ProtostuffUtils.deserialize(bytes, ShaleAllocationPlan.class);
+        shaleAllocationPlans.add(deserialize);
+      }
+      return shaleAllocationPlans;
     } catch (IOException e) {
-      throw new BusinessException(ErrorCodes.ALLOCATION_DATA_LOAD_FAILED, e, key);
+      throw new BusinessException(ErrorCodes.ALLOCATION_DATA_LOAD_FAILED, e, dir);
+    }
+  }
+
+  public List<HwmAllocationPlan> loadHwmFromLocal(PlanType planType) {
+    Path dir = Paths.get(baseDir);
+    List<HwmAllocationPlan> hwmAllocationPlans = new ArrayList<>();
+    String prefix = "hwm" + "|" + planType;
+    try (DirectoryStream<Path> pathStream = Files.newDirectoryStream(dir, prefix + "*")) {
+      for (Path entry : pathStream) {
+        byte[] bytes = Files.readAllBytes(entry);
+        HwmAllocationPlan deserialize = ProtostuffUtils.deserialize(bytes, HwmAllocationPlan.class);
+        hwmAllocationPlans.add(deserialize);
+      }
+      return hwmAllocationPlans;
+    } catch (IOException e) {
+      throw new BusinessException(ErrorCodes.ALLOCATION_DATA_LOAD_FAILED, e, dir);
     }
   }
 
@@ -76,7 +108,8 @@ public class LocalAllocationPlanClient implements AllocationPlanClient {
     byte[] file = ProtostuffUtils.serialize(allocationPlan);
     String md5 = DigestUtils.md5Hex(file);
     path = Paths.get(baseDir, path).toString();
-    String fileName = doUpload(path, file, md5);
+    String fileName = allocationPlan.getTags() + "|" + md5;
+    doUpload(path, file, fileName);
     return UploadResult.builder()
       .breakTypeIds(allocationPlan.getBreakTypeIds())
       .planType(PlanType.SSAI)
@@ -90,18 +123,12 @@ public class LocalAllocationPlanClient implements AllocationPlanClient {
   }
 
   @Override
-  public List<UploadResult> batchUploadShalePlan(String path, List<ShaleAllocationPlan> allocationPlans) {
-    return allocationPlans.stream()
-      .map(allocationPlan -> uploadShalePlan(path, allocationPlan))
-      .collect(Collectors.toList());
-  }
-
-  @Override
   public UploadResult uploadHwmPlan(String path, HwmAllocationPlan allocationPlan) {
     byte[] file = ProtostuffUtils.serialize(allocationPlan);
     String md5 = DigestUtils.md5Hex(file);
     path = Paths.get(baseDir, path).toString();
-    String fileName = doUpload(path, file, md5);
+    String fileName = allocationPlan.getTags() + "|" + md5;
+    doUpload(path, file, fileName);
     return UploadResult.builder()
       .breakTypeIds(allocationPlan.getBreakTypeIds())
       .algorithmType(AlgorithmType.HWM)
@@ -114,12 +141,6 @@ public class LocalAllocationPlanClient implements AllocationPlanClient {
       .build();
   }
 
-  @Override
-  public List<UploadResult> batchUploadHwmPlan(String path, List<HwmAllocationPlan> allocationPlans) {
-    return allocationPlans.stream()
-      .map(allocationPlan -> uploadHwmPlan(path, allocationPlan))
-      .collect(Collectors.toList());
-  }
 
   @Override
   public void uploadSupplyIdMap(String path, Map<String, Integer> supplyIdMap) {
@@ -131,7 +152,7 @@ public class LocalAllocationPlanClient implements AllocationPlanClient {
     doUpload(path, file, SUPPLY_ID_MAP_FILE_NAME);
   }
 
-  private String doUpload(String path, byte[] file, String fileName) {
+  private void doUpload(String path, byte[] file, String fileName) {
     Path filePath = Paths.get(path, fileName);
     try {
       log.info("test file path: {}", filePath);
@@ -141,6 +162,5 @@ public class LocalAllocationPlanClient implements AllocationPlanClient {
     } catch (IOException e) {
       throw new BusinessException(ErrorCodes.ALLOCATION_DATA_UPLOAD_FAILED, e, filePath);
     }
-    return fileName;
   }
 }

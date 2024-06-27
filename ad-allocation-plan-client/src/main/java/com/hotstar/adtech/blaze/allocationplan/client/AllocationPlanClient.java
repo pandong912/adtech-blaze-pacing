@@ -1,5 +1,6 @@
 package com.hotstar.adtech.blaze.allocationplan.client;
 
+import com.hotstar.adtech.blaze.admodel.common.enums.PlanType;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.hwm.HwmAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.ShaleAllocationPlan;
 import com.hotstar.adtech.blaze.allocation.planner.common.response.shale.SupplyInfo;
@@ -12,17 +13,13 @@ import java.util.Map;
 public interface AllocationPlanClient {
   UploadResult uploadShalePlan(String path, ShaleAllocationPlan allocationPlan);
 
-  List<UploadResult> batchUploadShalePlan(String path, List<ShaleAllocationPlan> allocationPlans);
-
   UploadResult uploadHwmPlan(String path, HwmAllocationPlan allocationPlan);
-
-  List<UploadResult> batchUploadHwmPlan(String path, List<HwmAllocationPlan> allocationPlans);
 
   void uploadSupplyIdMap(String path, Map<String, Integer> supplyIdMap);
 
-  List<ShaleAllocationPlan> loadShaleAllocationPlans(List<LoadRequest> loadRequests);
+  Map<Long, ShaleAllocationPlan> loadShaleAllocationPlans(PlanType planType, List<LoadRequest> loadRequests);
 
-  List<HwmAllocationPlan> loadHwmAllocationPlans(List<LoadRequest> loadRequests);
+  Map<Long, HwmAllocationPlan> loadHwmAllocationPlans(PlanType planType, List<LoadRequest> loadRequests);
 
   ShaleAllocationPlan loadShaleAllocationPlan(LoadRequest loadRequest);
 

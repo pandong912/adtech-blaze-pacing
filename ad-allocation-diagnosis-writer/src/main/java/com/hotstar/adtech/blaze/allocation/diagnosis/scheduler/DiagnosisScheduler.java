@@ -11,6 +11,7 @@ import com.hotstar.adtech.blaze.admodel.repository.model.AllocationSyncPoint;
 import com.hotstar.adtech.blaze.allocation.diagnosis.service.AllocationConcurrencyService;
 import com.hotstar.adtech.blaze.allocation.diagnosis.service.HwmPlanService;
 import com.hotstar.adtech.blaze.allocation.diagnosis.service.ShalePlanService;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -37,10 +38,12 @@ public class DiagnosisScheduler {
       .orElseGet(this::buildDefaultSyncPoint);
     List<AllocationPlanResult> rawAllocationPlanResults =
       allocationPlanResultRepository.findFirst20ByIdGreaterThanOrderById(syncPoint.getAllocationPlanResultId());
-    List<AllocationPlanResult> allocationPlanResults = rawAllocationPlanResults.stream()
+    List<AllocationPlanResult> finishedAllocationPlanResults =
+      findFinishedAllocationPlanResults(rawAllocationPlanResults);
+    List<AllocationPlanResult> successAllocationPlanResults = finishedAllocationPlanResults.stream()
       .filter((result) -> result.getTaskStatus() == TaskStatus.SUCCESS)
       .collect(Collectors.toList());
-    Long maxId = allocationPlanResults.stream()
+    Long maxId = finishedAllocationPlanResults.stream()
       .mapToLong(AllocationPlanResult::getId)
       .max()
       .orElse(syncPoint.getAllocationPlanResultId());
@@ -48,7 +51,7 @@ public class DiagnosisScheduler {
       return;
     }
     // write to clickhouse
-    allocationPlanResults
+    successAllocationPlanResults
       .parallelStream()
       .forEach(this::write);
     // save progress
@@ -57,6 +60,18 @@ public class DiagnosisScheduler {
       .build();
     allocationSyncPointRepository.save(newSyncPoint);
     log.info("update allocation sync point to {}", maxId);
+  }
+
+  private List<AllocationPlanResult> findFinishedAllocationPlanResults(
+    List<AllocationPlanResult> rawAllocationPlanResults) {
+    List<AllocationPlanResult> finishedAllocationPlanResults = new ArrayList<>();
+    for (AllocationPlanResult result : rawAllocationPlanResults) {
+      if (!result.getTaskStatus().isFinished()) {
+        break;
+      }
+      finishedAllocationPlanResults.add(result);
+    }
+    return finishedAllocationPlanResults;
   }
 
   private AllocationSyncPoint buildDefaultSyncPoint() {

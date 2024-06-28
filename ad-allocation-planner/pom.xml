@@ -18,7 +18,7 @@
     <dependencies>
         <dependency>
             <groupId>com.hotstar.adtech.blaze</groupId>
-            <artifactId>ad-redis-client</artifactId>
+            <artifactId>ad-reach-redis-client</artifactId>
         </dependency>
         <dependency>
             <groupId>com.hotstar.adtech.blaze</groupId>

@@ -5,6 +5,15 @@ blaze:
   ad-ingester-service:
     swagger:
       enable: false
+  redis:
+    master-replica:
+      master:
+        host: adtech-blaze-ad-prod.qneeam.ng.0001.apse1.cache.amazonaws.com
+        port: 6379
+      replicas:
+        - host: adtech-blaze-ad-prod-ro.qneeam.ng.0001.apse1.cache.amazonaws.com
+          port: 6379
+      default-timeout-mills: 2000
 pulse:
   counter-service:
     endpoint: http://pulse-counter.internal.hotstar.com

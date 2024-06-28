@@ -20,3 +20,12 @@ blaze:
     concurrency-sync-lag: 0
   data-exchanger:
     endpoint: localhost:8097
+  redis:
+    master-replica:
+      master:
+        host: localhost
+        port: 6379
+      replicas:
+        - host: localhost
+          port: 6379
+      default-timeout-mills: 2000

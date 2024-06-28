@@ -1,6 +1,14 @@
 spring:
   profiles:
-    include: ad-model-client-local, ad-redis-client-local
+    include: ad-model-client-local
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
+  data:
+    redis:
+      repositories:
+        enabled: false
 pulse:
   counter-service:
     readTimeout: 30000
@@ -18,3 +26,46 @@ management:
 blaze:
   data-exchanger:
     endpoint: localhost:8097
+  redis:
+    decision-cluster:
+      nodes:
+        - localhost:6379
+      maxRedirects: 10
+      default-timeout-mills: 2000
+    reach-cluster:
+      nodes:
+        - localhost:6379
+      maxRedirects: 10
+      default-timeout-mills: 2000
+    master-replica:
+      master:
+        host: localhost
+        port: 6379
+      replicas:
+        - host: localhost
+          port: 6379
+      default-timeout-mills: 2000
+launch:
+  darkly:
+    vaultConfigPath:
+    enabled:
+      countries: IN
+      platforms:
+    user: ads-np
+    countryCode: in
+    filters:
+      region: ap-south-1
+    relay:
+      host: http://launch-darkly-relay-service-alb-0-int.internal.develop.hotstar.com
+      sdkkey: ${LAUNCH_DARKLY_SDK_KEY}
+      port: 80
+      streamingDelay: 500
+      enabled: true
+      backoff:
+        retry: 3
+        interval: 3000
+    ddb:
+      ttl: 30000
+      enabled: false
+    scheduler:
+      delay: 900000

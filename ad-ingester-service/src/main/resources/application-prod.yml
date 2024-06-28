@@ -7,8 +7,16 @@ blaze:
       enable: false
   data-exchanger:
     endpoint: http://adtech-blaze-data-exchanger-apse1.hotstar-labs.com
+  redis:
+    master-replica:
+      master:
+        host: adtech-blaze-ad-prod.qneeam.ng.0001.apse1.cache.amazonaws.com
+        port: 6379
+      replicas:
+        - host: adtech-blaze-ad-prod-ro.qneeam.ng.0001.apse1.cache.amazonaws.com
+          port: 6379
+      default-timeout-mills: 2000
 pulse:
   counter-service:
     endpoint: https://pf-pulse-counter-service-apse1.hotstar-labs.com
     readTimeout: 5000
-

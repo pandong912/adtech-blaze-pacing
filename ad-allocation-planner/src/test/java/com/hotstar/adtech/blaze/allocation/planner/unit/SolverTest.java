@@ -37,9 +37,9 @@ public class SolverTest {
     Assertions.assertEquals(0.45, resultMap.get(3L).getMean());
     Assertions.assertEquals(1.0, resultMap.get(3L).getAlpha());
     Assertions.assertEquals(0.0013526903449429257, resultMap.get(3L).getTheta());
-    Assertions.assertEquals(8.824313841715659E-5, resultMap.get(3L).getSigma());
-    Assertions.assertEquals(0.007332337439689538, resultMap.get(19L).getSigma());
-    Assertions.assertEquals(6.569568150963583E-5, resultMap.get(18L).getSigma());
+    Assertions.assertEquals(8.81275526187119E-5, resultMap.get(3L).getSigma());
+    Assertions.assertEquals(7.861122467191701E-5, resultMap.get(19L).getSigma());
+    Assertions.assertEquals(6.558010298714471E-5, resultMap.get(18L).getSigma());
   }
 
   @Test

@@ -21,10 +21,6 @@ public interface AllocationPlanClient {
 
   Map<Long, HwmAllocationPlan> loadHwmAllocationPlans(PlanType planType, List<LoadRequest> loadRequests);
 
-  ShaleAllocationPlan loadShaleAllocationPlan(LoadRequest loadRequest);
-
-  HwmAllocationPlan loadHwmAllocationPlan(LoadRequest loadRequest);
-
   SupplyInfo loadSupplyIdMap(String path);
 
 }

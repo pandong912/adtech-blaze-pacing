@@ -2,6 +2,7 @@ package com.hotstar.adtech.blaze.allocation.diagnosis.service;
 
 import static com.hotstar.adtech.blaze.allocation.diagnosis.metric.MetricNames.ALLOCATION_PLAN;
 
+import com.hotstar.adtech.blaze.admodel.common.enums.PlanType;
 import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResult;
 import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResultDetail;
 import com.hotstar.adtech.blaze.allocation.diagnosis.model.AllocationAdSet;
@@ -9,6 +10,7 @@ import com.hotstar.adtech.blaze.allocation.diagnosis.model.AllocationPlan;
 import com.hotstar.adtech.blaze.allocation.diagnosis.sink.AllocationAdSetSink;
 import com.hotstar.adtech.blaze.allocation.diagnosis.sink.AllocationPlanSink;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.HwmAllocationDetail;
+import com.hotstar.adtech.blaze.allocation.planner.common.response.hwm.HwmAllocationPlan;
 import com.hotstar.adtech.blaze.allocationdata.client.AllocationDataClient;
 import com.hotstar.adtech.blaze.allocationdata.client.model.DemandDiagnosis;
 import com.hotstar.adtech.blaze.allocationdata.client.model.GeneralPlanContext;
@@ -37,31 +39,34 @@ public class HwmPlanService {
     String contentId = split[1];
     String versionString = split[2];
     GeneralPlanContext generalPlanContext = allocationDataClient.loadHwmData(contentId, versionString);
+    List<LoadRequest> loadRequests = hwmPlans.stream()
+      .map(hwmPlan -> buildLoadRequest(hwmPlan, result.getPath()))
+      .collect(Collectors.toList());
+    Map<Long, HwmAllocationPlan> ssaiPlans = allocationPlanClient.loadHwmAllocationPlans(PlanType.SSAI, loadRequests);
+    Map<Long, HwmAllocationPlan> spotPlans = allocationPlanClient.loadHwmAllocationPlans(PlanType.SPOT, loadRequests);
 
-    hwmPlans
-      .forEach(detail -> processPlan(contentId, result, generalPlanContext, detail));
+    ssaiPlans.forEach((planId, plan) -> processPlan(contentId, result, generalPlanContext, planId, plan));
+    spotPlans.forEach((planId, plan) -> processPlan(contentId, result, generalPlanContext, planId, plan));
     log.info("hwm plan size:{}", hwmPlans.size());
   }
 
   @Timed(ALLOCATION_PLAN)
   public void processPlan(String contentId, AllocationPlanResult result,
-                          GeneralPlanContext generalPlanContext,
-                          AllocationPlanResultDetail detail) {
+                          GeneralPlanContext generalPlanContext, Long planId, HwmAllocationPlan plan) {
     try {
       // write allocationPlan to clickhouse
       AllocationPlan allocationPlan =
-        AllocationBuilder.getAllocationPlan(contentId, result, generalPlanContext, detail);
+        AllocationBuilder.getHwmAllocationPlan(contentId, result, generalPlanContext, planId, plan);
       allocationPlanSink.writePlan(allocationPlan);
 
       // write allocationAdSet to clickhouse
-      LoadRequest loadRequest = buildLoadRequest(detail, result.getPath());
-      Map<Long, HwmAllocationDetail> resultMap = allocationPlanClient.loadHwmAllocationPlan(loadRequest)
+      Map<Long, HwmAllocationDetail> resultMap = plan
         .getHwmAllocationDetails()
         .stream()
         .collect(Collectors.toMap(HwmAllocationDetail::getAdSetId, Function.identity()));
 
       List<AllocationAdSet> allocationAdSets = generalPlanContext.getDemandDiagnosisList().stream()
-        .map(demandDiagnosis -> buildAllocationAdSet(demandDiagnosis, resultMap, contentId, result, detail))
+        .map(demandDiagnosis -> buildAllocationAdSet(demandDiagnosis, resultMap, contentId, result, planId))
         .collect(Collectors.toList());
       allocationAdSetSink.writeAdSet(allocationAdSets);
     } catch (Exception e) {
@@ -72,7 +77,7 @@ public class HwmPlanService {
 
   private AllocationAdSet buildAllocationAdSet(DemandDiagnosis demandDiagnosis,
                                                Map<Long, HwmAllocationDetail> resultMap, String contentId,
-                                               AllocationPlanResult result, AllocationPlanResultDetail detail) {
+                                               AllocationPlanResult result, Long planId) {
     HwmAllocationDetail hwmAllocationDetail = resultMap.computeIfAbsent(demandDiagnosis.getAdSetId(),
       (id) -> HwmAllocationDetail.builder().build());
     return AllocationAdSet.builder()
@@ -80,16 +85,16 @@ public class HwmPlanService {
       .demand(demandDiagnosis.getDemand())
       .adSetId(demandDiagnosis.getAdSetId())
       .order(demandDiagnosis.getOrder())
-      .planId(detail.getId())
+      .planId(planId)
       .probability(hwmAllocationDetail.getProbability())
       .campaignId(demandDiagnosis.getCampaignId())
       .siMatchId(contentId)
       .delivered(demandDiagnosis.getDelivered())
       .target(demandDiagnosis.getTarget())
-      .theta(0d)
-      .mean(0d)
-      .sigma(0d)
-      .alpha(0d)
+      .theta(-1d)
+      .mean(-1d)
+      .sigma(-1d)
+      .alpha(-1d)
       .build();
   }
 
@@ -99,6 +104,8 @@ public class HwmPlanService {
       .algorithmType(detail.getAlgorithmType())
       .fileName(detail.getFileName())
       .path(path)
+      .planId(detail.getId())
+      .planType(detail.getPlanType())
       .build();
   }
 

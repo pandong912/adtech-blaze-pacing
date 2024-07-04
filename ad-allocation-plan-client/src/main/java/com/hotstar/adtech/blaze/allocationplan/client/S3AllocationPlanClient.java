@@ -119,16 +119,6 @@ public class S3AllocationPlanClient implements AllocationPlanClient {
   }
 
   @Override
-  public ShaleAllocationPlan loadShaleAllocationPlan(LoadRequest loadRequest) {
-    return loadFromS3(ShaleAllocationPlan.class, loadRequest.getPath(), loadRequest.getFileName());
-  }
-
-  @Override
-  public HwmAllocationPlan loadHwmAllocationPlan(LoadRequest loadRequest) {
-    return loadFromS3(HwmAllocationPlan.class, loadRequest.getPath(), loadRequest.getFileName());
-  }
-
-  @Override
   public SupplyInfo loadSupplyIdMap(String path) {
     return loadFromS3(SupplyInfo.class, path, SUPPLY_ID_MAP_FILE_NAME);
   }

@@ -47,16 +47,6 @@ public class LocalAllocationPlanClient implements AllocationPlanClient {
   }
 
   @Override
-  public ShaleAllocationPlan loadShaleAllocationPlan(LoadRequest loadRequest) {
-    return loadShaleFromLocal().get(0);
-  }
-
-  @Override
-  public HwmAllocationPlan loadHwmAllocationPlan(LoadRequest loadRequest) {
-    return loadHwmFromLocal(loadRequest.getPlanType()).get(0);
-  }
-
-  @Override
   public SupplyInfo loadSupplyIdMap(String path) {
     return loadSupplyInfo();
   }

@@ -1,7 +1,4 @@
 blaze:
-  ad-ingester-service:
-    swagger:
-      enable: false
   redis:
     master-replica:
       master:
@@ -14,3 +11,6 @@ pulse:
   counter-service:
     endpoint: http://pulse-counter.internal.hotstar.com
     readTimeout: 5000
+springdoc:
+  swagger-ui:
+    enabled: false

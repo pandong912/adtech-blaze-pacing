@@ -11,6 +11,6 @@ public class MetricRegistryConfig {
 
   @Bean
   public TimedAspect timedAspect(MeterRegistry registry) {
-    return new TimedAspect(registry, ignored -> Collections.emptyList());
+    return new TimedAspect(registry);
   }
 }

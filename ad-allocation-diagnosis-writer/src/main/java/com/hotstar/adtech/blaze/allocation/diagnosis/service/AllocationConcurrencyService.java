@@ -27,21 +27,18 @@ public class AllocationConcurrencyService {
 
   @Timed(ALLOCATION_CONCURRENCY)
   public void writeConcurrency(AllocationPlanResult result) {
-    String[] split = result.getPath().split("/");
-    String contentId = split[1];
-    String versionString = split[2];
-    GeneralPlanContext generalPlanContext = allocationDataClient.loadHwmData(contentId, versionString);
+    GeneralPlanContext generalPlanContext = allocationDataClient.loadHwmData(result.getPath());
     Stream<AllocationCohortConcurrency> streams = generalPlanContext.getConcurrencyData().getStreams().stream()
-      .map(stream -> buildStreamConcurrency(stream, contentId, result));
+      .map(stream -> buildStreamConcurrency(stream, result.getContentId(), result));
 
     Stream<AllocationCohortConcurrency> cohorts = generalPlanContext.getConcurrencyData().getCohorts().stream()
-      .map(cohort -> buildCohortConcurrency(cohort, contentId, result));
+      .map(cohort -> buildCohortConcurrency(cohort, result.getContentId(), result));
 
     List<AllocationCohortConcurrency> collect = Stream.concat(streams, cohorts).collect(Collectors.toList());
     allocationConcurrencySink.write(collect);
 
     log.info("write concurrency data to clickhouse, contentId: {}, version: {}, concurrency: {}",
-      contentId, versionString, collect.size());
+      result.getVersion(), result.getVersion(), collect.size());
   }
 
   private AllocationCohortConcurrency buildCohortConcurrency(ContentCohort cohort, String contentId,

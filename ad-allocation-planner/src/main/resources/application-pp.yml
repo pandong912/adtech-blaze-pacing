@@ -1,4 +1,0 @@
-spring:
-  profiles:
-    include: ad-model-repository-pp, ad-model-client-pp, allocation-plan-client-pp, launch-darkly-nonprod, ad-reach-redis-client-pp, allocation-data-client-pp
-

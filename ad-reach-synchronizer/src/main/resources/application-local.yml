@@ -1,6 +1,3 @@
-spring:
-  profiles:
-    include: ad-reach-redis-client-local, launch-darkly-dev
 feign:
   client:
     config:

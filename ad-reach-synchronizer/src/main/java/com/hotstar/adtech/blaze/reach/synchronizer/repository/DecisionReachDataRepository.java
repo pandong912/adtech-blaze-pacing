@@ -1,14 +1,15 @@
 package com.hotstar.adtech.blaze.reach.synchronizer.repository;
 
-import static com.hotstar.adtech.blaze.pacing.redis.DecisionReachClusterRedisConfig.DECISION_REACH_CLUSTER_TEMPLATE;
+import static com.hotstar.adtech.blaze.reach.synchronizer.config.DecisionReachClusterRedisConfig.DECISION_REACH_CLUSTER_TEMPLATE;
 
-import com.hotstar.adtech.blaze.pacing.redis.DecisionReachClusterRedisConfig;
+import com.hotstar.adtech.blaze.reach.synchronizer.config.DecisionReachClusterRedisConfig;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -24,10 +25,12 @@ public class DecisionReachDataRepository {
   private static final String REACH_BUCKET_PREFIX = "reach-bucket" + DEFAULT_KEY_SPLITTER;
 
   private final RedisTemplate<String, Object> redisTemplate;
+  private final HashOperations<String, String, Double> hashOperations;
 
   public DecisionReachDataRepository(
     @Qualifier(DECISION_REACH_CLUSTER_TEMPLATE) RedisTemplate<String, Object> redisTemplate) {
     this.redisTemplate = redisTemplate;
+    this.hashOperations = redisTemplate.opsForHash();
   }
 
   private static String getReachKey(String contentId, String tsBucket, String cohort) {
@@ -42,7 +45,7 @@ public class DecisionReachDataRepository {
   public void setContentCohortReachRatio(String contentId, String cohort, String tsBucket,
                                          Map<String, Double> unReachData) {
     String key = getReachKey(contentId, tsBucket, cohort);
-    redisTemplate.opsForHash().putAll(key, unReachData);
+    hashOperations.putAll(key, unReachData);
     redisTemplate.expire(key, DEFAULT_TTL_SEC, TimeUnit.SECONDS);
   }
 
@@ -58,7 +61,7 @@ public class DecisionReachDataRepository {
 
   public Map<String, Double> getContentCohortReachRatio(String contentId, String tsBucket, String cohort) {
     String key = getReachKey(contentId, tsBucket, cohort);
-    return redisTemplate.<String, Double>opsForHash().entries(key);
+    return hashOperations.entries(key);
   }
 
   public String getTsBucket(String contentId) {

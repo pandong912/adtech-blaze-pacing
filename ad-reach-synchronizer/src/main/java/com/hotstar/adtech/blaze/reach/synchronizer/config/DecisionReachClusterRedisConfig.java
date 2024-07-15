@@ -1,4 +1,4 @@
-package com.hotstar.adtech.blaze.pacing.redis;
+package com.hotstar.adtech.blaze.reach.synchronizer.config;
 
 import static com.hotstar.adtech.blaze.adserver.data.redis.RedisConst.CONNECTION_FACTORY;
 import static com.hotstar.adtech.blaze.adserver.data.redis.RedisConst.PROPERTIES;
@@ -9,7 +9,6 @@ import com.hotstar.adtech.blaze.adserver.data.redis.model.ClusterConfig;
 import io.lettuce.core.resource.ClientResources;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +17,6 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 
 @Configuration
-@ConditionalOnProperty(name = "blaze.redis.decision-reach-cluster.enable")
 @RequiredArgsConstructor
 public class DecisionReachClusterRedisConfig {
   private static final String DECISION_REACH_CLUSTER = "decisionReachCluster";

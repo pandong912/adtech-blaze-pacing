@@ -9,7 +9,6 @@ import com.hotstar.adtech.blaze.adserver.data.redis.model.ClusterConfig;
 import io.lettuce.core.resource.ClientResources;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +18,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 @Configuration
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "blaze.redis.reach-cluster.enable")
 public class ReachClusterRedisConfig {
   private static final String REACH = "reach";
   private static final String REACH_PROPERTIES = REACH + PROPERTIES;

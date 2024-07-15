@@ -1,8 +1,8 @@
 package com.hotstar.adtech.blaze.ingester.repository;
 
-import static com.hotstar.adtech.blaze.pacing.redis.MasterReplicaRedisConfig.MASTER_REPLICA_TEMPLATE;
+import static com.hotstar.adtech.blaze.ingester.config.MasterReplicaRedisConfig.MASTER_REPLICA_TEMPLATE;
 
-import com.hotstar.adtech.blaze.pacing.redis.MasterReplicaRedisConfig;
+import com.hotstar.adtech.blaze.ingester.config.MasterReplicaRedisConfig;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -30,14 +31,16 @@ public class StreamConcurrencyRepository {
     "content" + DEFAULT_KEY_SPLITTER + "stream-concurrency" + DEFAULT_KEY_SPLITTER;
 
   private final RedisTemplate<String, Object> redisTemplate;
+  private final HashOperations<String, String, Long> hashOperations;
 
   public StreamConcurrencyRepository(@Qualifier(MASTER_REPLICA_TEMPLATE) RedisTemplate<String, Object> redisTemplate) {
     this.redisTemplate = redisTemplate;
+    this.hashOperations = redisTemplate.opsForHash();
   }
 
   public void setContentAllStreamConcurrency(String contentId, String tsBucket, Map<String, Long> concurrencyValues) {
     String key = getStreamConcurrencyKey(contentId, tsBucket);
-    redisTemplate.opsForHash().putAll(key, concurrencyValues);
+    hashOperations.putAll(key, concurrencyValues);
     redisTemplate.expire(key, DEFAULT_TTL_SEC, TimeUnit.SECONDS);
   }
 
@@ -61,7 +64,7 @@ public class StreamConcurrencyRepository {
 
   public Map<String, Long> getContentAllStreamConcurrency(String contentId, String tsBucket) {
     String key = getStreamConcurrencyKey(contentId, tsBucket);
-    return redisTemplate.<String, Long>opsForHash().entries(key);
+    return hashOperations.entries(key);
   }
 
   private String getStreamConcurrencyBucket(String contentId) {

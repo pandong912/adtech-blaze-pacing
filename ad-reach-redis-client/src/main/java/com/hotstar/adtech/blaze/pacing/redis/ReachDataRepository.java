@@ -8,6 +8,7 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -21,10 +22,10 @@ public class ReachDataRepository {
 
   private static final String REACH_KEY_PREFIX = "reach" + DEFAULT_KEY_SPLITTER;
 
-  private final RedisTemplate<String, Object> redisTemplate;
+  private final HashOperations<String, String, Map<String, Double>> hashOperations;
 
-  public ReachDataRepository(@Qualifier(REACH_TEMPLATE) RedisTemplate<String, Object> redisRepository) {
-    this.redisTemplate = redisRepository;
+  public ReachDataRepository(@Qualifier(REACH_TEMPLATE) RedisTemplate<String, Object> redisTemplate) {
+    this.hashOperations = redisTemplate.opsForHash();
   }
 
   private static long getDefaultTsBucket() {
@@ -39,7 +40,7 @@ public class ReachDataRepository {
   public Map<String, Map<String, Double>> batchGetContentCohortReachRatio(String contentId, String tsBucket,
                                                                           int shard) {
     String key = getReachKey(contentId, tsBucket, shard);
-    return redisTemplate.<String, Map<String, Double>>opsForHash().entries(key);
+    return hashOperations.entries(key);
   }
 
   private static String getReachKey(String contentId, String tsBucket, int shard) {
@@ -50,7 +51,7 @@ public class ReachDataRepository {
   public void setContentCohortReachRatio(String contentId, String tsBucket, String cohort,
                                          Map<String, Double> reachRatio) {
     String reachKey = getReachKey(contentId, tsBucket, calculateShardId(cohort));
-    redisTemplate.opsForHash().put(reachKey, cohort, reachRatio);
+    hashOperations.put(reachKey, cohort, reachRatio);
   }
 
   private int calculateShardId(String cohort) {

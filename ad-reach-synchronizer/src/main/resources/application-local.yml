@@ -20,5 +20,3 @@ blaze:
     decision-cluster:
       nodes:
         - localhost:6379
-      maxRedirects: 10
-      default-timeout-mills: 2000

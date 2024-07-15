@@ -1,9 +1,9 @@
 package com.hotstar.adtech.blaze.ingester.repository;
 
-import static com.hotstar.adtech.blaze.pacing.redis.MasterReplicaRedisConfig.MASTER_REPLICA_TEMPLATE;
+import static com.hotstar.adtech.blaze.ingester.config.MasterReplicaRedisConfig.MASTER_REPLICA_TEMPLATE;
 
 import com.hotstar.adtech.blaze.admodel.common.util.MapSplitter;
-import com.hotstar.adtech.blaze.pacing.redis.MasterReplicaRedisConfig;
+import com.hotstar.adtech.blaze.ingester.config.MasterReplicaRedisConfig;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -31,10 +32,12 @@ public class StreamCohortConcurrencyRepository {
     "content" + DEFAULT_KEY_SPLITTER + "stream-cohort-concurrency-bucket" + DEFAULT_KEY_SPLITTER;
 
   private final RedisTemplate<String, Object> redisTemplate;
+  private final HashOperations<String, String, Long> hashOperations;
 
   public StreamCohortConcurrencyRepository(
     @Qualifier(MASTER_REPLICA_TEMPLATE) RedisTemplate<String, Object> redisTemplate) {
     this.redisTemplate = redisTemplate;
+    this.hashOperations = redisTemplate.opsForHash();
   }
 
   private static long getDefaultTsBucket() {
@@ -48,14 +51,14 @@ public class StreamCohortConcurrencyRepository {
 
   public Map<String, Long> getContentStreamAllCohortConcurrency(String contentId, String tsBucket) {
     String key = getStreamCohortConcurrencyKey(contentId, tsBucket);
-    return redisTemplate.<String, Long>opsForHash().entries(key);
+    return hashOperations.entries(key);
   }
 
   public void setContentAllStreamCohortConcurrency(String contentId, String tsBucket,
                                                    Map<String, Long> concurrencyValues) {
     String key = getStreamCohortConcurrencyKey(contentId, tsBucket);
     MapSplitter.partition(concurrencyValues, 500)
-      .forEach(chunk -> redisTemplate.opsForHash().putAll(key, chunk));
+      .forEach(chunk -> hashOperations.putAll(key, chunk));
     redisTemplate.expire(key, DEFAULT_TTL_SEC, TimeUnit.SECONDS);
   }
 

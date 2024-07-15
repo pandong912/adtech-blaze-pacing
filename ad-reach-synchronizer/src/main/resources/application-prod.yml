@@ -8,5 +8,3 @@ blaze:
     decision-cluster:
       nodes:
         - ad-blaze-ds-ad-prod.45zxvp.clustercfg.aps1.cache.amazonaws.com:6379
-      maxRedirects: 10
-      default-timeout-mills: 2000

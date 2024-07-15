@@ -1,4 +1,4 @@
-package com.hotstar.adtech.blaze.pacing.redis;
+package com.hotstar.adtech.blaze.ingester.config;
 
 import static com.hotstar.adtech.blaze.adserver.data.redis.RedisConst.CONNECTION_FACTORY;
 import static com.hotstar.adtech.blaze.adserver.data.redis.RedisConst.PROPERTIES;
@@ -10,7 +10,6 @@ import com.hotstar.adtech.blaze.adserver.data.redis.model.MasterReplicaConfig;
 import io.lettuce.core.resource.ClientResources;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +21,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 @Configuration
-@ConditionalOnProperty(name = "blaze.redis.master-replica.enable")
 @RequiredArgsConstructor
 public class MasterReplicaRedisConfig {
 

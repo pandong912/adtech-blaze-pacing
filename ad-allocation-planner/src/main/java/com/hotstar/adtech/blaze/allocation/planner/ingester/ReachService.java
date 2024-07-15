@@ -2,11 +2,11 @@ package com.hotstar.adtech.blaze.allocation.planner.ingester;
 
 import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.MATCH_REACH_FETCH;
 
-import com.hotstar.adtech.blaze.adserver.data.redis.service.ReachDataRepository;
 import com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames;
 import com.hotstar.adtech.blaze.allocationdata.client.model.DegradationReachStorage;
 import com.hotstar.adtech.blaze.allocationdata.client.model.ReachStorage;
 import com.hotstar.adtech.blaze.allocationdata.client.model.RedisReachStorage;
+import com.hotstar.adtech.blaze.pacing.redis.ReachDataRepository;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Metrics;
 import java.util.Arrays;

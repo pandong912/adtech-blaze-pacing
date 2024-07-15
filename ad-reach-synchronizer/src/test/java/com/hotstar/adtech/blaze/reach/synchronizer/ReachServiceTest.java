@@ -1,8 +1,8 @@
 package com.hotstar.adtech.blaze.reach.synchronizer;
 
-import com.hotstar.adtech.blaze.adserver.data.redis.service.DecisionReachDataRepository;
-import com.hotstar.adtech.blaze.adserver.data.redis.service.ReachDataRepository;
+import com.hotstar.adtech.blaze.pacing.redis.ReachDataRepository;
 import com.hotstar.adtech.blaze.reach.synchronizer.entity.Match;
+import com.hotstar.adtech.blaze.reach.synchronizer.repository.DecisionReachDataRepository;
 import com.hotstar.adtech.blaze.reach.synchronizer.service.ReachService;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -50,7 +50,7 @@ public class ReachServiceTest extends TestEnvConfig {
     adSetMaximiseReach.put(17002L, false);
     Match match = new Match("123", "123");
     reachService.updateMatchReachMatch(match, adSetMaximiseReach);
-    Thread.sleep(3000);
+    Thread.sleep(10000);
     Map<String, Double> contentCohortReachRatio =
       decisionReachDataRepository.getContentCohortReachRatio("123", "P7|SSAI::001");
     Map<String, Double> contentCohortReachRatio1 =

@@ -1,6 +1,6 @@
 spring:
   profiles:
-    include: ad-model-repository-local, ad-model-client-local, allocation-plan-client-local, launch-darkly-dev, ad-redis-client-local
+    include: ad-model-repository-local, ad-model-client-local, allocation-plan-client-local, launch-darkly-dev, ad-reach-redis-client-local
 blaze:
   ad-allocation-planner:
     gap-time: 10

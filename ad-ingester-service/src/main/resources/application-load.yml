@@ -1,6 +1,12 @@
-spring:
-  profiles:
-    include: ad-redis-client-load
 pulse:
   counter-service:
     endpoint: http://pulse-counter.internal.preprod.hotstar.com
+blaze:
+  redis:
+    master-replica:
+      master:
+        host: adtech-blaze-ad-pp.mtjguk.ng.0001.aps1.cache.amazonaws.com
+        port: 6379
+      replicas:
+        - host: adtech-blaze-ad-pp-ro.mtjguk.ng.0001.aps1.cache.amazonaws.com
+          port: 6379

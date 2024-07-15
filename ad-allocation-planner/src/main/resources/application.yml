@@ -7,6 +7,14 @@ spring:
     name: blaze-allocation-planner
   profiles:
     active: local
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
+  data:
+    redis:
+      repositories:
+        enabled: false
   task:
     scheduling:
       shutdown:

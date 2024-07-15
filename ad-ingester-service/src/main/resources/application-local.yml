@@ -1,6 +1,3 @@
-spring:
-  profiles:
-    include: ad-redis-client-local
 pulse:
   counter-service:
     readTimeout: 30000
@@ -20,3 +17,11 @@ blaze:
     concurrency-sync-lag: 0
   data-exchanger:
     endpoint: localhost:8097
+  redis:
+    master-replica:
+      master:
+        host: localhost
+        port: 6379
+      replicas:
+        - host: localhost
+          port: 6379

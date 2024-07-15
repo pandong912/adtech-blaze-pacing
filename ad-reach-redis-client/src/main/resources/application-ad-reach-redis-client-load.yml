@@ -1,0 +1,7 @@
+blaze:
+  redis:
+    reach-cluster:
+      nodes:
+        - ad-blaze-reach-pp.mtjguk.clustercfg.aps1.cache.amazonaws.com:6379
+      maxRedirects: 10
+      default-timeout-mills: 2000

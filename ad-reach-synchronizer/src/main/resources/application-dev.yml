@@ -1,3 +1,8 @@
 spring:
   profiles:
-    include: ad-redis-client-dev, launch-darkly-dev
+    include: ad-reach-redis-client-dev, launch-darkly-dev
+blaze:
+  redis:
+    decision-cluster:
+      nodes:
+        - ad-blaze-ds-ad-dev.mtjguk.clustercfg.aps1.cache.amazonaws.com:6379

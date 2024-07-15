@@ -3,6 +3,14 @@ spring:
     name: blaze-ingester-service
   profiles:
     active: local
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
+  data:
+    redis:
+      repositories:
+        enabled: false
   task:
     scheduling:
       shutdown:
@@ -40,7 +48,7 @@ management:
 blaze:
   redis:
     master-replica:
-      enable: true
+      default-timeout-mills: 2000
     beacon-cluster:
       enable: true
   data-exchanger:

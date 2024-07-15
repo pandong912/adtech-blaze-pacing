@@ -1,3 +1,8 @@
 spring:
   profiles:
-    include: ad-redis-client-qa, launch-darkly-nonprod
+    include: ad-reach-redis-client-qa, launch-darkly-nonprod
+blaze:
+  redis:
+    decision-cluster:
+      nodes:
+        - ad-blaze-ds-ad-qa.mtjguk.clustercfg.aps1.cache.amazonaws.com:6379

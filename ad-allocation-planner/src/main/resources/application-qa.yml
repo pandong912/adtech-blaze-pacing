@@ -1,4 +1,4 @@
 spring:
   profiles:
-    include: ad-model-repository-qa, ad-model-client-qa, allocation-plan-client-qa, launch-darkly-nonprod, ad-redis-client-qa, allocation-data-client-qa
+    include: ad-model-repository-qa, ad-model-client-qa, allocation-plan-client-qa, launch-darkly-nonprod, ad-reach-redis-client-qa, allocation-data-client-qa
 

@@ -3,17 +3,17 @@ package com.hotstar.adtech.blaze.ingester;
 import com.hotstar.adtech.blaze.admodel.common.enums.Ladder;
 import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
 import com.hotstar.adtech.blaze.admodel.common.enums.Tenant;
-import com.hotstar.adtech.blaze.adserver.data.redis.service.StreamCohortConcurrencyRepository;
-import com.hotstar.adtech.blaze.adserver.data.redis.service.StreamConcurrencyRepository;
 import com.hotstar.adtech.blaze.ingester.entity.ConcurrencyGroup;
 import com.hotstar.adtech.blaze.ingester.entity.Match;
 import com.hotstar.adtech.blaze.ingester.entity.SingleStream;
+import com.hotstar.adtech.blaze.ingester.repository.StreamCohortConcurrencyRepository;
+import com.hotstar.adtech.blaze.ingester.repository.StreamConcurrencyRepository;
 import com.hotstar.adtech.blaze.ingester.service.ConcurrencyService;
 import com.hotstar.adtech.blaze.ingester.service.PulseService;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -65,7 +65,7 @@ public class ConcurrencyServiceTest extends TestEnvConfig {
   }
 
   private Map<String, String> getStreamMappingConverter() {
-    return Arrays.asList(
+    return Stream.of(
       SingleStream.builder()
         .playoutId("P1")
         .ads(StreamType.SSAI_Spot.getAds())
@@ -101,7 +101,7 @@ public class ConcurrencyServiceTest extends TestEnvConfig {
           .language("tel")
           .tenant(Tenant.India.getName())
           .build()
-      ).stream()
+      )
       .collect(Collectors.toMap(SingleStream::getKey, SingleStream::getPlayoutId));
   }
 

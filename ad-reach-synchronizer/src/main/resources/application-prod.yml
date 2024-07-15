@@ -1,7 +1,10 @@
 spring:
   profiles:
-    include: ad-redis-client-prod-eks, launch-darkly-prod
+    include: ad-reach-redis-client-prod, launch-darkly-prod
 blaze:
   data-exchanger:
     endpoint: adtech-blaze-data-exchanger-service.internal.sgp.hotstar.com
-
+  redis:
+    decision-cluster:
+      nodes:
+        - ad-blaze-ds-ad-prod.45zxvp.clustercfg.aps1.cache.amazonaws.com:6379

@@ -31,11 +31,11 @@ management:
 blaze:
   redis:
     reach-cluster:
-      enable: true
       timeout-mills: 10000
-    decision-reach-cluster:
-      enable: true
+    decision-cluster:
+      maxRedirects: 10
       timeout-mills: 500
+      default-timeout-mills: 2000
   data-exchanger:
     endpoint: adtech-blaze-data-exchanger-service.internal.hotstar.com
     retryer:

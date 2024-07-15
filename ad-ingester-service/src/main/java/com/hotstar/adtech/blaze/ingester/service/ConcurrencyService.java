@@ -2,12 +2,12 @@ package com.hotstar.adtech.blaze.ingester.service;
 
 import static com.hotstar.adtech.blaze.ingester.metric.MetricNames.INVALID_CONCURRENCY;
 
-import com.hotstar.adtech.blaze.adserver.data.redis.service.StreamCohortConcurrencyRepository;
-import com.hotstar.adtech.blaze.adserver.data.redis.service.StreamConcurrencyRepository;
 import com.hotstar.adtech.blaze.ingester.entity.ConcurrencyGroup;
 import com.hotstar.adtech.blaze.ingester.entity.Match;
 import com.hotstar.adtech.blaze.ingester.metric.MetricNames;
 import com.hotstar.adtech.blaze.ingester.metric.MetricTags;
+import com.hotstar.adtech.blaze.ingester.repository.StreamCohortConcurrencyRepository;
+import com.hotstar.adtech.blaze.ingester.repository.StreamConcurrencyRepository;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Metrics;
 import java.util.Map;

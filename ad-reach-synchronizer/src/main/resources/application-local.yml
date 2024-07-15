@@ -1,6 +1,6 @@
 spring:
   profiles:
-    include: ad-redis-client-local, launch-darkly-dev
+    include: ad-reach-redis-client-local, launch-darkly-dev
 feign:
   client:
     config:
@@ -16,3 +16,7 @@ blaze:
     reach-sync-lag: 0
   data-exchanger:
     endpoint: localhost:8097
+  redis:
+    decision-cluster:
+      nodes:
+        - localhost:6379

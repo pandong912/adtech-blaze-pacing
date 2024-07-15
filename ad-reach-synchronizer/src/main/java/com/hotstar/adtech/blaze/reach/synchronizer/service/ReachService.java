@@ -1,11 +1,11 @@
 package com.hotstar.adtech.blaze.reach.synchronizer.service;
 
 import com.google.common.base.Stopwatch;
-import com.hotstar.adtech.blaze.adserver.data.redis.service.DecisionReachDataRepository;
-import com.hotstar.adtech.blaze.adserver.data.redis.service.ReachDataRepository;
+import com.hotstar.adtech.blaze.pacing.redis.ReachDataRepository;
 import com.hotstar.adtech.blaze.reach.synchronizer.entity.Match;
 import com.hotstar.adtech.blaze.reach.synchronizer.metric.MetricNames;
 import com.hotstar.adtech.blaze.reach.synchronizer.metric.MetricTags;
+import com.hotstar.adtech.blaze.reach.synchronizer.repository.DecisionReachDataRepository;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Metrics;
 import java.time.Instant;

@@ -3,6 +3,14 @@ spring:
     name: blaze-reach-synchronizer
   profiles:
     active: local
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
+  data:
+    redis:
+      repositories:
+        enabled: false
 management:
   server:
     port: 8081

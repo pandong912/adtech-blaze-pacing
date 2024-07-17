@@ -16,4 +16,8 @@ public class ShaleAllocationPlan {
   private int duration;
   private List<ShaleAllocationDetail> shaleAllocationDetails;
   private List<ShaleSupplyAllocationDetail> shaleSupplyAllocationDetails;
+
+  public String getTags() {
+    return "shale" + "|" + "SSAI" + "|" + "breakType_" + breakTypeIds + "|" + "duration_" + duration;
+  }
 }

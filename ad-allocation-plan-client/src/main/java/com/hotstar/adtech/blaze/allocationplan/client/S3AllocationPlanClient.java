@@ -50,7 +50,8 @@ public class S3AllocationPlanClient implements AllocationPlanClient {
   public UploadResult uploadShalePlan(String path, ShaleAllocationPlan allocationPlan) {
     byte[] file = ProtostuffUtils.serialize(allocationPlan);
     String md5 = DigestUtils.md5Hex(file);
-    String fileName = doUpload(file, path, md5);
+    String fileName = allocationPlan.getTags() + "|" + md5;
+    doUpload(file, path, fileName);
     return UploadResult.builder()
       .breakTypeIds(allocationPlan.getBreakTypeIds())
       .algorithmType(AlgorithmType.SHALE)
@@ -63,18 +64,13 @@ public class S3AllocationPlanClient implements AllocationPlanClient {
       .build();
   }
 
-  @Override
-  public List<UploadResult> batchUploadShalePlan(String path, List<ShaleAllocationPlan> allocationPlans) {
-    return allocationPlans.stream()
-      .map(allocationPlan -> uploadShalePlan(path, allocationPlan))
-      .collect(Collectors.toList());
-  }
 
   @Override
   public UploadResult uploadHwmPlan(String path, HwmAllocationPlan allocationPlan) {
     byte[] file = ProtostuffUtils.serialize(allocationPlan);
     String md5 = DigestUtils.md5Hex(file);
-    String fileName = doUpload(file, path, md5);
+    String fileName = allocationPlan.getTags() + "|" + md5;
+    doUpload(file, path, fileName);
     return UploadResult.builder()
       .breakTypeIds(allocationPlan.getBreakTypeIds())
       .planType(allocationPlan.getPlanType())
@@ -87,12 +83,6 @@ public class S3AllocationPlanClient implements AllocationPlanClient {
       .build();
   }
 
-  @Override
-  public List<UploadResult> batchUploadHwmPlan(String path, List<HwmAllocationPlan> allocationPlans) {
-    return allocationPlans.stream()
-      .map(allocationPlan -> uploadHwmPlan(path, allocationPlan))
-      .collect(Collectors.toList());
-  }
 
   @Override
   public void uploadSupplyIdMap(String path, Map<String, Integer> supplyIdMap) {
@@ -105,27 +95,27 @@ public class S3AllocationPlanClient implements AllocationPlanClient {
 
 
   @Override
-  public List<ShaleAllocationPlan> loadShaleAllocationPlans(List<LoadRequest> loadRequests) {
-    return loadRequests.stream()
-      .map(loadRequest -> loadFromS3(ShaleAllocationPlan.class, loadRequest.getPath(), loadRequest.getFileName()))
+  public Map<Long, ShaleAllocationPlan> loadShaleAllocationPlans(PlanType planType,
+                                                                 List<LoadRequest> loadRequests) {
+    List<LoadRequest> selectedPlan = loadRequests.stream()
+      .filter(loadRequest -> planType == loadRequest.getPlanType())
+      .filter(loadRequest -> AlgorithmType.SHALE == loadRequest.getAlgorithmType())
       .collect(Collectors.toList());
+    return selectedPlan.stream()
+      .collect(Collectors.toMap(LoadRequest::getPlanId,
+        l -> loadFromS3(ShaleAllocationPlan.class, l.getPath(), l.getFileName())));
   }
 
   @Override
-  public List<HwmAllocationPlan> loadHwmAllocationPlans(List<LoadRequest> loadRequests) {
-    return loadRequests.stream()
-      .map(loadRequest -> loadFromS3(HwmAllocationPlan.class, loadRequest.getPath(), loadRequest.getFileName()))
+  public Map<Long, HwmAllocationPlan> loadHwmAllocationPlans(PlanType planType,
+                                                             List<LoadRequest> loadRequests) {
+    List<LoadRequest> selectedPlan = loadRequests.stream()
+      .filter(loadRequest -> planType == loadRequest.getPlanType())
+      .filter(loadRequest -> AlgorithmType.HWM == loadRequest.getAlgorithmType())
       .collect(Collectors.toList());
-  }
-
-  @Override
-  public ShaleAllocationPlan loadShaleAllocationPlan(LoadRequest loadRequest) {
-    return loadFromS3(ShaleAllocationPlan.class, loadRequest.getPath(), loadRequest.getFileName());
-  }
-
-  @Override
-  public HwmAllocationPlan loadHwmAllocationPlan(LoadRequest loadRequest) {
-    return loadFromS3(HwmAllocationPlan.class, loadRequest.getPath(), loadRequest.getFileName());
+    return selectedPlan.stream()
+      .collect(Collectors.toMap(LoadRequest::getPlanId,
+        l -> loadFromS3(HwmAllocationPlan.class, l.getPath(), l.getFileName())));
   }
 
   @Override
@@ -133,7 +123,7 @@ public class S3AllocationPlanClient implements AllocationPlanClient {
     return loadFromS3(SupplyInfo.class, path, SUPPLY_ID_MAP_FILE_NAME);
   }
 
-  private String doUpload(byte[] file, String path, String fileName) {
+  private void doUpload(byte[] file, String path, String fileName) {
     String key = Paths.get(path, fileName).toString();
     try (InputStream is = new ByteArrayInputStream(file)) {
       ObjectMetadata metadata = new ObjectMetadata();
@@ -142,7 +132,6 @@ public class S3AllocationPlanClient implements AllocationPlanClient {
     } catch (IOException e) {
       throw new BusinessException(ErrorCodes.ALLOCATION_DATA_UPLOAD_FAILED, e, bucketName + "/" + key);
     }
-    return fileName;
   }
 
   private <T> T loadFromS3(Class<T> clazz, String path, String fileName) {

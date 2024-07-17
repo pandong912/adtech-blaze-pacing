@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.hotstar.adtech.blaze</groupId>
         <artifactId>blaze-pacing</artifactId>
-        <version>1.8.3-SNAPSHOT</version>
+        <version>1.8.5-SNAPSHOT</version>
     </parent>
 
     <artifactId>ad-allocation-planner-common</artifactId>

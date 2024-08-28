@@ -1,6 +1,3 @@
-spring:
-  profiles:
-    include: ad-reach-redis-client-prod, launch-darkly-prod
 blaze:
   redis:
     decision-cluster:

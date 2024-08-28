@@ -65,7 +65,7 @@ public class AllocationPlanWorker {
 
   private UploadResult generateHwmPlan(AllocationPlanResultDetail subtask, AllocationPlanResult task) {
     GeneralPlanContext generalPlanContext =
-      allocationDataLoader.loadGeneralData(task.getContentId(), task.getVersion());
+      allocationDataLoader.loadGeneralData(task.getPath());
     HwmAllocationPlan hwmAllocationPlan =
       hwmPlanWorker.generatePlans(generalPlanContext, subtask.getPlanType(),
         parseBreakTypeIds(subtask.getBreakTypeIds()), subtask.getDuration());
@@ -75,7 +75,7 @@ public class AllocationPlanWorker {
 
   private UploadResult generateShalePlan(AllocationPlanResultDetail subtask, AllocationPlanResult task) {
     ShalePlanContext shalePlanContext =
-      allocationDataLoader.loadShaleData(task.getContentId(), task.getVersion());
+      allocationDataLoader.loadShaleData(task.getPath());
     ShaleAllocationPlan shaleAllocationPlan =
       shalePlanWorker.generatePlans(shalePlanContext, subtask.getPlanType(),
         parseBreakTypeIds(subtask.getBreakTypeIds()), subtask.getDuration());

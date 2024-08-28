@@ -38,11 +38,9 @@ public class ShalePlanService {
     if (shalePlans.isEmpty()) {
       return;
     }
-    String[] split = result.getPath().split("/");
-    String contentId = split[1];
-    String versionString = split[2];
+    String contentId = result.getContentId();
     GeneralPlanContext generalPlanContext =
-      allocationDataClient.loadShaleData(contentId, versionString).getGeneralPlanContext();
+      allocationDataClient.loadShaleData(result.getPath()).getGeneralPlanContext();
     List<LoadRequest> loadRequests = shalePlans.stream()
       .map(shalePlan -> buildLoadRequest(shalePlan, result.getPath()))
       .collect(Collectors.toList());

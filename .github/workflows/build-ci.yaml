@@ -25,7 +25,7 @@ jobs:
       TRUNK_BRANCH_NAME: master
       HARNESS_WEBHOOK: RKUICdPdce717uOns0dnh7PeaHxbKphMuavziZAV
       MAVEN_SETTINGS_PATHS: 'secret/non-prod/adtech/nexus/release secret/non-prod/adtech/nexus/snapshot secret/non-prod/adtech/nexus/launchdarkly'
-      JAVA_VERSION: 8
+      JAVA_VERSION: 21
       PRE_BUILD_SCRIPT_PATH: 'mvn clean package -pl ad-allocation-planner -am -Dmaven.test.skip=true'
       CUSTOM_UNIT_TEST_SCRIPT: 'mvn clean test -pl ad-allocation-planner -am'
   build-ad-ingester-service:
@@ -42,7 +42,7 @@ jobs:
       TRUNK_BRANCH_NAME: master
       HARNESS_WEBHOOK: luCSjvyaHAcKnIa4Vnrgd0rvxWjnSbindbo0pwEb
       MAVEN_SETTINGS_PATHS: 'secret/non-prod/adtech/nexus/release secret/non-prod/adtech/nexus/snapshot'
-      JAVA_VERSION: 8
+      JAVA_VERSION: 21
       PRE_BUILD_SCRIPT_PATH: 'mvn clean package -pl ad-ingester-service -am -Dmaven.test.skip=true'
       CUSTOM_UNIT_TEST_SCRIPT: 'mvn clean test -pl ad-ingester-service -am'
   build-ci-reach-synchronizer:
@@ -59,7 +59,7 @@ jobs:
       TRUNK_BRANCH_NAME: master
       HARNESS_WEBHOOK: 1bjWVdjKBpV3qV5Gk5Nmd8RNWZOorIAsUX0yPPBt
       MAVEN_SETTINGS_PATHS: 'secret/non-prod/adtech/nexus/release secret/non-prod/adtech/nexus/snapshot secret/non-prod/adtech/nexus/launchdarkly'
-      JAVA_VERSION: 8
+      JAVA_VERSION: 21
       PRE_BUILD_SCRIPT_PATH: 'mvn clean package -pl ad-reach-synchronizer -am -Dmaven.test.skip=true'
       CUSTOM_UNIT_TEST_SCRIPT: 'mvn clean test -pl ad-reach-synchronizer -am'
   build-ci-ad-allocation-diagnosis-writer:
@@ -76,6 +76,6 @@ jobs:
       TRUNK_BRANCH_NAME: master
       HARNESS_WEBHOOK: 1bjWVdjKBpV3qV5Gk5Nmd8RNWZOorIAsUX0yPPBt
       MAVEN_SETTINGS_PATHS: 'secret/non-prod/adtech/nexus/release secret/non-prod/adtech/nexus/snapshot secret/non-prod/adtech/nexus/launchdarkly'
-      JAVA_VERSION: 8
+      JAVA_VERSION: 21
       PRE_BUILD_SCRIPT_PATH: 'mvn clean package -pl ad-allocation-diagnosis-writer -am -Dmaven.test.skip=true'
       CUSTOM_UNIT_TEST_SCRIPT: 'mvn clean test -pl ad-allocation-diagnosis-writer -am'

@@ -9,9 +9,9 @@ public interface AllocationDataClient {
 
   void uploadHwmData(String contentId, String version, GeneralPlanContext generalPlanContext);
 
-  ShalePlanContext loadShaleData(String contentId, String version);
+  ShalePlanContext loadShaleData(String allocationPlanPath);
 
-  GeneralPlanContext loadHwmData(String contentId, String version);
+  GeneralPlanContext loadHwmData(String allocationPlanPath);
 
 }
 

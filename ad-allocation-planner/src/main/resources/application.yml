@@ -1,12 +1,15 @@
 spring:
-  datasource:
-    hikari:
-      maximum-pool-size: 20
-      minimum-idle: 1
-  application:
-    name: blaze-allocation-planner
   profiles:
     active: local
+    group:
+     local: ad-model-repository-local, ad-model-client-local, allocation-plan-client-local, launch-darkly-dev, ad-reach-redis-client-local
+     dev: ad-model-repository-dev, ad-model-client-dev, allocation-plan-client-dev, launch-darkly-dev, ad-reach-redis-client-dev, allocation-data-client-dev
+     qa: ad-model-repository-qa, ad-model-client-qa, allocation-plan-client-qa, launch-darkly-nonprod, ad-reach-redis-client-qa, allocation-data-client-qa
+     pp: ad-model-repository-pp, ad-model-client-pp, allocation-plan-client-pp, launch-darkly-nonprod, ad-reach-redis-client-pp, allocation-data-client-pp
+     load: ad-model-repository-load, ad-model-client-load, allocation-plan-client-pp, launch-darkly-nonprod, ad-reach-redis-client-load, allocation-data-client-pp
+     pp-test: ad-model-repository-pp, ad-model-client-pp, allocation-plan-client-pp, launch-darkly-nonprod, ad-reach-redis-client-pp, allocation-data-client-pp
+     prod: ad-model-repository-prod, ad-model-client-prod, allocation-plan-client-prod, launch-darkly-prod, ad-reach-redis-client-prod, allocation-data-client-prod
+     prod-eks: ad-model-repository-prod, ad-model-client-prod, allocation-plan-client-prod, launch-darkly-prod, ad-reach-redis-client-prod, allocation-data-client-prod
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
@@ -15,6 +18,12 @@ spring:
     redis:
       repositories:
         enabled: false
+  datasource:
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 1
+  application:
+    name: blaze-allocation-planner
   task:
     scheduling:
       shutdown:

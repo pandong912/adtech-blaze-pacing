@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 public class LocalAllocationDataClient implements AllocationDataClient {
 
   private static final String ALLOCATION_PLAN_DATA = "allocation-plan-data";
+  private static final String ALLOCATION_PLAN = "allocation-plan";
   private static final String SHALE_PLAN_DATA = "shale-plan-data";
   private static final String HWM_PLAN_DATA = "hwm-plan-data";
   private final String baseDir;
@@ -67,13 +68,17 @@ public class LocalAllocationDataClient implements AllocationDataClient {
   }
 
   @Override
-  public ShalePlanContext loadShaleData(String contentId, String version) {
+  public ShalePlanContext loadShaleData(String allocationPlanPath) {
+    String[] split = allocationPlanPath.split("/");
+    String contentId = split[1];
     String path = Paths.get(ALLOCATION_PLAN_DATA, contentId).toString();
     return loadFromLocal(ShalePlanContext.class, path, SHALE_PLAN_DATA);
   }
 
   @Override
-  public GeneralPlanContext loadHwmData(String contentId, String version) {
+  public GeneralPlanContext loadHwmData(String allocationPlanPath) {
+    String[] split = allocationPlanPath.split("/");
+    String contentId = split[1];
     String path = Paths.get(ALLOCATION_PLAN_DATA, contentId).toString();
     return loadFromLocal(GeneralPlanContext.class, path, HWM_PLAN_DATA);
   }

@@ -3,9 +3,12 @@
     <parent>
         <artifactId>blaze-pacing</artifactId>
         <groupId>com.hotstar.adtech.blaze</groupId>
-        <version>1.8.5-SNAPSHOT</version>
+        <version>1.9.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+    <properties>
+        <java.version>8</java.version>
+    </properties>
 
     <artifactId>ad-allocation-plan-client</artifactId>
 
@@ -26,6 +29,10 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-sts</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>

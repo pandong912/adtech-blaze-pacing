@@ -1,6 +1,3 @@
-spring:
-  profiles:
-    include: ad-model-repository-local, ad-model-client-local, allocation-plan-client-local, allocation-data-client-local
 blaze:
   data-exchanger:
     endpoint: localhost:8097

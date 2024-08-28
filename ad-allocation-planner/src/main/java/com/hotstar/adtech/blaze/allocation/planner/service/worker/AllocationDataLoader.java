@@ -8,6 +8,7 @@ import com.hotstar.adtech.blaze.allocationdata.client.model.GeneralPlanContext;
 import com.hotstar.adtech.blaze.allocationdata.client.model.ShalePlanContext;
 import io.micrometer.core.annotation.Timed;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -20,15 +21,15 @@ public class AllocationDataLoader {
   @Cacheable(cacheNames = CacheConfig.SHALE_DATA,
     cacheManager = CacheConfig.CACHE_MANAGER, sync = true)
   @Timed(value = WORKER_DATA_LOAD, extraTags = {"algorithm", "shale"})
-  public ShalePlanContext loadShaleData(String contentId, Instant version) {
-    return allocationDataClient.loadShaleData(contentId, version.toString());
+  public ShalePlanContext loadShaleData(String path) {
+    return allocationDataClient.loadShaleData(path);
   }
 
   @Timed(value = WORKER_DATA_LOAD, extraTags = {"algorithm", "hwm"})
   @Cacheable(cacheNames = CacheConfig.HWM_DATA,
     cacheManager = CacheConfig.CACHE_MANAGER, sync = true)
-  public GeneralPlanContext loadGeneralData(String contentId, Instant version) {
-    return allocationDataClient.loadHwmData(contentId, version.toString());
+  public GeneralPlanContext loadGeneralData(String path) {
+    return allocationDataClient.loadHwmData(path);
   }
 }
 

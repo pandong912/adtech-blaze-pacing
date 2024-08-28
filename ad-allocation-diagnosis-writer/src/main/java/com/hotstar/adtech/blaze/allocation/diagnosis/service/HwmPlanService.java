@@ -35,10 +35,8 @@ public class HwmPlanService {
   private final AllocationAdSetSink allocationAdSetSink;
 
   public void writeClickhouse(AllocationPlanResult result, List<AllocationPlanResultDetail> hwmPlans) {
-    String[] split = result.getPath().split("/");
-    String contentId = split[1];
-    String versionString = split[2];
-    GeneralPlanContext generalPlanContext = allocationDataClient.loadHwmData(contentId, versionString);
+    String contentId = result.getContentId();
+    GeneralPlanContext generalPlanContext = allocationDataClient.loadHwmData(result.getPath());
     List<LoadRequest> loadRequests = hwmPlans.stream()
       .map(hwmPlan -> buildLoadRequest(hwmPlan, result.getPath()))
       .collect(Collectors.toList());

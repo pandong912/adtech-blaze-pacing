@@ -25,6 +25,7 @@ import org.apache.commons.io.IOUtils;
 public class S3AllocationDataClient implements AllocationDataClient {
 
   private static final String ALLOCATION_PLAN_DATA = "allocation-plan-data";
+  private static final String ALLOCATION_PLAN = "allocation-plan";
   private static final String SHALE_PLAN_DATA = "shale-plan-data";
   private static final String HWM_PLAN_DATA = "hwm-plan-data";
   private static final int S3_LOAD_BUF_SIZE = 1024 * 4;
@@ -88,14 +89,14 @@ public class S3AllocationDataClient implements AllocationDataClient {
   }
 
   @Override
-  public ShalePlanContext loadShaleData(String contentId, String version) {
-    String path = Paths.get(ALLOCATION_PLAN_DATA, contentId, version).toString();
+  public ShalePlanContext loadShaleData(String allocationPlanPath) {
+    String path = allocationPlanPath.replace(ALLOCATION_PLAN, ALLOCATION_PLAN_DATA);
     return loadFromS3(ShalePlanContext.class, path, SHALE_PLAN_DATA);
   }
 
   @Override
-  public GeneralPlanContext loadHwmData(String contentId, String version) {
-    String path = Paths.get(ALLOCATION_PLAN_DATA, contentId, version).toString();
+  public GeneralPlanContext loadHwmData(String allocationPlanPath) {
+    String path = allocationPlanPath.replace(ALLOCATION_PLAN, ALLOCATION_PLAN_DATA);
     return loadFromS3(GeneralPlanContext.class, path, HWM_PLAN_DATA);
   }
 }

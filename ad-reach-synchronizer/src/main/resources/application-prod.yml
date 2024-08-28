@@ -1,7 +1,4 @@
-spring:
-  profiles:
-    include: ad-reach-redis-client-prod, launch-darkly-prod
-blaze:
+ blaze:
   data-exchanger:
     endpoint: adtech-blaze-data-exchanger-service.internal.sgp.hotstar.com
   redis:

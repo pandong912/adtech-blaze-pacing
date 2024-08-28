@@ -6,6 +6,9 @@
         <version>1.8.5-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
+    <properties>
+        <java.version>8</java.version>
+    </properties>
 
     <artifactId>ad-allocation-plan-client</artifactId>
 

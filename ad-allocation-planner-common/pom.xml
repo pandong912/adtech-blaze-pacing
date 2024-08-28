@@ -6,6 +6,9 @@
         <artifactId>blaze-pacing</artifactId>
         <version>1.8.5-SNAPSHOT</version>
     </parent>
+    <properties>
+        <java.version>8</java.version>
+    </properties>
 
     <artifactId>ad-allocation-planner-common</artifactId>
 

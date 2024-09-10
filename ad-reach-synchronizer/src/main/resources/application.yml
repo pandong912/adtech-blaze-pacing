@@ -7,8 +7,8 @@ spring:
       dev: ad-reach-redis-client-dev, launch-darkly-dev
       local: ad-reach-redis-client-local, launch-darkly-dev
       pp: ad-reach-redis-client-pp, launch-darkly-nonprod
-      prod: ad-reach-redis-client-prod-eks, launch-darkly-prod
-      prod-eks: ad-reach-redis-client-prod-eks, launch-darkly-prod
+      prod: ad-reach-redis-client-prod, launch-darkly-prod
+      prod-eks: ad-reach-redis-client-prod, launch-darkly-prod
       load: ad-reach-redis-client-load, launch-darkly-nonprod
       qa: ad-reach-redis-client-qa, launch-darkly-nonprod
   autoconfigure:

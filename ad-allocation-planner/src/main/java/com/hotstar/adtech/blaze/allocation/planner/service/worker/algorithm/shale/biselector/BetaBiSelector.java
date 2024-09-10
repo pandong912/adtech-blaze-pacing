@@ -22,14 +22,14 @@ public class BetaBiSelector {
         double betaMin = 0;
         double betaMax = 0;
 
-        double calculateBMax = calculateBMax(supply);
-        betaMax = Math.max(betaMax, calculateBMax);
+        double calculateBetaMax = calculateBetaMax(supply);
+        betaMax = Math.max(betaMax, calculateBetaMax);
         double beta = bisectBeta(betaMin, betaMax + 1, supply);
         supply.setBeta(beta);
       });
   }
 
-  private double calculateBMax(ShaleSupply supply) {
+  private double calculateBetaMax(ShaleSupply supply) {
     double max = 0;
     for (ShaleDemand demand : graph.getDemands()) {
       if (graph.isQualified(demand, supply)) {

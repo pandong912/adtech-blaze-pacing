@@ -30,6 +30,7 @@ public class DataProcessService {
       .adDuration(demandDiagnosis.getAdDuration())
       .maximizeReach(demandDiagnosis.getMaximizeReach())
       .reachIndex(demandDiagnosis.getReachIndex())
+      .remainDelivery(demandDiagnosis.getTarget() - demandDiagnosis.getDelivered())
       .build();
   }
 

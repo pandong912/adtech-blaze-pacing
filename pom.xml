@@ -39,8 +39,8 @@
         <commons-collections4.version>4.4</commons-collections4.version>
         <commons-io.version>2.7</commons-io.version>
         <protostuff.version>1.6.0</protostuff.version>
-        <plugin.checkstyle.version>3.0.0</plugin.checkstyle.version>
-        <checkstyle.version>8.13</checkstyle.version>
+        <plugin.checkstyle.version>3.2.1</plugin.checkstyle.version>
+        <checkstyle.version>10.9.2</checkstyle.version>
         <repository-id>ads-release</repository-id>
         <repository-url>https://nexus.hotstar-labs.com/repository/ads-release/
         </repository-url>
@@ -425,7 +425,6 @@
                     <failsOnError>false</failsOnError>
                     <failOnViolation>true</failOnViolation>
                     <violationSeverity>warning</violationSeverity>
-                    <encoding>UTF-8</encoding>
                     <sourceDirectories>
                         <sourceDirectory>${project.build.sourceDirectory}
                         </sourceDirectory>

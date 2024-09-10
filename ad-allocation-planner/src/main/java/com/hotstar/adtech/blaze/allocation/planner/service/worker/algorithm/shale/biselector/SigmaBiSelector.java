@@ -21,24 +21,24 @@ public class SigmaBiSelector {
       .forEach(demand -> {
         double sigmaMin = 0;
         double sigmaMax = 0;
-        double calculatedZMax = getCalculatedZMax(demand);
-        sigmaMax = Math.max(calculatedZMax, sigmaMax);
+        double calculatedSigmaMax = getCalculatedSigmaMax(demand);
+        sigmaMax = Math.max(calculatedSigmaMax, sigmaMax);
         double sigma = bisectSigma(sigmaMin, sigmaMax + 1, demand);
         demand.setSigma(sigma);
       });
   }
 
-  private double getCalculatedZMax(ShaleDemand demand) {
+  private double getCalculatedSigmaMax(ShaleDemand demand) {
     double max = 0;
     for (ShaleSupply supply : graph.getSupplies()) {
       if (graph.isQualified(demand, supply)) {
-        max = Math.max(max, calculateZMax(supply, demand));
+        max = Math.max(max, calculateSigmaMax(supply, demand));
       }
     }
     return max;
   }
 
-  private double calculateZMax(ShaleSupply supply, ShaleDemand demand) {
+  private double calculateSigmaMax(ShaleSupply supply, ShaleDemand demand) {
     return supply.getBreakDuration() * V / demand.getAdDuration() / demand.getTheta() + supply.getBeta()
       - V - graph.getRd(demand, supply);
   }

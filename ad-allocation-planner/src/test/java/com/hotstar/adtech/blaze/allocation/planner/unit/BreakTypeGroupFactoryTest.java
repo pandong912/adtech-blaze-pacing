@@ -73,7 +73,7 @@ public class BreakTypeGroupFactoryTest {
     List<BreakTypeGroup> breakTypeGroups =
       executor.getBreakTypeList(ruleFeasibleProtocol, QualificationTestData.getBreakDetails());
     System.out.println(breakTypeGroups);
-    Assertions.assertEquals(3,breakTypeGroups.size());
+    Assertions.assertEquals(3, breakTypeGroups.size());
     Assertions.assertEquals(2, breakTypeGroups.get(0).getBreakTypeIds().size());
   }
 }

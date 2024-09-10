@@ -5,6 +5,8 @@ import com.hotstar.adtech.blaze.allocation.planner.common.admodel.evaluator.Targ
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Value;
 
@@ -38,5 +40,15 @@ public class GeneralPlanContext {
       .map(d -> d - duration)
       .orElse(duration);
     return duration + step / 2;
+  }
+
+  public Map<Integer, AdSetRemainImpr> buildRemainDeliveryMap() {
+    Map<Integer, Long> index2Response = responses.stream()
+      .collect(Collectors.toMap(Response::getDemandId, Response::getRemainDelivery));
+
+    return adSets.stream()
+      .map(adSet -> new AdSetRemainImpr(adSet,
+        index2Response.computeIfAbsent(adSet.getDemandId(), id -> Long.MAX_VALUE)))
+      .collect(Collectors.toMap(a -> a.adSet().getDemandId(), Function.identity()));
   }
 }

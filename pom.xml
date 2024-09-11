@@ -53,6 +53,7 @@
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.jacoco.reportPaths>target/jacoco.exec</sonar.jacoco.reportPaths>
         <sonar.language>java</sonar.language>
+        <micrometer.version>1.12.6</micrometer.version>
     </properties>
 
     <scm>
@@ -209,6 +210,11 @@
             <dependency>
                 <groupId>io.micrometer</groupId>
                 <artifactId>micrometer-registry-prometheus</artifactId>
+                <version>${micrometer.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-core</artifactId>
                 <version>${micrometer.version}</version>
             </dependency>
 

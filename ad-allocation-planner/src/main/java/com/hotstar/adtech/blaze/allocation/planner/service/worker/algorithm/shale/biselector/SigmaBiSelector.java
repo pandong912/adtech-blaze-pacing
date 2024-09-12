@@ -7,6 +7,7 @@ import static com.hotstar.adtech.blaze.allocation.planner.service.worker.algorit
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleDemand;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleGraph;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleSupply;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,19 +22,23 @@ public class SigmaBiSelector {
       .forEach(demand -> {
         double sigmaMin = 0;
         double sigmaMax = 0;
-        double calculatedSigmaMax = getCalculatedSigmaMax(demand);
+        List<ShaleSupply> qualified = new ArrayList<>(graph.getSupplies().size() / 2);
+        for (ShaleSupply supply : graph.getSupplies()) {
+          if (graph.isQualified(demand, supply)) {
+            qualified.add(supply);
+          }
+        }
+        double calculatedSigmaMax = getCalculatedSigmaMax(demand, qualified);
         sigmaMax = Math.max(calculatedSigmaMax, sigmaMax);
-        double sigma = bisectSigma(sigmaMin, sigmaMax + 1, demand);
+        double sigma = bisectSigma(sigmaMin, sigmaMax + 1, demand, qualified);
         demand.setSigma(sigma);
       });
   }
 
-  private double getCalculatedSigmaMax(ShaleDemand demand) {
+  private double getCalculatedSigmaMax(ShaleDemand demand, List<ShaleSupply> qualified) {
     double max = 0;
-    for (ShaleSupply supply : graph.getSupplies()) {
-      if (graph.isQualified(demand, supply)) {
-        max = Math.max(max, calculateSigmaMax(supply, demand));
-      }
+    for (ShaleSupply supply : qualified) {
+      max = Math.max(max, calculateSigmaMax(supply, demand));
     }
     return max;
   }
@@ -43,14 +48,12 @@ public class SigmaBiSelector {
       - V - graph.getRd(demand, supply);
   }
 
-  private double bisectSigma(double sigmaMin, double sigmaMax, ShaleDemand demand) {
+  private double bisectSigma(double sigmaMin, double sigmaMax, ShaleDemand demand, List<ShaleSupply> qualified) {
     while (sigmaMin + ERR < sigmaMax) {
       double z = (sigmaMin + sigmaMax) / 2;
       double ktt = 0;
-      for (ShaleSupply supply : graph.getSupplies()) {
-        if (graph.isQualified(demand, supply)) {
-          ktt += calculateKttForSigma(supply, z, demand);
-        }
+      for (ShaleSupply supply : qualified) {
+        ktt += calculateKttForSigma(supply, z, demand);
       }
       if (ktt > (1 + EPS) * demand.getDemand() * demand.getAdDuration()) {
         sigmaMax = z;

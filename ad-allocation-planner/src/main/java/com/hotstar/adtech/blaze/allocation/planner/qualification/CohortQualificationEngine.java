@@ -74,8 +74,8 @@ public class CohortQualificationEngine {
     BitSet qualified = (BitSet) preQualified.clone();
     preQualified.stream()
       .mapToObj(candidateAdSets::get)
-      .filter(adSetRemainImpr -> !adSetPredicate.test(adSetRemainImpr) ||
-        adSetRemainImpr.adSet().getSsaiAds().stream().noneMatch(adPredicate))
+      .filter(adSetRemainImpr -> !adSetPredicate.test(adSetRemainImpr)
+        || adSetRemainImpr.adSet().getSsaiAds().stream().noneMatch(adPredicate))
       .map(AdSetRemainImpr::adSet)
       .map(AdSet::getDemandId)
       .forEach(qualified::clear);

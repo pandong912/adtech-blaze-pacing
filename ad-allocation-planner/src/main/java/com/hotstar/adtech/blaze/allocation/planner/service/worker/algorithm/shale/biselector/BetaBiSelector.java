@@ -7,6 +7,8 @@ import static com.hotstar.adtech.blaze.allocation.planner.service.worker.algorit
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleDemand;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleGraph;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleSupply;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,32 +23,33 @@ public class BetaBiSelector {
       .forEach(supply -> {
         double betaMin = 0;
         double betaMax = 0;
-
-        double calculateBetaMax = calculateBetaMax(supply);
+        List<ShaleDemand> qualified = new ArrayList<>(graph.getDemands().size() / 2);
+        for (ShaleDemand demand : graph.getDemands()) {
+          if (graph.isQualified(demand, supply)) {
+            qualified.add(demand);
+          }
+        }
+        double calculateBetaMax = calculateBetaMax(supply, qualified);
         betaMax = Math.max(betaMax, calculateBetaMax);
-        double beta = bisectBeta(betaMin, betaMax + 1, supply);
+        double beta = bisectBeta(betaMin, betaMax + 1, supply, qualified);
         supply.setBeta(beta);
       });
   }
 
-  private double calculateBetaMax(ShaleSupply supply) {
+  private double calculateBetaMax(ShaleSupply supply, List<ShaleDemand> qualified) {
     double max = 0;
-    for (ShaleDemand demand : graph.getDemands()) {
-      if (graph.isQualified(demand, supply)) {
-        max = Math.max(max, demand.getAlpha() + graph.getRd(demand, supply) + V);
-      }
+    for (ShaleDemand demand : qualified) {
+      max = Math.max(max, demand.getAlpha() + graph.getRd(demand, supply) + V);
     }
     return max;
   }
 
-  private double bisectBeta(double betaMin, double betaMax, ShaleSupply supply) {
+  private double bisectBeta(double betaMin, double betaMax, ShaleSupply supply, List<ShaleDemand> qualified) {
     while (betaMin + ERR < betaMax) {
       double b = (betaMin + betaMax) / 2;
       double ktt = 0;
-      for (ShaleDemand demand : graph.getDemands()) {
-        if (graph.isQualified(demand, supply)) {
-          ktt += calculateKttForBeta(demand, b, supply);
-        }
+      for (ShaleDemand demand : qualified) {
+        ktt += calculateKttForBeta(demand, b, supply);
       }
       if (ktt > 1 + EPS) {
         betaMin = b;

@@ -15,4 +15,5 @@ public class Response {
   int adDuration;
   int maximizeReach;
   int reachIndex;
+  long remainDelivery;
 }

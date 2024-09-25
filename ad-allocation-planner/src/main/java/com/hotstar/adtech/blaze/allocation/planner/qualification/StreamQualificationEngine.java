@@ -10,6 +10,7 @@ import com.hotstar.adtech.blaze.allocation.planner.qualification.index.Targeting
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.AspectRatioInspector;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.DurationInspector;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.inspector.LanguageInspector;
+import com.hotstar.adtech.blaze.allocationdata.client.model.AdSetRemainImpr;
 import java.util.BitSet;
 import java.util.Map;
 import java.util.Set;
@@ -20,7 +21,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class StreamQualificationEngine {
 
-  public BitSet qualify(PlayoutStream playoutStream, Map<Integer, AdSet> candidateAdSets, int relaxedDuration,
+  public BitSet qualify(PlayoutStream playoutStream, long concurrency,
+                        Map<Integer, AdSetRemainImpr> candidateAdSets,
+                        int relaxedDuration,
                         Integer breakTypeId, TargetingEvaluators evaluators) {
     BitSet qualified = (BitSet) evaluators.getActiveAdSetBitSet().clone();
 
@@ -42,8 +45,10 @@ public class StreamQualificationEngine {
     qualified.and(language);
 
     Predicate<Ad> adPredicate = buildAdInspector(relaxedDuration, playoutStream.getLanguage());
-    BitSet ad = adTargeting(qualified, adPredicate, candidateAdSets);
-    qualified.and(ad);
+    Predicate<AdSetRemainImpr> adSetPredicate = buildAdSetInspector(concurrency);
+
+    BitSet customTargeting = customTargeting(qualified, adPredicate, adSetPredicate, candidateAdSets);
+    qualified.and(customTargeting);
     return qualified;
   }
 
@@ -56,15 +61,17 @@ public class StreamQualificationEngine {
       .collect(Collectors.toSet());
   }
 
-  private BitSet adTargeting(BitSet preQualified, Predicate<Ad> adPredicate, Map<Integer, AdSet> candidateAdSets) {
+  private BitSet customTargeting(BitSet preQualified, Predicate<Ad> adPredicate,
+                                 Predicate<AdSetRemainImpr> adSetPredicate,
+                                 Map<Integer, AdSetRemainImpr> candidateAdSets) {
     BitSet qualified = (BitSet) preQualified.clone();
     preQualified.stream()
       .mapToObj(candidateAdSets::get)
-      .forEach(adSet -> {
-        if (adSet.getSpotAds().stream().noneMatch(adPredicate)) {
-          qualified.clear(adSet.getDemandId());
-        }
-      });
+      .filter(adSetRemainImpr -> !adSetPredicate.test(adSetRemainImpr)
+        || adSetRemainImpr.adSet().getSpotAds().stream().noneMatch(adPredicate))
+      .map(AdSetRemainImpr::adSet)
+      .map(AdSet::getDemandId)
+      .forEach(qualified::clear);
     return qualified;
   }
 
@@ -73,5 +80,12 @@ public class StreamQualificationEngine {
     LanguageInspector languageInspector = new LanguageInspector(language.getId());
     AspectRatioInspector aspectRatioInspector = new AspectRatioInspector(language.getName());
     return ad -> durationInspector.qualify(ad) && languageInspector.qualify(ad) && aspectRatioInspector.qualify(ad);
+  }
+
+  private Predicate<AdSetRemainImpr> buildAdSetInspector(long concurrency) {
+    if (concurrency < 2000) {
+      return adSet -> true;
+    }
+    return adSet -> adSet.remainDelivery() > concurrency;
   }
 }

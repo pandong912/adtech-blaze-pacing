@@ -5,7 +5,6 @@ import static com.hotstar.adtech.blaze.allocation.planner.qualification.index.Ta
 
 import com.hotstar.adtech.blaze.admodel.common.enums.PlanType;
 import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
-import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
@@ -14,6 +13,7 @@ import com.hotstar.adtech.blaze.allocation.planner.qualification.index.Targeting
 import com.hotstar.adtech.blaze.allocation.planner.qualification.result.BitSetQualificationResult;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.result.QualificationResult;
 import com.hotstar.adtech.blaze.allocation.planner.source.context.GraphContext;
+import com.hotstar.adtech.blaze.allocationdata.client.model.AdSetRemainImpr;
 import com.hotstar.adtech.blaze.allocationdata.client.model.GeneralPlanContext;
 import com.hotstar.adtech.blaze.allocationdata.client.model.RequestData;
 import io.micrometer.core.annotation.Timed;
@@ -38,25 +38,25 @@ public class SsaiQualificationExecutor {
   @Timed(value = QUALIFICATION, extraTags = {"type", "ssai"})
   public GraphContext executeQualify(GeneralPlanContext generalPlanContext,
                                      List<Integer> breakTypeIds, Integer duration) {
-    List<AdSet> adSets = generalPlanContext.getAdSets();
-    Map<Integer, AdSet> index2AdSet = adSets.stream().collect(Collectors.toMap(AdSet::getDemandId, adSet -> adSet));
+    Map<Integer, AdSetRemainImpr> index2AdSet = generalPlanContext.buildRemainDeliveryMap();
     ConcurrencyData concurrency = generalPlanContext.getConcurrencyData();
     List<ContentCohort> mixedStreamCohorts = concurrency.getCohorts();
     List<ContentStream> streams = concurrency.getStreams().stream()
       .filter(stream -> stream.getPlayoutStream().getStreamType() == StreamType.Spot)
-      .collect(Collectors.toList());
+      .toList();
     RequestData requestData = generalPlanContext.getRequestData();
     TargetingEvaluators targetingEvaluators = buildSsaiTargetingEvaluators(generalPlanContext.getTargetingEvaluators());
 
     Map<String, Integer> attributeId2TargetingTagMap = generalPlanContext.getAttributeId2TargetingTagMap();
-    Integer relaxedDuration = generalPlanContext.getRelaxedDuration(breakTypeIds.get(0), duration);
+    Integer breakTypeId = breakTypeIds.getFirst();
+    Integer relaxedDuration = generalPlanContext.getRelaxedDuration(breakTypeId, duration);
     Stream<RequestFeasible> cohort = mixedStreamCohorts
       .parallelStream()
       .map(contentCohort -> cohortQualify(contentCohort, index2AdSet, attributeId2TargetingTagMap,
         targetingEvaluators, relaxedDuration));
     Stream<RequestFeasible> stream = streams
       .parallelStream()
-      .map(contentStream -> streamQualify(contentStream, index2AdSet, relaxedDuration, breakTypeIds.get(0),
+      .map(contentStream -> streamQualify(contentStream, index2AdSet, relaxedDuration, breakTypeId,
         targetingEvaluators));
 
 
@@ -75,24 +75,25 @@ public class SsaiQualificationExecutor {
   }
 
 
-  private RequestFeasible cohortQualify(ContentCohort contentCohort, Map<Integer, AdSet> adSets,
+  private RequestFeasible cohortQualify(ContentCohort contentCohort, Map<Integer, AdSetRemainImpr> adSets,
                                         Map<String, Integer> attributeId2TargetingTagMap,
                                         TargetingEvaluators targetingEvaluators, int duration) {
     Map<Integer, Set<String>> parseSsaiTag = parseSsaiTag(contentCohort.getSsaiTag(),
       attributeId2TargetingTagMap);
     BitSet qualified =
-      cohortQualificationEngine.qualify(contentCohort.getPlayoutStream(), adSets, duration, parseSsaiTag,
-        targetingEvaluators);
+      cohortQualificationEngine.qualify(contentCohort.getPlayoutStream(), contentCohort.getConcurrency(), adSets,
+        duration, parseSsaiTag, targetingEvaluators);
     return RequestFeasible.builder()
       .bitSet(qualified)
       .supplyId(contentCohort.getConcurrencyId())
       .build();
   }
 
-  private RequestFeasible streamQualify(ContentStream contentStream, Map<Integer, AdSet> adSets, int relaxedDuration,
-                                        Integer breakTypeId, TargetingEvaluators targetingEvaluators) {
-    BitSet qualified = streamQualificationEngine.qualify(contentStream.getPlayoutStream(), adSets,
-      relaxedDuration, breakTypeId, targetingEvaluators);
+  private RequestFeasible streamQualify(ContentStream contentStream, Map<Integer, AdSetRemainImpr> adSets,
+                                        int relaxedDuration, Integer breakTypeId,
+                                        TargetingEvaluators targetingEvaluators) {
+    BitSet qualified = streamQualificationEngine.qualify(contentStream.getPlayoutStream(),
+      contentStream.getConcurrency(), adSets, relaxedDuration, breakTypeId, targetingEvaluators);
     return RequestFeasible.builder()
       .bitSet(qualified)
       .supplyId(contentStream.getConcurrencyIdInCohort())
@@ -112,4 +113,6 @@ public class SsaiQualificationExecutor {
     }
     return attributeId2TargetingTags;
   }
+
+
 }

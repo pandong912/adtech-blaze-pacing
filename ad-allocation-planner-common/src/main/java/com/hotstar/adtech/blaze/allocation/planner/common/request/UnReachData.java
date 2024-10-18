@@ -1,6 +1,6 @@
 package com.hotstar.adtech.blaze.allocation.planner.common.request;
 
-import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.PlayoutStream;
 import java.util.Map;
 import lombok.Builder;
 import lombok.Value;
@@ -8,7 +8,9 @@ import lombok.Value;
 @Value
 @Builder
 public class UnReachData {
+
   private static final String SSAI_TAG_SPLITTER = "|";
+
   String ssaiTag;
   PlayoutStream playoutStream;
   Map<Long, Double> unReachRatio;

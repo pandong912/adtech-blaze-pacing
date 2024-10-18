@@ -13,11 +13,12 @@ import org.springframework.web.bind.annotation.RestController;
 @Profile("!sim && !worker")
 @RequiredArgsConstructor
 public class DebugController {
-  private final DataLoader dataLoader;
 
+  private final DataLoader dataLoader;
 
   @GetMapping("/ad-model")
   public AdModel getAdModel() {
     return dataLoader.getAdModel();
   }
+
 }

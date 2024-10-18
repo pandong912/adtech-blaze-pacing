@@ -1,4 +1,4 @@
-package com.hotstar.adtech.blaze.allocation.planner.common.model;
+package com.hotstar.adtech.blaze.allocation.planner;
 
 import lombok.Builder;
 import lombok.Getter;

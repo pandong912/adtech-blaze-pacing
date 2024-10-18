@@ -1,8 +1,8 @@
 package com.hotstar.adtech.blaze.allocation.planner.ingester;
 
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModel;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModelVersion;
 import com.hotstar.adtech.blaze.allocation.planner.common.algomodel.StandardMatchProgressModel;
-import com.hotstar.adtech.blaze.allocation.planner.common.model.AdModelVersion;
 import jakarta.annotation.PostConstruct;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -18,11 +18,11 @@ import org.springframework.stereotype.Component;
 @Profile("!sim && !worker")
 public class DataLoader {
 
-  private final DataExchangerService dataExchangerService;
-  private final AdModelLoader adModelLoader;
   private final AtomicReference<StandardMatchProgressModel> standardMatchProgressModelRef = new AtomicReference<>();
   private final AtomicReference<AdModel> adModelReference = new AtomicReference<>(AdModel.EMPTY);
 
+  private final DataExchangerService dataExchangerService;
+  private final AdModelLoader adModelLoader;
 
   @PostConstruct
   public void init() {

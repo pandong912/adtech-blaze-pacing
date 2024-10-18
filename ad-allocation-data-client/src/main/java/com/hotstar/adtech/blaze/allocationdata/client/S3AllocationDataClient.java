@@ -7,7 +7,6 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.hotstar.adtech.blaze.admodel.common.exception.BusinessException;
-import com.hotstar.adtech.blaze.admodel.common.exception.ServiceException;
 import com.hotstar.adtech.blaze.allocationdata.client.model.GeneralPlanContext;
 import com.hotstar.adtech.blaze.allocationdata.client.model.ShalePlanContext;
 import com.hotstar.adtech.blaze.allocationdata.client.util.GzipUtils;

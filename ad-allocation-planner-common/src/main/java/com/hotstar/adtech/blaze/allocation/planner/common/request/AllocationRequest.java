@@ -1,8 +1,8 @@
 package com.hotstar.adtech.blaze.allocation.planner.common.request;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.PlanType;
-import com.hotstar.adtech.blaze.allocation.planner.common.model.AdModelVersion;
-import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModelVersion;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ConcurrencyData;
 import java.util.List;
 import java.util.Map;

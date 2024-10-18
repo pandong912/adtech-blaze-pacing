@@ -1,4 +1,4 @@
-package com.hotstar.adtech.blaze.allocation.planner.config.launchdarkly;
+package com.hotstar.adtech.blaze.allocation.planner.launchdarkly;
 
 import lombok.Getter;
 

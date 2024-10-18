@@ -26,7 +26,6 @@ public class ShaleAndHwmModePublisher {
   private final ShalePlanContextLoader shalePlanContextLoader;
   private final TaskPublisher taskPublisher;
 
-
   @Timed(value = MetricNames.GENERATOR, extraTags = {"type", "shale-hwm"})
   public void publishPlan(Match match, AdModel adModel) {
     try {

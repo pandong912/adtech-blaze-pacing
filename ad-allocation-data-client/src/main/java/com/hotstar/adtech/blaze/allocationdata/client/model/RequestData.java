@@ -23,7 +23,7 @@ public class RequestData {
     List<Request> spotRequestsInCohort = concurrencyData.getStreams().stream()
       .filter(contentStream -> contentStream.getPlayoutStream().getStreamType() == StreamType.Spot)
       .map(this::buildRequestInCohort)
-      .collect(Collectors.toList());
+      .toList();
     ssaiAndSpotRequests.addAll(spotRequestsInCohort);
     this.ssaiAndSpotRequests = ssaiAndSpotRequests;
     this.spotRequests = spotRequests;

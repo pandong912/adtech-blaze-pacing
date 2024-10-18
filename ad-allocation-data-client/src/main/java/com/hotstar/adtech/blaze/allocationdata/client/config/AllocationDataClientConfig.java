@@ -29,14 +29,13 @@ public class AllocationDataClientConfig {
   @Configuration
   @Profile("local")
   public static class LocalDataClientConfiguration {
+
     @Value("${blaze.allocation-data-client.local.base-dir:./}")
     private String baseDir;
-
 
     @Bean
     public AllocationDataClient allocationDataClient() {
       return new LocalAllocationDataClient(baseDir);
-
     }
   }
 }

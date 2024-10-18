@@ -2,9 +2,8 @@ package com.hotstar.adtech.blaze.allocation.planner;
 
 import com.google.common.collect.Sets;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Ad;
-import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
-import com.hotstar.adtech.blaze.allocation.planner.common.model.Language;
-import com.hotstar.adtech.blaze.allocation.planner.common.model.Platform;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.BreakDetail;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Language;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;

@@ -1,6 +1,6 @@
 package com.hotstar.adtech.blaze.reach.synchronizer.task;
 
-import com.hotstar.adtech.blaze.reach.synchronizer.config.launchdarkly.BlazeDynamicConfig;
+import com.hotstar.adtech.blaze.reach.synchronizer.launchdarkly.DynamicConfig;
 import com.hotstar.adtech.blaze.reach.synchronizer.entity.AdModel;
 import com.hotstar.adtech.blaze.reach.synchronizer.entity.AdSet;
 import com.hotstar.adtech.blaze.reach.synchronizer.entity.Match;
@@ -21,11 +21,11 @@ public class ReachDataUpdater {
 
   private final AdModelLoader adModelLoader;
   private final ReachService reachService;
-  private final BlazeDynamicConfig blazeDynamicConfig;
+  private final DynamicConfig dynamicConfig;
 
   @Scheduled(fixedDelayString = "${blaze.ad-reach-synchronizer.schedule.reach-sync-delay:60000}")
   public void update() {
-    if (!blazeDynamicConfig.getEnableMaximiseReach()) {
+    if (!dynamicConfig.getEnableMaximiseReach()) {
       return;
     }
     AdModel adModel = adModelLoader.get();

@@ -1,6 +1,5 @@
 package com.hotstar.adtech.blaze.allocation.planner.controller;
 
-import com.hotstar.adtech.blaze.admodel.common.domain.StandardResponse;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModel;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.evaluator.TargetingEvaluatorsProtocol;
@@ -50,22 +49,21 @@ public class AllocationPlanController {
   private final BreakTypeGroupFactory breakTypeGroupFactory;
 
   @PostMapping("/hwm")
-  public StandardResponse<List<HwmAllocationPlan>> generateHwmPlan(@RequestBody AllocationRequest allocationRequest) {
+  public List<HwmAllocationPlan> generateHwmPlan(@RequestBody AllocationRequest allocationRequest) {
     GeneralPlanContext generalPlanContext = buildGeneralPlanContext(allocationRequest, Collections.emptyList());
     setConcurrencyId(generalPlanContext);
     List<BreakTypeGroup> breakTypeList = generalPlanContext.getBreakTypeList();
-    List<HwmAllocationPlan> hwmSolveResults = breakTypeList.stream()
+    return breakTypeList.stream()
       .flatMap(breakTypeGroup -> breakTypeGroup
         .getAllBreakDurations()
         .stream()
         .map(duration -> hwmPlanWorker.generatePlans(generalPlanContext, allocationRequest.getPlanType(),
           breakTypeGroup.getBreakTypeIds(), duration)))
       .collect(Collectors.toList());
-    return StandardResponse.success(hwmSolveResults);
   }
 
   @PostMapping("/shale")
-  public StandardResponse<ShaleResponse> generateShalePlan(
+  public ShaleResponse generateShalePlan(
     @RequestBody ShaleAllocationRequest shaleAllocationRequest) {
     GeneralPlanContext generalPlanContext = buildGeneralPlanContext(shaleAllocationRequest.getAllocationRequest(),
       shaleAllocationRequest.getReachAdSetIds());
@@ -91,12 +89,11 @@ public class AllocationPlanController {
           breakTypeGroup.getBreakTypeIds(), duration)))
       .collect(Collectors.toList());
 
-    return StandardResponse.success(ShaleResponse.builder()
+    return ShaleResponse.builder()
       .allocationPlans(shaleSolveResults)
       .concurrencyIdMap(concurrencyIdMap)
-      .build());
+      .build();
   }
-
 
   private ReachStorage buildReachStorage(Map<String, Integer> concurrencyIdMap,
                                          Map<Long, Integer> adSetIdMap, ShaleAllocationRequest shaleAllocationRequest) {
@@ -114,7 +111,6 @@ public class AllocationPlanController {
         ));
     return new RedisReachStorage(unReachStore);
   }
-
 
   private GeneralPlanContext buildGeneralPlanContext(AllocationRequest request, Collection<Long> reachAdSetIds) {
     AdModel adModel = adModelLoader.loadAdModel(request.getAdModelVersion());
@@ -162,4 +158,5 @@ public class AllocationPlanController {
     IntStream.range(0, streams.size()).forEach(i -> streams.get(i).setConcurrencyId(i, cohorts.size()));
     IntStream.range(0, cohorts.size()).forEach(i -> cohorts.get(i).setConcurrencyId(i));
   }
+
 }

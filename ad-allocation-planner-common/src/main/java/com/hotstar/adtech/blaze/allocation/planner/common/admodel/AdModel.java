@@ -1,9 +1,6 @@
 package com.hotstar.adtech.blaze.allocation.planner.common.admodel;
 
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.evaluator.TargetingEvaluatorsProtocol;
-import com.hotstar.adtech.blaze.allocation.planner.common.model.AdModelVersion;
-import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
-import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +14,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AdModel {
   public static AdModel EMPTY = AdModel.builder()
+    .attributeId2TargetingTags(Collections.emptyMap())
+    .matches(Collections.emptyMap())
+    .playoutStreamGroup(Collections.emptyMap())
+    .globalPlayoutStreamMap(Collections.emptyMap())
+    .adSetGroup(Collections.emptyMap())
+    .breakDetailGroup(Collections.emptyMap())
+    .targetingEvaluatorsMap(Collections.emptyMap())
     .adModelVersion(AdModelVersion.EMPTY)
     .build();
 

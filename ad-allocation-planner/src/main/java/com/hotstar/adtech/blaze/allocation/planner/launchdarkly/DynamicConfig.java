@@ -1,8 +1,8 @@
-package com.hotstar.adtech.blaze.allocation.planner.config.launchdarkly;
+package com.hotstar.adtech.blaze.allocation.planner.launchdarkly;
 
 import com.hotstar.adtech.blaze.allocation.planner.service.manager.AllocationPlanMode;
 
-public interface BlazeDynamicConfig {
+public interface DynamicConfig {
 
   Boolean getEnableMaximiseReach();
 

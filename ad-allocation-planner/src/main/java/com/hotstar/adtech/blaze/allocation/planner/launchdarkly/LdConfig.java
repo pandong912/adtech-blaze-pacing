@@ -1,5 +1,6 @@
-package com.hotstar.adtech.blaze.reach.synchronizer.config.launchdarkly;
+package com.hotstar.adtech.blaze.allocation.planner.launchdarkly;
 
+import com.hotstar.adtech.blaze.allocation.planner.service.manager.AllocationPlanMode;
 import com.hotstar.launchdarkly.LdConfigStore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,10 +11,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration("launchDarklyStoreConfig")
 @ComponentScan(basePackages = "com.hotstar.launchdarkly")
 @RequiredArgsConstructor
-public class BlazeLdConfig implements BlazeDynamicConfig {
+public class LdConfig implements DynamicConfig {
 
   private final LdConfigStore ldConfigStore;
-
 
   private Boolean getBooleanValue(LdValue ldValue) {
     return ldConfigStore.getFeatureFlag(ldValue.getLdKey(), Boolean.parseBoolean(ldValue.getLdDefaultValue()));
@@ -26,5 +26,11 @@ public class BlazeLdConfig implements BlazeDynamicConfig {
   @Override
   public Boolean getEnableMaximiseReach() {
     return getBooleanValue(LdValue.EnableMaximiseReach);
+  }
+
+  @Override
+  public AllocationPlanMode getAllocationPlanMode() {
+    String stringValue = getStringValue(LdValue.PacingMode);
+    return AllocationPlanMode.valueOf(stringValue.toUpperCase());
   }
 }

@@ -1,7 +1,7 @@
 package com.hotstar.adtech.blaze.allocation.planner.qualification;
 
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.evaluator.RuleFeasibleProtocol;
-import com.hotstar.adtech.blaze.allocation.planner.common.model.BreakDetail;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.index.RuleFeasible;
 import com.hotstar.adtech.blaze.allocation.planner.qualification.index.TargetingEngine;
 import com.hotstar.adtech.blaze.allocationdata.client.model.BreakTypeGroup;

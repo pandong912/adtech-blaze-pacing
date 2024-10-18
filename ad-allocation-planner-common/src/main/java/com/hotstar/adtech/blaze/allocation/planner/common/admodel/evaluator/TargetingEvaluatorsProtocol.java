@@ -40,4 +40,5 @@ public class TargetingEvaluatorsProtocol {
       .maxBitIndex(0)
       .build();
   }
+
 }

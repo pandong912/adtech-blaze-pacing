@@ -1,4 +1,4 @@
-package com.hotstar.adtech.blaze.reach.synchronizer.config.launchdarkly;
+package com.hotstar.adtech.blaze.reach.synchronizer.launchdarkly;
 
 import lombok.Getter;
 

@@ -1,7 +1,5 @@
 package com.hotstar.adtech.blaze.allocation.planner.service.manager;
 
-import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.MANAGER_PUBLISH;
-
 import com.hotstar.adtech.blaze.admodel.common.enums.AlgorithmType;
 import com.hotstar.adtech.blaze.admodel.common.enums.PlanType;
 import com.hotstar.adtech.blaze.admodel.common.enums.TaskStatus;
@@ -9,6 +7,7 @@ import com.hotstar.adtech.blaze.admodel.repository.AllocationPlanResultRepositor
 import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResult;
 import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResultDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Match;
+import com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames;
 import com.hotstar.adtech.blaze.allocationdata.client.AllocationDataClient;
 import com.hotstar.adtech.blaze.allocationdata.client.model.BreakContext;
 import com.hotstar.adtech.blaze.allocationdata.client.model.BreakTypeGroup;
@@ -34,7 +33,7 @@ public class TaskPublisher {
   private final AllocationDataClient allocationDataClient;
   private final AllocationPlanClient allocationPlanClient;
 
-  @Timed(value = MANAGER_PUBLISH)
+  @Timed(value = MetricNames.MANAGER_PUBLISH)
   public void uploadAndPublish(Match match, GeneralPlanContext generalPlanContext, Instant version,
                                AlgorithmType spotAlgorithm, AlgorithmType... ssaiAlgorithms) {
     if (generalPlanContext.isEmpty()) {
@@ -44,7 +43,7 @@ public class TaskPublisher {
     publish(match, generalPlanContext, version, spotAlgorithm, ssaiAlgorithms);
   }
 
-  @Timed(value = MANAGER_PUBLISH)
+  @Timed(value = MetricNames.MANAGER_PUBLISH)
   public void uploadAndPublish(Match match, ShalePlanContext shalePlanContext, Map<String, Integer> supplyIdMap,
                                Instant version,
                                AlgorithmType spotAlgorithm, AlgorithmType... ssaiAlgorithms) {
@@ -76,11 +75,11 @@ public class TaskPublisher {
       .flatMap(ssaiAlgorithm -> breakTypeList.stream()
         .flatMap(breakTypeGroup -> buildAllocationPlanResultDetail(breakTypeGroup, task, breakContext, ssaiAlgorithm,
           PlanType.SSAI)))
-      .collect(Collectors.toList());
+      .toList();
     List<AllocationPlanResultDetail> spotAllocationPlanResultDetails = breakTypeList.stream()
       .flatMap(breakTypeGroup -> buildAllocationPlanResultDetail(breakTypeGroup, task, breakContext, spotAlgorithm,
         PlanType.SPOT))
-      .collect(Collectors.toList());
+      .toList();
 
     task.getAllocationPlanResultDetails().addAll(ssaiAllocationPlanResultDetails);
     task.getAllocationPlanResultDetails().addAll(spotAllocationPlanResultDetails);

@@ -6,7 +6,6 @@ import lombok.Value;
 @Value
 @Builder
 public class HwmAllocationDetail {
-  private long adSetId;
-  private double probability;
-
+  long adSetId;
+  double probability;
 }

@@ -55,7 +55,6 @@ public class HwmSolver {
     return allocations.values();
   }
 
-
   private HwmResult allocate(HwmDemand demand, HwmGraph hwmGraph) {
     long totalSupply = 0L;
     for (HwmSupply supply : hwmGraph.getSupplies()) {

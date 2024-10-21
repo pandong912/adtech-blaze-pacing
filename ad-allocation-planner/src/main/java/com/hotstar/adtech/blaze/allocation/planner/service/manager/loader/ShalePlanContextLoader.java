@@ -6,8 +6,8 @@ import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModel;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdSet;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Match;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
-import com.hotstar.adtech.blaze.allocation.planner.config.launchdarkly.BlazeDynamicConfig;
 import com.hotstar.adtech.blaze.allocation.planner.ingester.ReachService;
+import com.hotstar.adtech.blaze.allocation.planner.launchdarkly.DynamicConfig;
 import com.hotstar.adtech.blaze.allocation.planner.service.worker.algorithm.shale.ShaleConstant;
 import com.hotstar.adtech.blaze.allocationdata.client.model.DegradationReachStorage;
 import com.hotstar.adtech.blaze.allocationdata.client.model.GeneralPlanContext;
@@ -30,7 +30,7 @@ public class ShalePlanContextLoader {
 
   private final GeneralPlanContextLoader generalPlanContextLoader;
   private final ReachService reachService;
-  private final BlazeDynamicConfig blazeDynamicConfig;
+  private final DynamicConfig dynamicConfig;
 
   @Timed(value = PLAN_DATA_LOAD, extraTags = {"algorithm", "shale"})
   public Pair<Map<String, Integer>, ShalePlanContext> getShalePlanContext(Match match, AdModel adModel) {
@@ -59,7 +59,7 @@ public class ShalePlanContextLoader {
 
   ReachStorage loadReach(String contentId, Map<String, Integer> concurrencyIdMap,
                          Map<Long, Integer> adSetIdToReachIndex) {
-    if (blazeDynamicConfig.getEnableMaximiseReach()) {
+    if (dynamicConfig.getEnableMaximiseReach()) {
       return reachService.getUnReachRatio(contentId, concurrencyIdMap, adSetIdToReachIndex);
     } else {
       return new DegradationReachStorage();

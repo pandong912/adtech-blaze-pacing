@@ -8,8 +8,8 @@ import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResult;
 import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResultDetail;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModel;
 import com.hotstar.adtech.blaze.allocation.planner.common.admodel.Match;
-import com.hotstar.adtech.blaze.allocation.planner.config.launchdarkly.BlazeDynamicConfig;
 import com.hotstar.adtech.blaze.allocation.planner.ingester.DataLoader;
+import com.hotstar.adtech.blaze.allocation.planner.launchdarkly.DynamicConfig;
 import com.hotstar.adtech.blaze.allocation.planner.service.AllocationPlanTaskService;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Metrics;
@@ -31,10 +31,10 @@ public class AllocationPlanManager {
 
   private final HwmModePublisher hwmModePublisher;
   private final ShaleModePublisher shaleModePublisher;
-  private final BlazeDynamicConfig blazeDynamicConfig;
+  private final ShaleAndHwmModePublisher shaleAndHwmModePublisher;
+  private final DynamicConfig dynamicConfig;
   private final DataLoader dataLoader;
   private final AllocationPlanTaskService allocationPlanTaskService;
-  private final ShaleAndHwmModePublisher shaleAndHwmModePublisher;
 
   @Value("${blaze.ad-allocation-planner.gap-time:30000}")
   private long planGapTime;
@@ -97,7 +97,7 @@ public class AllocationPlanManager {
   }
 
   private void publishNewTask(Match match, AdModel adModel) {
-    AllocationPlanMode allocationPlanMode = blazeDynamicConfig.getAllocationPlanMode();
+    AllocationPlanMode allocationPlanMode = dynamicConfig.getAllocationPlanMode();
     switch (allocationPlanMode) {
       case HWM:
         hwmModePublisher.publishPlan(match, adModel);

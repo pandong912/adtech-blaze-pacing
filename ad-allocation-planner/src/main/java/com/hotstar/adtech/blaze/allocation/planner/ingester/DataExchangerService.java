@@ -5,10 +5,10 @@ import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.MAT
 import static com.hotstar.adtech.blaze.allocation.planner.metric.MetricNames.MATCH_TOTAL_BREAK_FETCH;
 
 import com.hotstar.adtech.blaze.admodel.client.common.Names;
-import com.hotstar.adtech.blaze.allocation.planner.common.model.AdModelVersion;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.AdModelVersion;
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.PlayoutStream;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentCohort;
 import com.hotstar.adtech.blaze.allocation.planner.common.model.ContentStream;
-import com.hotstar.adtech.blaze.allocation.planner.common.model.PlayoutStream;
 import com.hotstar.adtech.blaze.exchanger.api.DataExchangerClient;
 import com.hotstar.adtech.blaze.exchanger.api.entity.BreakId;
 import com.hotstar.adtech.blaze.exchanger.api.response.AdModelResultUriResponse;

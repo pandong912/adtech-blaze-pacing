@@ -1,4 +1,4 @@
-package com.hotstar.adtech.blaze.allocation.planner.common.model;
+package com.hotstar.adtech.blaze.allocation.planner.common.admodel;
 
 import com.hotstar.adtech.blaze.admodel.common.enums.Ladder;
 import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;

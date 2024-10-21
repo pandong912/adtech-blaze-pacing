@@ -1,5 +1,6 @@
 package com.hotstar.adtech.blaze.allocation.planner.common.model;
 
+import com.hotstar.adtech.blaze.allocation.planner.common.admodel.PlayoutStream;
 import lombok.Builder;
 import lombok.Setter;
 import lombok.Value;

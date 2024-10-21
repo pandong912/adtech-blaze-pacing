@@ -32,7 +32,6 @@ public class ShaleModePublisher {
       Instant version = Instant.now();
       Pair<Map<String, Integer>, ShalePlanContext> planContext =
         shalePlanContextLoader.getShalePlanContext(match, adModel);
-
       taskPublisher.uploadAndPublish(match, planContext.getRight(), planContext.getLeft(), version, AlgorithmType.HWM,
         AlgorithmType.SHALE);
     } catch (Exception e) {

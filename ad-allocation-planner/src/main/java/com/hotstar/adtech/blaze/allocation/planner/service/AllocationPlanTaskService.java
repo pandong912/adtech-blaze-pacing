@@ -1,6 +1,5 @@
 package com.hotstar.adtech.blaze.allocation.planner.service;
 
-import com.amazonaws.util.CollectionUtils;
 import com.hotstar.adtech.blaze.admodel.common.enums.TaskStatus;
 import com.hotstar.adtech.blaze.admodel.repository.AllocationPlanResultDetailRepository;
 import com.hotstar.adtech.blaze.admodel.repository.AllocationPlanResultRepository;
@@ -9,14 +8,11 @@ import com.hotstar.adtech.blaze.admodel.repository.model.AllocationPlanResultDet
 import com.hotstar.adtech.blaze.allocationplan.client.model.UploadResult;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -81,19 +77,13 @@ public class AllocationPlanTaskService {
   }
 
 
-  @Transactional(isolation = Isolation.REPEATABLE_READ, rollbackFor = Exception.class)
   public Optional<AllocationPlanResultDetail> takeOneSubTask() {
     List<AllocationPlanResultDetail> allocationPlanResultDetails =
       allocationPlanResultDetailRepository
         .findAllByCreatedAtAfterAndTaskStatus(Instant.now().minus(8, ChronoUnit.MINUTES), TaskStatus.PUBLISHED);
-    if (CollectionUtils.isNullOrEmpty(allocationPlanResultDetails)) {
-      return Optional.empty();
-    } else {
-      Collections.shuffle(allocationPlanResultDetails);
-      AllocationPlanResultDetail detail = allocationPlanResultDetails.get(0);
-      detail.setTaskStatus(TaskStatus.IN_PROGRESS);
-      allocationPlanResultDetailRepository.save(detail);
-      return Optional.of(detail);
-    }
+    return allocationPlanResultDetails.stream()
+      .filter(detail -> detail.getTaskStatus().equals(TaskStatus.PUBLISHED))
+      .filter(detail -> allocationPlanResultDetailRepository.updateTaskStatusById(detail.getId()) > 0)
+      .findFirst();
   }
 }

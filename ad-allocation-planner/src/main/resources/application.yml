@@ -88,4 +88,3 @@ feign:
 logging:
   level:
     com.hotstar.launchdarkly: WARN
-    org.hibernate.engine.jdbc.spi.SqlExceptionHelper: ERROR

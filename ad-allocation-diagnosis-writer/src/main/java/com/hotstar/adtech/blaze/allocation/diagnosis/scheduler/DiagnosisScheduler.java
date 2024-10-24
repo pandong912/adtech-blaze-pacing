@@ -30,7 +30,6 @@ public class DiagnosisScheduler {
   private final AllocationPlanResultRepository allocationPlanResultRepository;
   private final AllocationPlanResultDetailRepository allocationPlanResultDetailRepository;
 
-
   @Scheduled(fixedDelayString = "10000")
   public void update() {
     AllocationSyncPoint syncPoint = allocationSyncPointRepository
@@ -42,7 +41,7 @@ public class DiagnosisScheduler {
       findFinishedAllocationPlanResults(rawAllocationPlanResults);
     List<AllocationPlanResult> successAllocationPlanResults = finishedAllocationPlanResults.stream()
       .filter((result) -> result.getTaskStatus() == TaskStatus.SUCCESS)
-      .collect(Collectors.toList());
+      .toList();
     Long maxId = finishedAllocationPlanResults.stream()
       .mapToLong(AllocationPlanResult::getId)
       .max()

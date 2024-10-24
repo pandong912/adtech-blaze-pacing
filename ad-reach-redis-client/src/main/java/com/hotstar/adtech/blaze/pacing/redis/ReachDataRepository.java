@@ -1,6 +1,6 @@
 package com.hotstar.adtech.blaze.pacing.redis;
 
-import static com.hotstar.adtech.blaze.pacing.redis.ReachClusterRedisConfig.REACH_TEMPLATE;
+import static com.hotstar.adtech.blaze.pacing.redis.ReachClusterRedisConfig.REACH_REDIS_TEMPLATE;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -24,7 +24,7 @@ public class ReachDataRepository {
 
   private final HashOperations<String, String, Map<String, Double>> hashOperations;
 
-  public ReachDataRepository(@Qualifier(REACH_TEMPLATE) RedisTemplate<String, Object> redisTemplate) {
+  public ReachDataRepository(@Qualifier(REACH_REDIS_TEMPLATE) RedisTemplate<String, Object> redisTemplate) {
     this.hashOperations = redisTemplate.opsForHash();
   }
 

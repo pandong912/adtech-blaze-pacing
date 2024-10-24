@@ -15,7 +15,6 @@ import com.hotstar.adtech.blaze.allocation.diagnosis.service.AdModelAdSetMatchSe
 import com.hotstar.adtech.blaze.allocation.diagnosis.service.AdModelMatchService;
 import java.time.Instant;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -34,7 +33,6 @@ public class AdModelScheduler {
 
   @Scheduled(fixedDelayString = "30000")
   public void update() {
-
     AdModelSyncPoint syncPoint = adModelSyncPointRepository
       .findFirstByOrderByIdDesc()
       .orElseGet(this::buildDefaultSyncPoint);
@@ -52,8 +50,7 @@ public class AdModelScheduler {
 
     List<AdModelUri> adModelUris = adModelResults.stream()
       .map(this::buildAdModelUri)
-      .collect(Collectors.toList());
-
+      .toList();
 
     adModelUris.stream()
       .map(this::loadData)
@@ -66,12 +63,10 @@ public class AdModelScheduler {
   }
 
   private void writeToClickHouse(AdModelData adModelData) {
-
     adModelAdSetMatchService.writeMatchAdSet(adModelData);
     adModelAdService.writeAd(adModelData.getAdEntities().getAds(), adModelData.getVersion());
     adModelMatchService.writeMatch(adModelData.getMatchEntities().getMatches(), adModelData.getVersion());
   }
-
 
   private AdModelUri buildAdModelUri(AdModelResult adModelResult) {
     return AdModelUri.builder()

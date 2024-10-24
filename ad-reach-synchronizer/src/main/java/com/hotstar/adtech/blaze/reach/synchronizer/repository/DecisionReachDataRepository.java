@@ -1,8 +1,8 @@
 package com.hotstar.adtech.blaze.reach.synchronizer.repository;
 
-import static com.hotstar.adtech.blaze.reach.synchronizer.config.DecisionReachClusterRedisConfig.DECISION_REACH_CLUSTER_TEMPLATE;
+import static com.hotstar.adtech.blaze.reach.synchronizer.config.RedisConfig.DECISION_REDIS_TEMPLATE;
 
-import com.hotstar.adtech.blaze.reach.synchronizer.config.DecisionReachClusterRedisConfig;
+import com.hotstar.adtech.blaze.reach.synchronizer.config.RedisConfig;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 
 
 @Repository
-@ConditionalOnBean(DecisionReachClusterRedisConfig.class)
+@ConditionalOnBean(RedisConfig.class)
 @Slf4j
 public class DecisionReachDataRepository {
   public static final long DEFAULT_TTL_SEC = Duration.ofMinutes(10).getSeconds();
@@ -28,7 +28,7 @@ public class DecisionReachDataRepository {
   private final HashOperations<String, String, Double> hashOperations;
 
   public DecisionReachDataRepository(
-    @Qualifier(DECISION_REACH_CLUSTER_TEMPLATE) RedisTemplate<String, Object> redisTemplate) {
+    @Qualifier(DECISION_REDIS_TEMPLATE) RedisTemplate<String, Object> redisTemplate) {
     this.redisTemplate = redisTemplate;
     this.hashOperations = redisTemplate.opsForHash();
   }

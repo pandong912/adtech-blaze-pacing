@@ -1,9 +1,9 @@
 package com.hotstar.adtech.blaze.reach.synchronizer.task;
 
-import com.hotstar.adtech.blaze.reach.synchronizer.launchdarkly.DynamicConfig;
 import com.hotstar.adtech.blaze.reach.synchronizer.entity.AdModel;
 import com.hotstar.adtech.blaze.reach.synchronizer.entity.AdSet;
 import com.hotstar.adtech.blaze.reach.synchronizer.entity.Match;
+import com.hotstar.adtech.blaze.reach.synchronizer.launchdarkly.DynamicConfig;
 import com.hotstar.adtech.blaze.reach.synchronizer.service.AdModelLoader;
 import com.hotstar.adtech.blaze.reach.synchronizer.service.ReachService;
 import java.util.List;

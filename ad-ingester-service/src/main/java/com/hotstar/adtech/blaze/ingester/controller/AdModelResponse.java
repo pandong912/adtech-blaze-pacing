@@ -3,22 +3,17 @@ package com.hotstar.adtech.blaze.ingester.controller;
 import com.hotstar.adtech.blaze.ingester.entity.Ad;
 import com.hotstar.adtech.blaze.ingester.entity.AdModelVersion;
 import com.hotstar.adtech.blaze.ingester.entity.Match;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Value;
 
+@Value
 @Builder
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class AdModelResponse {
-  private List<Match> matches;
-  private Map<Long, Map<String, String>> streamMappingConverterGroup;
-  private Map<String, String> globalStreamMappingConverter;
-  private Map<String, Ad> adMap;
-  private AdModelVersion adModelVersion;
+  List<Match> matches;
+  Map<Long, Map<String, String>> streamMappingConverterGroup;
+  Map<String, String> globalStreamMappingConverter;
+  Map<String, Ad> adMap;
+  AdModelVersion adModelVersion;
 }

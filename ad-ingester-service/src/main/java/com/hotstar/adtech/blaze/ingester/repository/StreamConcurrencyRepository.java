@@ -1,8 +1,8 @@
 package com.hotstar.adtech.blaze.ingester.repository;
 
-import static com.hotstar.adtech.blaze.ingester.config.MasterReplicaRedisConfig.MASTER_REPLICA_TEMPLATE;
+import static com.hotstar.adtech.blaze.ingester.config.RedisConfig.MASTER_REPLICA_TEMPLATE;
 
-import com.hotstar.adtech.blaze.ingester.config.MasterReplicaRedisConfig;
+import com.hotstar.adtech.blaze.ingester.config.RedisConfig;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Repository;
 
 
 @Repository
-@ConditionalOnBean(MasterReplicaRedisConfig.class)
+@ConditionalOnBean(RedisConfig.class)
 public class StreamConcurrencyRepository {
 
   public static final long DEFAULT_TTL_SEC = Duration.ofDays(3).getSeconds();

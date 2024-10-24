@@ -6,7 +6,7 @@ import static com.hotstar.adtech.blaze.adserver.data.redis.RedisConst.STRING_TEM
 import static com.hotstar.adtech.blaze.adserver.data.redis.RedisConst.TEMPLATE;
 
 import com.hotstar.adtech.blaze.adserver.data.redis.RedisFactory;
-import com.hotstar.adtech.blaze.adserver.data.redis.model.MasterReplicaConfig;
+import com.hotstar.adtech.blaze.adserver.data.redis.model.MasterReplicaRedisConfig;
 import io.lettuce.core.resource.ClientResources;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,7 +22,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 @Configuration
 @RequiredArgsConstructor
-public class MasterReplicaRedisConfig {
+public class RedisConfig {
 
   private static final String MASTER_REPLICA = "masterReplica";
   private static final String MASTER_REPLICA_PROPERTIES = MASTER_REPLICA + PROPERTIES;
@@ -32,14 +32,14 @@ public class MasterReplicaRedisConfig {
 
   @Bean(MASTER_REPLICA_PROPERTIES)
   @ConfigurationProperties(prefix = "blaze.redis.master-replica")
-  public MasterReplicaConfig masterReplicaRedisProperties() {
-    return new MasterReplicaConfig();
+  public MasterReplicaRedisConfig masterReplicaRedisProperties() {
+    return new MasterReplicaRedisConfig();
   }
 
   @Bean(MASTER_REPLICA_CONNECTION_FACTORY)
   public RedisConnectionFactory redisConnectionFactory(ClientResources clientResources,
                                                        @Qualifier(MASTER_REPLICA_PROPERTIES)
-                                                       MasterReplicaConfig properties) {
+                                                       MasterReplicaRedisConfig properties) {
     LettuceClientConfiguration clientConfig =
       RedisFactory.initLettuceClientConfiguration(clientResources, properties);
 
@@ -53,7 +53,7 @@ public class MasterReplicaRedisConfig {
   @Bean(MASTER_REPLICA_TEMPLATE)
   public RedisTemplate<String, Object> redisTemplate(
     @Qualifier(MASTER_REPLICA_CONNECTION_FACTORY) RedisConnectionFactory redisConnectionFactory) {
-    return RedisFactory.createTemplate(redisConnectionFactory);
+    return RedisFactory.createRedisTemplate(redisConnectionFactory);
   }
 
   @Bean(MASTER_REPLICA_STRING_TEMPLATE)

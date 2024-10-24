@@ -61,11 +61,7 @@ blaze:
       maxAttempts: 3
   ad-reach-synchronizer:
     metrics-prefix: blaze
-    executor:
-      core-pool-size: 4
-      max-pool-size: 16
-      keep-alive-seconds: 60
-      queue-capacity: 20000
-    load.ad-model: 10000
+    load:
+      ad-model: 10000
     schedule:
       reach-sync-delay: 30000

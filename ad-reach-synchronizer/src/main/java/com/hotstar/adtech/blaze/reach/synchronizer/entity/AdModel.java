@@ -5,8 +5,8 @@ import java.util.Map;
 import lombok.Builder;
 import lombok.Value;
 
-@Builder
 @Value
+@Builder
 public class AdModel {
   List<Match> matches;
   Map<String, List<AdSet>> contentIdToAdSets;

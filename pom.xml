@@ -30,7 +30,7 @@
         <java.version>21</java.version>
         <blaze-module.version>1.9.2-SNAPSHOT</blaze-module.version>
         <blaze-data-exchanger.version>2.1.1</blaze-data-exchanger.version>
-        <blaze-ad-model-module.version>1.22.1</blaze-ad-model-module.version>
+        <blaze-ad-model-module.version>1.22.2</blaze-ad-model-module.version>
         <pulse.version>2.3.1</pulse.version>
         <templatize.macro.version>2.0.5-RELEASE</templatize.macro.version>
         <spring.boot.version>3.3.1</spring.boot.version>

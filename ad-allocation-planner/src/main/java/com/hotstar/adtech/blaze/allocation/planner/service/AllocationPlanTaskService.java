@@ -82,7 +82,6 @@ public class AllocationPlanTaskService {
       allocationPlanResultDetailRepository
         .findAllByCreatedAtAfterAndTaskStatus(Instant.now().minus(8, ChronoUnit.MINUTES), TaskStatus.PUBLISHED);
     return allocationPlanResultDetails.stream()
-      .filter(detail -> detail.getTaskStatus().equals(TaskStatus.PUBLISHED))
       .filter(detail -> allocationPlanResultDetailRepository.updateTaskStatusById(detail.getId()) > 0)
       .findFirst();
   }

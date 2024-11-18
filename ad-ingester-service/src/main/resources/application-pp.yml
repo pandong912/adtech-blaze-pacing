@@ -10,3 +10,7 @@ blaze:
       replicas:
         - host: adtech-blaze-ad-pp-ro.mtjguk.ng.0001.aps1.cache.amazonaws.com
           port: 6379
+  ad-ingester-service:
+    concurrency:
+      inject:
+        enable: true

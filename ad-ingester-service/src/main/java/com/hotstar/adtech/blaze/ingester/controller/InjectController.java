@@ -1,6 +1,5 @@
 package com.hotstar.adtech.blaze.ingester.controller;
 
-import com.hotstar.adtech.blaze.ingester.entity.ConcurrencyGroup;
 import com.hotstar.adtech.blaze.ingester.service.InjectConcurrencyService;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.Map;

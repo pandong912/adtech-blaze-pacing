@@ -2,14 +2,12 @@ package com.hotstar.adtech.blaze.ingester.service;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.hotstar.adtech.blaze.ingester.entity.ConcurrencyGroup;
 import com.hotstar.adtech.blaze.ingester.repository.StreamCohortConcurrencyRepository;
 import com.hotstar.adtech.blaze.ingester.repository.StreamConcurrencyRepository;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class InjectConcurrencyService extends ConcurrencyService {

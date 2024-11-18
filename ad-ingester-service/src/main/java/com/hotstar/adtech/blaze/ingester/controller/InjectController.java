@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/inject/concurrency")
-@ConditionalOnBean(InjectConcurrencyService.class)
 public class InjectController {
 
   // only works when concurrency inject enabled

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @ConditionalOnBean(InjectConcurrencyService.class)
 public class InjectController {
 
-  // only works when concurrency
+  // only works when concurrency inject enabled
   @Autowired(required = false)
   private InjectConcurrencyService provider;
 

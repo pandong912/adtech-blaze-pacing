@@ -17,10 +17,9 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
 
-@Component
 @RequiredArgsConstructor
 @Slf4j
 public class ConcurrencyService {
@@ -42,15 +41,9 @@ public class ConcurrencyService {
 
   private void updateStreamConcurrency(String contentId, Map<String, String> converter) {
     try {
-      ConcurrencyGroup concurrencyGroup = pulseService.getLiveContentStreamConcurrency(contentId);
-      String tsBucket = String.valueOf(concurrencyGroup.getTsBucket());
-      Map<String, Long> aggregatedStreamConcurrency =
-        concurrencyGroup.getConcurrencyValues().entrySet()
-          .stream()
-          .map(entry -> mapStreamKeyToPlayoutId(contentId, converter, entry.getKey(), entry.getValue()))
-          .filter(Objects::nonNull)
-          .collect(Collectors.groupingBy(ConcurrencyValue::getConcurrencyKey,
-            Collectors.summingLong(ConcurrencyValue::getConcurrency)));
+      var tsBucketAndStreamConcurrency = tsBucketAndStreamConcurrency(contentId, converter);
+      String tsBucket = tsBucketAndStreamConcurrency.getLeft();
+      Map<String, Long> aggregatedStreamConcurrency = tsBucketAndStreamConcurrency.getRight();
 
       streamConcurrencyRepository
         .setContentAllStreamConcurrency(contentId, tsBucket, aggregatedStreamConcurrency);
@@ -62,21 +55,25 @@ public class ConcurrencyService {
     }
   }
 
+  protected Pair<String, Map<String, Long>> tsBucketAndStreamConcurrency(String contentId,
+                                                                         Map<String, String> converter) {
+    ConcurrencyGroup concurrencyGroup = pulseService.getLiveContentStreamConcurrency(contentId);
+    String tsBucket = String.valueOf(concurrencyGroup.getTsBucket());
+    Map<String, Long> aggregatedStreamConcurrency =
+      concurrencyGroup.getConcurrencyValues().entrySet()
+        .stream()
+        .map(entry -> mapStreamKeyToPlayoutId(contentId, converter, entry.getKey(), entry.getValue()))
+        .filter(Objects::nonNull)
+        .collect(Collectors.groupingBy(ConcurrencyValue::getConcurrencyKey,
+          Collectors.summingLong(ConcurrencyValue::getConcurrency)));
+    return Pair.of(tsBucket, aggregatedStreamConcurrency);
+  }
+
   private void updateCohortConcurrency(String contentId, Map<String, String> converter) {
     try {
-      //ConcurrencyGroup.concurrencyValues:
-      //key: in-eng-phone-ssai|SSAI::xxx|English+Android
-      //value: concurrency number
-      ConcurrencyGroup concurrencyGroup = pulseService.getLiveContentStreamCohortConcurrency(contentId);
-      String tsBucket = String.valueOf(concurrencyGroup.getTsBucket());
-
-      Map<String, Long> aggregatedCohortConcurrency =
-        concurrencyGroup.getConcurrencyValues().entrySet()
-          .stream()
-          .map(entry -> mapCohortKeyToPlayoutId(contentId, converter, entry.getKey(), entry.getValue()))
-          .filter(Objects::nonNull)
-          .collect(Collectors.groupingBy(ConcurrencyValue::getConcurrencyKey,
-            Collectors.summingLong(ConcurrencyValue::getConcurrency)));
+      var tsBucketAndCohortConcurrency = tsBucketAndCohortConcurrency(contentId, converter);
+      String tsBucket = String.valueOf(tsBucketAndCohortConcurrency.getLeft());
+      Map<String, Long> aggregatedCohortConcurrency = tsBucketAndCohortConcurrency.getRight();
 
       streamCohortConcurrencyRepository
         .setContentAllStreamCohortConcurrency(contentId, tsBucket, aggregatedCohortConcurrency);
@@ -86,6 +83,24 @@ public class ConcurrencyService {
         .increment();
       log.error("Fail to update content streamCohort concurrency, content id: " + contentId, e);
     }
+  }
+
+  protected Pair<String, Map<String, Long>> tsBucketAndCohortConcurrency(String contentId,
+                                                                         Map<String, String> converter) {
+    //ConcurrencyGroup.concurrencyValues:
+    //key: in-eng-phone-ssai|SSAI::xxx|English+Android
+    //value: concurrency number
+    ConcurrencyGroup concurrencyGroup = pulseService.getLiveContentStreamCohortConcurrency(contentId);
+    String tsBucket = String.valueOf(concurrencyGroup.getTsBucket());
+
+    Map<String, Long> aggregatedCohortConcurrency =
+      concurrencyGroup.getConcurrencyValues().entrySet()
+        .stream()
+        .map(entry -> mapCohortKeyToPlayoutId(contentId, converter, entry.getKey(), entry.getValue()))
+        .filter(Objects::nonNull)
+        .collect(Collectors.groupingBy(ConcurrencyValue::getConcurrencyKey,
+          Collectors.summingLong(ConcurrencyValue::getConcurrency)));
+    return Pair.of(tsBucket, aggregatedCohortConcurrency);
   }
 
   private ConcurrencyValue mapCohortKeyToPlayoutId(String contentId, Map<String, String> converter,

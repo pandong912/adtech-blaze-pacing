@@ -2,6 +2,9 @@ blaze:
   ad-ingester-service:
     schedule:
       concurrency-sync-delay: 5000
+    concurrency:
+      inject:
+        enable: true
   redis:
     master-replica:
       master:

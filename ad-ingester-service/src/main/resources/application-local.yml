@@ -15,6 +15,9 @@ management:
 blaze:
   ad-ingester-service:
     concurrency-sync-lag: 0
+    concurrency:
+      inject:
+        enable: true
   data-exchanger:
     endpoint: localhost:8097
   redis:

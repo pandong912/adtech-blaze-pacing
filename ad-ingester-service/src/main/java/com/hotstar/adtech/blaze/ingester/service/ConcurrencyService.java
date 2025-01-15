@@ -2,14 +2,17 @@ package com.hotstar.adtech.blaze.ingester.service;
 
 import static com.hotstar.adtech.blaze.ingester.metric.MetricNames.INVALID_CONCURRENCY;
 
+import com.hotstar.adtech.blaze.admodel.common.enums.StreamType;
 import com.hotstar.adtech.blaze.ingester.entity.ConcurrencyGroup;
 import com.hotstar.adtech.blaze.ingester.entity.Match;
+import com.hotstar.adtech.blaze.ingester.launchdarkly.DynamicConfig;
 import com.hotstar.adtech.blaze.ingester.metric.MetricNames;
 import com.hotstar.adtech.blaze.ingester.metric.MetricTags;
 import com.hotstar.adtech.blaze.ingester.repository.StreamCohortConcurrencyRepository;
 import com.hotstar.adtech.blaze.ingester.repository.StreamConcurrencyRepository;
 import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.Metrics;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -17,6 +20,7 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.scheduling.annotation.Async;
 
@@ -30,13 +34,46 @@ public class ConcurrencyService {
 
   private final StreamCohortConcurrencyRepository streamCohortConcurrencyRepository;
   public static final String STREAM_COHORT_HASH_KEY_SPLITTER = "|";
+  private final DynamicConfig ldConfig;
 
   @Async("concurrencyExecutor")
   @Timed(MetricNames.CONTENT_CONCURRENCY_SYNC)
   public void updateMatchConcurrency(Match match, Map<String, String> streamMappingConverter) {
     String contentId = match.getContentId();
-    updateStreamConcurrency(contentId, streamMappingConverter);
+    Map<String, String> streamMappingConverterForStream = buildConverterForStreamConcurrency(streamMappingConverter);
+    updateStreamConcurrency(contentId, streamMappingConverterForStream);
     updateCohortConcurrency(contentId, streamMappingConverter);
+  }
+
+  public Map<String, String> buildConverterForStreamConcurrency(Map<String, String> originConverter) {
+    try {
+      if (!ldConfig.getEnableSsaiStramIncludeSpotUser()) {
+        return originConverter;
+      }
+      Map<String, String> streamMappingConverterForStream = new HashMap<>(originConverter);
+      originConverter.forEach(
+        (playbackTagStr, playoutId) -> modifyMap(playbackTagStr, playoutId, streamMappingConverterForStream));
+      log.info("originConverter {}, newConverter: {}", originConverter, streamMappingConverterForStream);
+      return streamMappingConverterForStream;
+    } catch (Exception e) {
+      log.error("Fail to build stream mapping converter for stream concurrency, will use origin stream mapping", e);
+      return originConverter;
+    }
+  }
+
+  private static void modifyMap(String playbackTagStr, String playoutId, Map<String, String> converter) {
+    String[] playbackTags = playbackTagStr.split("-", -1);
+    if (StreamType.SSAI_Spot.getAds().equals(playbackTags[3])) {
+      playbackTags[3] = StreamType.Spot.getAds();
+      String newPlaybackTagStr = StringUtils.join(playbackTags, "-");
+      if (converter.containsKey(newPlaybackTagStr)) {
+        log.info("stream mapping converter is existed, playbackTagStr: {}, existed playoutId: {}", newPlaybackTagStr,
+          converter.get(newPlaybackTagStr));
+        return;
+      }
+      log.info("put new stream mapping, playbackTagStr: {}, playoutId: {}", newPlaybackTagStr, playoutId);
+      converter.put(newPlaybackTagStr, playoutId);
+    }
   }
 
   private void updateStreamConcurrency(String contentId, Map<String, String> converter) {

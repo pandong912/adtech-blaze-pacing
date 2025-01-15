@@ -2,6 +2,7 @@ package com.hotstar.adtech.blaze.ingester.service;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.hotstar.adtech.blaze.ingester.launchdarkly.LdConfig;
 import com.hotstar.adtech.blaze.ingester.repository.StreamCohortConcurrencyRepository;
 import com.hotstar.adtech.blaze.ingester.repository.StreamConcurrencyRepository;
 import java.time.Duration;
@@ -24,8 +25,9 @@ public class InjectConcurrencyService extends ConcurrencyService {
 
   public InjectConcurrencyService(PulseService pulseService,
                                   StreamConcurrencyRepository streamConcurrencyRepository,
-                                  StreamCohortConcurrencyRepository streamCohortConcurrencyRepository) {
-    super(pulseService, streamConcurrencyRepository, streamCohortConcurrencyRepository);
+                                  StreamCohortConcurrencyRepository streamCohortConcurrencyRepository,
+                                  LdConfig ldConfig) {
+    super(pulseService, streamConcurrencyRepository, streamCohortConcurrencyRepository, ldConfig);
   }
 
   @Override

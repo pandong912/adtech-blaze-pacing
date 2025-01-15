@@ -1,6 +1,49 @@
 spring:
-  profiles:
-    include: ad-model-client-local, ad-reach-redis-client-local
+  application:
+    name: blaze-ingester-service
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
+      - org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration
+  data:
+    redis:
+      repositories:
+        enabled: false
+  task:
+    scheduling:
+      shutdown:
+        await-termination: true
+        await-termination-period: 30s
+    execution:
+      shutdown:
+        await-termination: true
+        await-termination-period: 15s
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus,beans
+  metrics:
+    enable:
+      all: false
+      system: true
+      http: true
+      jvm:
+        memory: true
+        gc: true
+      tomcat: true
+      blaze: true
+      lettuce: true
+    distribution:
+      percentiles-histogram:
+        lettuce: true
+        blaze: true
+  endpoint:
+    health:
+      show-details: always
 pulse:
   counter-service:
     readTimeout: 30000
@@ -10,27 +53,15 @@ feign:
     config:
       default:
         loggerLevel: full
-server:
-  port: 9092
-management:
-  server:
-    port: 9093
 blaze:
   ad-ingester-service:
     concurrency-sync-lag: 0
+    concurrency:
+      inject:
+        enable: true
   data-exchanger:
     endpoint: localhost:8097
   redis:
-    decision-cluster:
-      nodes:
-        - localhost:6379
-      maxRedirects: 10
-      default-timeout-mills: 2000
-    reach-cluster:
-      nodes:
-        - localhost:6379
-      maxRedirects: 10
-      default-timeout-mills: 2000
     master-replica:
       master:
         host: localhost
@@ -38,7 +69,6 @@ blaze:
       replicas:
         - host: localhost
           port: 6379
-      default-timeout-mills: 2000
 launch:
   darkly:
     vaultConfigPath:

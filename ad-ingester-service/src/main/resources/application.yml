@@ -3,6 +3,14 @@ spring:
     name: blaze-ingester-service
   profiles:
     active: local
+    group:
+      local: launch-darkly-dev
+      dev: launch-darkly-dev
+      qa: launch-darkly-nonprod
+      pp: launch-darkly-nonprod
+      load: launch-darkly-nonprod
+      prod: launch-darkly-prod
+      prod-eks: launch-darkly-prod
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration

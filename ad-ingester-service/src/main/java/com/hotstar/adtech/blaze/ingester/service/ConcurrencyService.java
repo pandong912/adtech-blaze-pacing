@@ -45,24 +45,24 @@ public class ConcurrencyService {
     updateCohortConcurrency(contentId, streamMappingConverter);
   }
 
-  public Map<String, String> buildConverterForStreamConcurrency(Map<String, String> originConverter) {
+  public Map<String, String> buildConverterForStreamConcurrency(Map<String, String> oldConverter) {
     try {
       if (!ldConfig.getEnableSsaiStramIncludeSpotUser()) {
-        return originConverter;
+        return oldConverter;
       }
-      Map<String, String> streamMappingConverterForStream = new HashMap<>(originConverter);
-      originConverter.forEach(
+      Map<String, String> streamMappingConverterForStream = new HashMap<>(oldConverter);
+      oldConverter.forEach(
         (playbackTagStr, playoutId) -> modifyMap(playbackTagStr, playoutId, streamMappingConverterForStream));
-      log.info("originConverter {}, newConverter: {}", originConverter, streamMappingConverterForStream);
+      log.info("oldConverter {}, newConverter: {}", oldConverter, streamMappingConverterForStream);
       return streamMappingConverterForStream;
     } catch (Exception e) {
       log.error("Fail to build stream mapping converter for stream concurrency, will use origin stream mapping", e);
-      return originConverter;
+      return oldConverter;
     }
   }
 
   private static void modifyMap(String playbackTagStr, String playoutId, Map<String, String> converter) {
-    String[] playbackTags = playbackTagStr.split("-", -1);
+    String[] playbackTags = StringUtils.split(playbackTagStr, "-");
     if (playbackTags.length < 4) {
       return;
     }

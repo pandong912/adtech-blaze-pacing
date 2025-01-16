@@ -10,49 +10,10 @@ spring:
     redis:
       repositories:
         enabled: false
-  task:
-    scheduling:
-      shutdown:
-        await-termination: true
-        await-termination-period: 30s
-    execution:
-      shutdown:
-        await-termination: true
-        await-termination-period: 15s
-management:
-  server:
-    port: 8081
-  endpoints:
-    web:
-      exposure:
-        include: health,metrics,prometheus,beans
-  metrics:
-    enable:
-      all: false
-      system: true
-      http: true
-      jvm:
-        memory: true
-        gc: true
-      tomcat: true
-      blaze: true
-      lettuce: true
-    distribution:
-      percentiles-histogram:
-        lettuce: true
-        blaze: true
-  endpoint:
-    health:
-      show-details: always
 pulse:
   counter-service:
     readTimeout: 30000
     endpoint: localhost:8096
-feign:
-  client:
-    config:
-      default:
-        loggerLevel: full
 blaze:
   ad-ingester-service:
     concurrency-sync-lag: 0

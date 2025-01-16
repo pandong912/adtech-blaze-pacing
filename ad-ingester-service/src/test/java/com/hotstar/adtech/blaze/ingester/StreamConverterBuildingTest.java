@@ -13,11 +13,9 @@ public class StreamConverterBuildingTest {
       "in-eng-web-ssai", "P1",
       "in-eng-tv-ssai", "P2",
       "in-eng-tv-non_ssai", "P3",
-      "in-eng-phone-non_ssai", "P4",
-      "in-eng-web-non_ssai", "P4"
+      "in-eng-phone-non_ssai", "P4"
     );
     Map<String, String> newMap = concurrencyService.buildConverterForStreamConcurrency(streamMappingConverter);
-    System.out.println(newMap);
     Assertions.assertEquals(streamMappingConverter, newMap);
   }
 
@@ -34,7 +32,6 @@ public class StreamConverterBuildingTest {
       "in-eng-web-non_ssai", "P4"
     );
     Map<String, String> newMap = concurrencyService.buildConverterForStreamConcurrency(streamMappingConverter);
-    System.out.println(newMap);
     Assertions.assertEquals(streamMappingConverter, newMap);
   }
 
@@ -48,7 +45,6 @@ public class StreamConverterBuildingTest {
       "in-eng-tv-ssai", "P2"
     );
     Map<String, String> newMap = concurrencyService.buildConverterForStreamConcurrency(streamMappingConverter);
-    System.out.println(newMap);
     Map<String, String> expectedMap = Map.of("in-eng-phone-ssai", "P1",
       "in-eng-web-ssai", "P1",
       "in-eng-tv-ssai", "P2",
@@ -70,7 +66,6 @@ public class StreamConverterBuildingTest {
       "in-eng-web-non_ssai", "P1"
     );
     Map<String, String> newMap = concurrencyService.buildConverterForStreamConcurrency(streamMappingConverter);
-    System.out.println(newMap);
     Map<String, String> expectedMap = Map.of("in-eng-phone-ssai", "P1",
       "in-eng-web-ssai", "P1",
       "in-eng-tv-ssai", "P2",

@@ -63,6 +63,9 @@ public class ConcurrencyService {
 
   private static void modifyMap(String playbackTagStr, String playoutId, Map<String, String> converter) {
     String[] playbackTags = playbackTagStr.split("-", -1);
+    if (playbackTags.length < 4) {
+      return;
+    }
     if (StreamType.SSAI_Spot.getAds().equals(playbackTags[3])) {
       playbackTags[3] = StreamType.Spot.getAds();
       String newPlaybackTagStr = StringUtils.join(playbackTags, "-");
@@ -71,7 +74,6 @@ public class ConcurrencyService {
           converter.get(newPlaybackTagStr));
         return;
       }
-      log.info("put new stream mapping, playbackTagStr: {}, playoutId: {}", newPlaybackTagStr, playoutId);
       converter.put(newPlaybackTagStr, playoutId);
     }
   }

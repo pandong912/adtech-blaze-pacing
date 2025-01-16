@@ -1,5 +1,6 @@
 package com.hotstar.adtech.blaze.ingester.config;
 
+import com.hotstar.adtech.blaze.ingester.launchdarkly.LdConfig;
 import com.hotstar.adtech.blaze.ingester.repository.StreamCohortConcurrencyRepository;
 import com.hotstar.adtech.blaze.ingester.repository.StreamConcurrencyRepository;
 import com.hotstar.adtech.blaze.ingester.service.ConcurrencyService;
@@ -24,8 +25,9 @@ public class ConcurrencyServiceConfig {
   public InjectConcurrencyService injectConcurrencyService(
     StreamConcurrencyRepository streamConcurrencyRepository,
     StreamCohortConcurrencyRepository streamCohortConcurrencyRepository,
-    PulseService pulseService) {
-    return new InjectConcurrencyService(pulseService, streamConcurrencyRepository, streamCohortConcurrencyRepository);
+    PulseService pulseService, LdConfig ldConfig) {
+    return new InjectConcurrencyService(pulseService, streamConcurrencyRepository, streamCohortConcurrencyRepository,
+      ldConfig);
   }
 
   @Bean
@@ -33,8 +35,9 @@ public class ConcurrencyServiceConfig {
   ConcurrencyService concurrencyService(
     StreamConcurrencyRepository streamConcurrencyRepository,
     StreamCohortConcurrencyRepository streamCohortConcurrencyRepository,
-    PulseService pulseService) {
-    return new ConcurrencyService(pulseService, streamConcurrencyRepository, streamCohortConcurrencyRepository);
+    PulseService pulseService, LdConfig ldConfig) {
+    return new ConcurrencyService(pulseService, streamConcurrencyRepository, streamCohortConcurrencyRepository,
+      ldConfig);
   }
 
 }

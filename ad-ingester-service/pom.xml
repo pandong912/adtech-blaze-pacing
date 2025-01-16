@@ -36,6 +36,10 @@
             <groupId>com.hotstar.pulse</groupId>
             <artifactId>pulse-counter-client</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.hotstar.macro</groupId>
+            <artifactId>templatize-macro</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

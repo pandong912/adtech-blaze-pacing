@@ -45,7 +45,7 @@ public class ConcurrencyServiceTest extends TestEnvConfig {
       .when(pulseService.getLiveContentStreamConcurrency(Mockito.anyString()))
       .thenReturn(getStreamConcurrency());
     concurrencyService = new ConcurrencyService(pulseService, streamConcurrencyRepository,
-      streamCohortConcurrencyRepository);
+      streamCohortConcurrencyRepository, new LdconfigTestClass());
     Match match = Match.builder().contentId("123").tournamentId(123L).build();
     Map<String, String> streamMappingConverter = getStreamMappingConverter();
     concurrencyService.updateMatchConcurrency(match, streamMappingConverter);

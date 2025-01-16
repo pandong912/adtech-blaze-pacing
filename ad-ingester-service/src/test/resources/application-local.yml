@@ -1,36 +1,28 @@
 spring:
-  profiles:
-    include: ad-model-client-local, ad-reach-redis-client-local
+  application:
+    name: blaze-ingester-service
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
+      - org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration
+  data:
+    redis:
+      repositories:
+        enabled: false
 pulse:
   counter-service:
     readTimeout: 30000
     endpoint: localhost:8096
-feign:
-  client:
-    config:
-      default:
-        loggerLevel: full
-server:
-  port: 9092
-management:
-  server:
-    port: 9093
 blaze:
   ad-ingester-service:
     concurrency-sync-lag: 0
+    concurrency:
+      inject:
+        enable: true
   data-exchanger:
     endpoint: localhost:8097
   redis:
-    decision-cluster:
-      nodes:
-        - localhost:6379
-      maxRedirects: 10
-      default-timeout-mills: 2000
-    reach-cluster:
-      nodes:
-        - localhost:6379
-      maxRedirects: 10
-      default-timeout-mills: 2000
     master-replica:
       master:
         host: localhost
@@ -38,7 +30,6 @@ blaze:
       replicas:
         - host: localhost
           port: 6379
-      default-timeout-mills: 2000
 launch:
   darkly:
     vaultConfigPath:

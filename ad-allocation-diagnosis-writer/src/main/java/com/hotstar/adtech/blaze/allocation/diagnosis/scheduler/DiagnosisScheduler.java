@@ -11,6 +11,8 @@ import com.hotstar.adtech.blaze.admodel.repository.model.AllocationSyncPoint;
 import com.hotstar.adtech.blaze.allocation.diagnosis.service.AllocationConcurrencyService;
 import com.hotstar.adtech.blaze.allocation.diagnosis.service.HwmPlanService;
 import com.hotstar.adtech.blaze.allocation.diagnosis.service.ShalePlanService;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -65,7 +67,8 @@ public class DiagnosisScheduler {
     List<AllocationPlanResult> rawAllocationPlanResults) {
     List<AllocationPlanResult> finishedAllocationPlanResults = new ArrayList<>();
     for (AllocationPlanResult result : rawAllocationPlanResults) {
-      if (!result.getTaskStatus().isFinished()) {
+      if (!result.getTaskStatus().isFinished() &&
+        result.getCreatedAt().isAfter(Instant.now().minus(15, ChronoUnit.MINUTES))) {
         break;
       }
       finishedAllocationPlanResults.add(result);

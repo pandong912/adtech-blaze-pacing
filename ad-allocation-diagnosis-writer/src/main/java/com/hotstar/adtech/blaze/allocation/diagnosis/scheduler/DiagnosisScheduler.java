@@ -67,8 +67,8 @@ public class DiagnosisScheduler {
     List<AllocationPlanResult> rawAllocationPlanResults) {
     List<AllocationPlanResult> finishedAllocationPlanResults = new ArrayList<>();
     for (AllocationPlanResult result : rawAllocationPlanResults) {
-      if (!result.getTaskStatus().isFinished() &&
-        result.getCreatedAt().isAfter(Instant.now().minus(15, ChronoUnit.MINUTES))) {
+      if (!result.getTaskStatus().isFinished()
+        && result.getCreatedAt().isAfter(Instant.now().minus(15, ChronoUnit.MINUTES))) {
         break;
       }
       finishedAllocationPlanResults.add(result);

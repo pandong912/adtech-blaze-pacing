@@ -104,6 +104,8 @@ public class ShalePlanService {
       .algorithmType(detail.getAlgorithmType())
       .fileName(detail.getFileName())
       .path(path)
+      .planType(detail.getPlanType())
+      .planId(detail.getId())
       .build();
   }
 
